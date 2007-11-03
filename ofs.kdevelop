@@ -22,6 +22,15 @@
     <run>
       <mainprogram>src/ofs</mainprogram>
       <terminal>true</terminal>
+      <runarguments>
+        <ofs></ofs>
+      </runarguments>
+      <debugarguments>
+        <ofs></ofs>
+      </debugarguments>
+      <cwd>
+        <ofs>/home/haxor/IT-projekt/ofs/debug/./src</ofs>
+      </cwd>
     </run>
     <configurations>
       <optimized>
