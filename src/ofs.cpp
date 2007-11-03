@@ -25,12 +25,16 @@
 
 #include <iostream>
 #include <cstdlib>
+#include "ofs_fuse.h"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+ofs_fuse my_ofs;
   cout << "Hello, world!" << endl;
 //
-  return EXIT_SUCCESS;
+return my_ofs.main(argc, argv, NULL, &my_ofs);
+
+  //return EXIT_SUCCESS;
 }
