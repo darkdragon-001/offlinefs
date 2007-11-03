@@ -21,6 +21,7 @@
 #define OFS_FUSE_H
 
 #include <fusexx.hpp>
+#include <string>
 
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
