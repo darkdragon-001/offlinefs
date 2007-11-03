@@ -23,10 +23,10 @@
       <mainprogram>src/ofs</mainprogram>
       <terminal>true</terminal>
       <runarguments>
-        <ofs></ofs>
+        <ofs/>
       </runarguments>
       <debugarguments>
-        <ofs></ofs>
+        <ofs/>
       </debugarguments>
       <cwd>
         <ofs>/home/haxor/IT-projekt/ofs/debug/./src</ofs>
