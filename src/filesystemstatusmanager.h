@@ -20,6 +20,8 @@
 #ifndef FILESYSTEMSTATUSMANAGER_H
 #define FILESYSTEMSTATUSMANAGER_H
 #include "mutexlocker.h"
+#include "filesystem.h"
+#include <string>
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
 */
@@ -27,10 +29,15 @@ class FilesystemStatusManager{
 public:
     static FilesystemStatusManager& Instance();
     ~FilesystemStatusManager(); 
+    register_filesystem(string MountPath, string TempMount);
+    remove_filesystem(string MountPath, string TempMount);
+    Filesystem give_me_Filesystem_to_File(string Path);
 protected:
     FilesystemStatusManager();
   private:
     static std::auto_ptr<FilesystemStatusManager> theFilesystemStatusManagerInstance;
+	vector<Filesystem> fslist;
+
     static Mutex m; 
 };
 #endif
