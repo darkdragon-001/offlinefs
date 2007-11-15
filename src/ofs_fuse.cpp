@@ -21,7 +21,6 @@
 
 #include <string>
 #include <pthread.h>
-#include "ofs_daemon.h"
 #include <errno.h>
 #include <stdio.h>
 #include <sstream>
