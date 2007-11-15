@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,15 +23,26 @@
 using namespace std;
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
+	The file Object holds all ofs-specific infomation of one file.
+	Instances are created and filled by the filestatusmanager.
 */
 class File{
 public:
-    File();
-bool get_Offline_State();
-bool get_Availability();
-    ~File();
+	File(bool offline_state, bool availability,
+		string remote_path, string cache_path);
+	File(const File &copy);
+	File& operator =(const File &copy);
+	bool get_offline_state() const;
+	bool get_availability() const;
+	string get_remote_path() const;
+	string get_cache_path() const;
+	~File();
 private:
-
+	bool offline_state;
+	bool availability;
+	string remote_path;
+	string cache_path;
 };
 
 #endif

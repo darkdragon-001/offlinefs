@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -29,4 +29,15 @@ Filestatusmanager& Filestatusmanager::Instance()
     if (theFilestatusmanagerInstance.get() == 0)
       theFilestatusmanagerInstance.reset(new Filestatusmanager);
     return *theFilestatusmanagerInstance;
+}
+
+/**
+ * Create a File object, which holds all information about the requested file
+ * @param Path The file path, relative to the current ofs mountpoint
+ * @return Information about the requested file
+ */
+File Filestatusmanager::give_me_file(string Path)
+{
+	return File(false, false, string(TESTING_REMOTE_PATH)+Path,
+		string(TESTING_BACKING_PATH)+Path);
 }

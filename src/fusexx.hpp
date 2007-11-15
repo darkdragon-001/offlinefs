@@ -76,78 +76,78 @@ namespace fusexx {
 		 * Overload these functions
 		 */
 		 public:
-			static int readlink (const char *, char *, size_t) { return 0; }
-		    static int getattr (const char *, struct stat * ) { return 0; }
-		    static int getdir (const char *, fuse_dirh_t, fuse_dirfil_t) { return 0; }
-		    static int mknod (const char *, mode_t, dev_t) { return 0; }
-		    static int mkdir (const char *, mode_t) { return 0; }
-		    static int unlink (const char *) { return 0; }
-		    static int rmdir (const char *) { return 0; }
-		    static int symlink (const char *, const char *) { return 0; }
-		    static int rename (const char *, const char *) { return 0; }
-		    static int link (const char *, const char *) { return 0; }
-		    static int chmod (const char *, mode_t) { return 0; }
-		    static int chown (const char *, uid_t, gid_t) { return 0; }
-		    static int truncate (const char *, off_t) { return 0; }
-		    static int utime (const char *, struct utimbuf *) { return 0; }
-		    static int open (const char *, struct fuse_file_info *) { return 0; }
-		    static int read (const char *, char *, size_t, off_t, struct fuse_file_info *) { return 0; }
-		    static int write (const char *, const char *, size_t, off_t,struct fuse_file_info *) { return 0; }
-		    static int statfs (const char *, struct statvfs *) { return 0; }
-		    static int flush (const char *, struct fuse_file_info *) { return 0; }
-		    static int release (const char *, struct fuse_file_info *) { return 0; }
-		    static int fsync (const char *, int, struct fuse_file_info *) { return 0; }
-		    static int setxattr (const char *, const char *, const char *, size_t, int) { return 0; }
-		    static int getxattr (const char *, const char *, char *, size_t) { return 0; }
-		    static int listxattr (const char *, char *, size_t) { return 0; }
-		    static int removexattr (const char *, const char *) { return 0; }
-		    static int readdir (const char *, void *, fuse_fill_dir_t, off_t, struct fuse_file_info *) { return 0; }
-		    static int opendir (const char *, struct fuse_file_info *) { return 0; }
-		    static int releasedir (const char *, struct fuse_file_info *) { return 0; }
-		    static int fsyncdir (const char *, int, struct fuse_file_info *) { return 0; }
-		    static void *init (struct fuse_conn_info *conn) { return NULL; }
-		    static void  destroy (void *) { }
-		    static int access (const char *, int) { return 0; }
-		    static int create (const char *, mode_t, struct fuse_file_info *) { return 0; }
-		    static int ftruncate (const char *, off_t, struct fuse_file_info *) { return 0; }
-		    static int fgetattr (const char *, struct stat *, struct fuse_file_info *) { return 0; }
+			static int fuse_readlink (const char *, char *, size_t) { return 0; }
+		    static int fuse_getattr (const char *, struct stat * ) { return 0; }
+		    static int fuse_getdir (const char *, fuse_dirh_t, fuse_dirfil_t) { return 0; }
+		    static int fuse_mknod (const char *, mode_t, dev_t) { return 0; }
+		    static int fuse_mkdir (const char *, mode_t) { return 0; }
+		    static int fuse_unlink (const char *) { return 0; }
+		    static int fuse_rmdir (const char *) { return 0; }
+		    static int fuse_symlink (const char *, const char *) { return 0; }
+		    static int fuse_rename (const char *, const char *) { return 0; }
+		    static int fuse_link (const char *, const char *) { return 0; }
+		    static int fuse_chmod (const char *, mode_t) { return 0; }
+		    static int fuse_chown (const char *, uid_t, gid_t) { return 0; }
+		    static int fuse_truncate (const char *, off_t) { return 0; }
+		    static int fuse_utime (const char *, struct utimbuf *) { return 0; }
+		    static int fuse_open (const char *, struct fuse_file_info *) { return 0; }
+		    static int fuse_read (const char *, char *, size_t, off_t, struct fuse_file_info *) { return 0; }
+		    static int fuse_write (const char *, const char *, size_t, off_t,struct fuse_file_info *) { return 0; }
+		    static int fuse_statfs (const char *, struct statvfs *) { return 0; }
+		    static int fuse_flush (const char *, struct fuse_file_info *) { return 0; }
+		    static int fuse_release (const char *, struct fuse_file_info *) { return 0; }
+		    static int fuse_fsync (const char *, int, struct fuse_file_info *) { return 0; }
+		    static int fuse_setxattr (const char *, const char *, const char *, size_t, int) { return 0; }
+		    static int fuse_getxattr (const char *, const char *, char *, size_t) { return 0; }
+		    static int fuse_listxattr (const char *, char *, size_t) { return 0; }
+		    static int fuse_removexattr (const char *, const char *) { return 0; }
+		    static int fuse_readdir (const char *, void *, fuse_fill_dir_t, off_t, struct fuse_file_info *) { return 0; }
+		    static int fuse_opendir (const char *, struct fuse_file_info *) { return 0; }
+		    static int fuse_releasedir (const char *, struct fuse_file_info *) { return 0; }
+		    static int fuse_fsyncdir (const char *, int, struct fuse_file_info *) { return 0; }
+		    static void *fuse_init (struct fuse_conn_info *conn) { return NULL; }
+		    static void  fuse_destroy (void *) { }
+		    static int fuse_access (const char *, int) { return 0; }
+		    static int fuse_create (const char *, mode_t, struct fuse_file_info *) { return 0; }
+		    static int fuse_ftruncate (const char *, off_t, struct fuse_file_info *) { return 0; }
+		    static int fuse_fgetattr (const char *, struct stat *, struct fuse_file_info *) { return 0; }
 		    		    
 		    static void loadOperations () {
-				operations.readlink = T::readlink;
-			    operations.getattr = T::getattr;
-			    operations.getdir = T::getdir;
-			    operations.mknod = T::mknod;
-			    operations.mkdir = T::mkdir;
-			    operations.unlink = T::unlink;
-			    operations.rmdir = T::rmdir;
-			    operations.symlink = T::symlink;
-			    operations.rename = T::rename;
-			    operations.link = T::link;
-			    operations.chmod = T::chmod;
-			    operations.chown = T::chown;
-			    operations.truncate = T::truncate;
-			    operations.utime = T::utime;
-			    operations.open = T::open;
-			    operations.read = T::read;
-			    operations.write = T::write;
-			    operations.statfs = T::statfs;
-			    operations.flush = T::flush;
-			    operations.release = T::release;
-			    operations.fsync = T::fsync;
-			    operations.setxattr = T::setxattr;
-			    operations.getxattr = T::getxattr;
-			    operations.listxattr = T::listxattr;
-			    operations.removexattr = T::removexattr;
-			    operations.readdir = T::readdir;
-			    operations.opendir = T::opendir;
-			    operations.releasedir = T::releasedir;
-			    operations.fsyncdir = T::fsyncdir;
-			    operations.init = T::init;
-			    operations.destroy = T::destroy;
-			    operations.access = T::access;
-			    operations.create = T::create;
-			    operations.ftruncate = T::ftruncate;
-			    operations.fgetattr = T::fgetattr;
+				operations.readlink = T::fuse_readlink;
+			    operations.getattr = T::fuse_getattr;
+			    operations.getdir = T::fuse_getdir;
+			    operations.mknod = T::fuse_mknod;
+			    operations.mkdir = T::fuse_mkdir;
+			    operations.unlink = T::fuse_unlink;
+			    operations.rmdir = T::fuse_rmdir;
+			    operations.symlink = T::fuse_symlink;
+			    operations.rename = T::fuse_rename;
+			    operations.link = T::fuse_link;
+			    operations.chmod = T::fuse_chmod;
+			    operations.chown = T::fuse_chown;
+			    operations.truncate = T::fuse_truncate;
+			    operations.utime = T::fuse_utime;
+			    operations.open = T::fuse_open;
+			    operations.read = T::fuse_read;
+			    operations.write = T::fuse_write;
+			    operations.statfs = T::fuse_statfs;
+			    operations.flush = T::fuse_flush;
+			    operations.release = T::fuse_release;
+			    operations.fsync = T::fuse_fsync;
+			    operations.setxattr = T::fuse_setxattr;
+			    operations.getxattr = T::fuse_getxattr;
+			    operations.listxattr = T::fuse_listxattr;
+			    operations.removexattr = T::fuse_removexattr;
+			    operations.readdir = T::fuse_readdir;
+			    operations.opendir = T::fuse_opendir;
+			    operations.releasedir = T::fuse_releasedir;
+			    operations.fsyncdir = T::fuse_fsyncdir;
+			    operations.init = T::fuse_init;
+			    operations.destroy = T::fuse_destroy;
+			    operations.access = T::fuse_access;
+			    operations.create = T::fuse_create;
+			    operations.ftruncate = T::fuse_ftruncate;
+			    operations.fgetattr = T::fuse_fgetattr;
 			}
 			
 			/*

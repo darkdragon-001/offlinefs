@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,18 +25,22 @@
 #include "mutex.h"
 #include "mutexlocker.h"
 using namespace std;
+
+#define TESTING_REMOTE_PATH "/usr"
+#define TESTING_BACKING_PATH "/tmp/ofsbacking"
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
 	@brief Singleton which gives us the corresponding File-Object to a 
 	given file path
 */
 class Filestatusmanager{
 public:
-File give_me_file(string Path);
-static Filestatusmanager& Instance();
-~Filestatusmanager();
+	File give_me_file(string Path);
+	static Filestatusmanager& Instance();
+	~Filestatusmanager();
 protected:
-    Filestatusmanager();
+	Filestatusmanager();
     
 private:
 
