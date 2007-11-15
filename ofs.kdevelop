@@ -27,7 +27,7 @@
       <mainprogram/>
       <terminal>true</terminal>
       <runarguments>
-        <ofs/>
+        <ofs>/tmp/fuse</ofs>
       </runarguments>
       <debugarguments>
         <ofs>/tmp/fuse</ofs>
