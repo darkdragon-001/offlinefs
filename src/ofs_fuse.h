@@ -27,6 +27,13 @@
 #include "file.h"
 
 using namespace std;
+#define HAVE_SETXATTR
+// when calling getfattr -d filename attributes are only shown
+// when starting with 'user.' - this might be a FUSE bug
+#define OFS_ATTRIBUTE_OFFLINE "ofs.offline"
+#define OFS_ATTRIBUTE_AVAILABLE "ofs.available"
+#define OFS_ATTRIBUTE_VALUE_YES "yes"
+#define OFS_ATTRIBUTE_VALUE_NO "no"
 
 /**
 	@author Tobias Jaehnel <tjaehnel@gmail.com>
@@ -77,12 +84,12 @@ public:
 	static int fuse_release(const char *path, struct fuse_file_info *fi);
 	static int fuse_fsync(const char *path, int isdatasync,
                      struct fuse_file_info *fi);
-/*	static int fuse_setxattr(const char *path, const char *name,
+	static int fuse_setxattr(const char *path, const char *name,
 			const char *value, size_t size, int flags);
 	static int fuse_getxattr(const char *path, const char *name, char *value,
                     size_t size);
 	static int fuse_listxattr(const char *path, char *list, size_t size);
-	static int fuse_removexattr(const char *path, const char *name);*/
+	static int fuse_removexattr(const char *path, const char *name);
 /*	static int fuse_lock(const char *path, struct fuse_file_info *fi, int cmd,
                     struct flock *lock);*/
 	static void *fuse_init (struct fuse_conn_info *conn);

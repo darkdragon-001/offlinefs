@@ -29,6 +29,7 @@
 #include <sys/file.h>
 #include <ulockmgr.h>
 #include <sys/time.h>
+#include <attr/xattr.h>
 
 #include "filestatusmanager.h"
 
@@ -759,39 +760,182 @@ int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
 #ifdef HAVE_SETXATTR
 /* xattr operations are optional and can safely be left unimplemented 
   TODO: This has to be implemented in order to set the 'offline' flag*/
-/*int ofs_fuse::fuse_setxattr(const char *path, const char *name, const char *value,
-                        size_t size, int flags)
+/**
+ * Set an extended attribute
+ *
+ * In our case offline state and availability can be read and modified using
+ * extended attributes. The shell commands are called setfattr and getfattr.
+ *
+ * offline attribute:
+ *         - start making path offline immediately
+ *         - value does not matter (except "no")
+ *         - setting to "no" is the same as removing the attribute
+ *           @see removexattr TODO: implement this
+ * availability attribute: is read only
+ *
+ * @param path Path to file
+ * @param name Name of attribute to set
+ * @param value Desired value of the attribute
+ * @param size Size of the value buffer
+ * @param flags Don't know
+ *
+ */
+int ofs_fuse::fuse_setxattr(const char *path, const char *name,
+			const char *value, size_t size, int flags)
 {
-    int res = lsetxattr(path, name, value, size, flags);
-    if (res == -1)
-        return -errno;
-    return 0;
+	int res = 0;
+	File file = Filestatusmanager::Instance().give_me_file(path);
+	// offline attribute
+	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
+		// TODO: make path offline
+	// availability attribute
+	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
+		// readonly -> error
+		res = -1;
+		errno = EACCES;
+	} else {
+		res = lsetxattr(file.get_remote_path().c_str(), name,
+			value, size, flags);
+	}
+	if (res == -1)
+		return -errno;
+	return 0;
 }
 
+/**
+ * Fetch an extended attribute
+ *
+ * The function is called twice. First with size = 0, in irder to determine
+ * the size, values must have to hold the result.
+ * On the second call, value points to a buffer of apropriate size an we 
+ * can fill it with the actual result
+ *
+ * @param path Path to the File (relative to filesystem root)
+ * @param name Name of the desired attribute
+ * @param value Pointer to buffer, the result should be copied to (second call)
+ * @param size size of buffer value points to (0 on first call)
+ */
 int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
                     size_t size)
 {
-    int res = lgetxattr(path, name, value, size);
-    if (res == -1)
-        return -errno;
-    return res;
+	int res = 0;
+	File file = Filestatusmanager::Instance().give_me_file(path);
+	// offline attribute
+	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
+		if (file.get_offline_state()) {
+			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
+					strlen(OFS_ATTRIBUTE_VALUE_YES) );
+			}
+		} else {
+			res = strlen(OFS_ATTRIBUTE_VALUE_NO);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_NO,
+					strlen(OFS_ATTRIBUTE_VALUE_NO) );
+			}
+		}
+	// availability attribute
+	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
+		if (file.get_availability()) {
+			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
+					strlen(OFS_ATTRIBUTE_VALUE_YES) );
+			}
+		} else {
+			res = strlen(OFS_ATTRIBUTE_VALUE_NO);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_NO,
+					strlen(OFS_ATTRIBUTE_VALUE_NO) );
+			}
+		}
+ 	// unknown attribute - delegate to the underlying filesystem
+	} else {
+		res = lgetxattr(file.get_remote_path().c_str(),
+			name, value, size);
+		// do not return "unsupported" but "unknown attribute"
+		if(errno == ENOTSUP)
+			errno = ENOATTR;
+	} 
+	if (res == -1)
+		return -errno;
+	return res;
 }
 
+/**
+ * Give a list of extended attributes
+ * 
+ * Returns the attributes as a list of NULL seperated char-strings
+ * First and second call @see fust_getxattr
+ *
+ * @param path Path to file
+ * @param list points to buffer which should contain the attribute list
+ * @param size length of buffer
+ */
 int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 {
-    int res = llistxattr(path, list, size);
-    if (res == -1)
-        return -errno;
-    return res;
+	int res = 0;
+	int fsres = 0;
+	char *fslist = NULL;
+	File file = Filestatusmanager::Instance().give_me_file(path);
+	
+	res += strlen(OFS_ATTRIBUTE_OFFLINE) + 1;
+	res += strlen(OFS_ATTRIBUTE_AVAILABLE) + 1;
+	if (size > 0) {
+		strncpy(list, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1);
+		strncpy(list+strlen(OFS_ATTRIBUTE_OFFLINE)+1,
+			OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE)+1);
+		fslist = new char[size-res];		
+		fsres = llistxattr(file.get_remote_path().c_str(),
+			fslist, size-res);
+		if (fsres > 0)
+			res += fsres;
+	} else {
+		fsres = llistxattr(file.get_remote_path().c_str(), fslist, 0);
+		if (fsres > 0)
+			res += fsres;		
+	}
+	return res;
 }
 
+/**
+ * Remove an extended attribute
+ * 
+ * Removing the offline attribute results in setting it to "no" and
+ * clearing the offline cache.
+ * The availability flag is read only
+ *
+ * @param path Path to the file
+ * @param name Name of the attribute
+ */
 int ofs_fuse::fuse_removexattr(const char *path, const char *name)
 {
-    int res = lremovexattr(path, name);
-    if (res == -1)
-        return -errno;
-    return 0;
-}*/
+	int res = 0;
+	File file = Filestatusmanager::Instance().give_me_file(path);
+	// offline attribute
+	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
+		// TODO: clear cache
+	// availability attribute
+	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
+		// readonly -> error
+		res = -1;
+		errno = EACCES;
+	} else {
+		res = lremovexattr(file.get_remote_path().c_str(), name);
+	}
+	if (res == -1)
+		return -errno;
+	return 0;
+}
 #endif /* HAVE_SETXATTR */
 
 /**
