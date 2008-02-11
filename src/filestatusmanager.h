@@ -26,7 +26,7 @@
 #include "mutexlocker.h"
 using namespace std;
 
-#define TESTING_REMOTE_PATH "/home/tobias/ofsproject"
+#define TESTING_REMOTE_PATH "/usr"
 #define TESTING_BACKING_PATH "/tmp/ofsbacking"
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
