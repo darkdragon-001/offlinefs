@@ -104,41 +104,6 @@ private:
 	
 	string basepath;
 
-protected:
-	string get_absolute_path(string rel_path);
-	
-	class openfile_info
-	{
-	public:
-		openfile_info(const int fd_remote, const int fd_cache,
-							const File fileinfo) :
-			fd_remote(fd_remote), fd_cache(fd_cache),
-			fileinfo(fileinfo) {};
-		int get_fd_remote() const { return fd_remote; };
-		int get_fd_cache() const { return fd_cache; };
-		File get_fileinfo() const { return fileinfo; };
-	private:
-		int fd_remote;
-		int fd_cache;
-		File fileinfo;
-	};
-
-	class opendir_info
-	{
-	public:
-		opendir_info(DIR *dirptr_remote, DIR *dirptr_cache,
-				File fileinfo) :
-			dirptr_remote(dirptr_remote), dirptr_cache(dirptr_cache),
-			fileinfo(fileinfo) {};
-		DIR *get_dirptr_remote() const { return dirptr_remote; };
-		DIR *get_dirptr_cache() const { return dirptr_cache; };
-		File get_fileinfo() const { return fileinfo; };
-	private:
-		DIR *dirptr_remote;
-		DIR *dirptr_cache;
-		File fileinfo;
-	};
-
 };
 
 #endif

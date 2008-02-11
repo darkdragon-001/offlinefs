@@ -64,13 +64,10 @@ ofs_fuse::ofs_fuse () :
 int ofs_fuse::fuse_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-	
-	res = lstat(file.get_remote_path().c_str(), stbuf);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_getattr(stbuf);
+	delete file;
+	return res;
 }
 
 /**
@@ -90,17 +87,14 @@ int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
 {
 	int res;
 	(void) path;
-
-	openfile_info *fileinfo = (openfile_info *)fi->fh;
-	if (!fileinfo)
+	File *file = (File *)fi->fh;
+	if (!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
-	res = fstat(fileinfo->get_fd_remote(), stbuf);
-	if (res == -1)
-		return -errno;
-	return 0;
+	res = file->op_fgetattr(stbuf);
+	return res;
 }
 
 /**
@@ -118,13 +112,10 @@ int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
 int ofs_fuse::fuse_access(const char *path, int mask)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = access(file.get_remote_path().c_str(), mask);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_access(mask);
+	delete file;
+	return res;
 }
 
 /**
@@ -142,38 +133,30 @@ int ofs_fuse::fuse_access(const char *path, int mask)
 int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = readlink(file.get_remote_path().c_str(), buf, size - 1);
-	if (res == -1)
-		return -errno;
-
-	buf[res] = '\0';
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_readlink(buf, size);
+	delete file;
+	return res;
 }
 
 
 /**
  * Open directory
  *
- * This method should check if the open operation is
- * permitted for this directory
  * @param path 
  * @param fi 
  * @return 
  */
 int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
 {
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	DIR *dp = opendir(file.get_remote_path().c_str());
-	if (dp == NULL)
-		return -errno;
-	
-	opendir_info *dirinfo = new opendir_info(dp, NULL, file);
-	fi->fh = (unsigned long)dirinfo;
-	
-	return 0;
+	int res;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_opendir();
+	if (res < 0)
+		delete file;
+	else	
+		fi->fh = (unsigned long)file;
+	return res;
 }
 
 /**
@@ -204,27 +187,15 @@ int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                        off_t offset, struct fuse_file_info *fi)
 {
 	(void) path;
-	opendir_info *dirinfo = (opendir_info *)fi->fh;
-	if (!dirinfo)
+	int res;
+	File *file = (File *)fi->fh;
+	if(!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
-
-	DIR *dp = dirinfo->get_dirptr_remote();
-	struct dirent *de;
-
-	seekdir(dp, offset);
-	while ((de = readdir(dp)) != NULL) {
-		struct stat st;
-		memset(&st, 0, sizeof(st));
-		st.st_ino = de->d_ino;
-		st.st_mode = de->d_type << 12;
-		if (filler(buf, de->d_name, &st, telldir(dp)))
-			break;
-	}
-
-	return 0;
+	res = file->op_readdir(buf, filler, offset);
+	return res;
 }
 
 /**
@@ -236,19 +207,18 @@ int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
 {
 	(void) path;
-	opendir_info *dirinfo = (opendir_info *)fi->fh;
-	if (!dirinfo)
+	int res;
+	File *file = (File *)fi->fh;
+	if (!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
-	DIR *dp = dirinfo->get_dirptr_remote();
-
-	closedir(dp);
-	delete dirinfo;
+	res = file->op_releasedir();
+	delete file;
 	fi->fh = 0;
 
-	return 0;
+	return res;
 }
 
 /**
@@ -265,17 +235,10 @@ int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
 int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	string remotepath = file.get_remote_path();
-	if (S_ISFIFO(mode))
-		res = mkfifo(remotepath.c_str(), mode);
-	else
-		res = mknod(remotepath.c_str(), mode, rdev);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_mknod(mode, rdev);
+	delete file;
+	return res;
 }
 
 /**
@@ -287,13 +250,10 @@ int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = mkdir(file.get_remote_path().c_str(), mode);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_mkdir(mode);
+	delete file;
+	return res;
 }
 
 /**
@@ -304,13 +264,10 @@ int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 int ofs_fuse::fuse_unlink(const char *path)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = unlink(file.get_remote_path().c_str());
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_unlink();
+	delete file;
+	return res;
 }
 
 /**
@@ -321,13 +278,10 @@ int ofs_fuse::fuse_unlink(const char *path)
 int ofs_fuse::fuse_rmdir(const char *path)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = rmdir(file.get_remote_path().c_str());
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_rmdir();
+	delete file;
+	return res;
 }
 
 /**
@@ -342,13 +296,10 @@ int ofs_fuse::fuse_rmdir(const char *path)
 int ofs_fuse::fuse_symlink(const char *from, const char *to)
 {
 	int res;
-	File file_to = Filestatusmanager::Instance().give_me_file(to);
-
-	res = symlink(from, file_to.get_remote_path().c_str());
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file_to = Filestatusmanager::Instance().give_me_file(to);
+	res = file_to->op_symlink(from);
+	delete file_to;
+	return res;
 }
 
 /**
@@ -360,14 +311,12 @@ int ofs_fuse::fuse_symlink(const char *from, const char *to)
 int ofs_fuse::fuse_rename(const char *from, const char *to)
 {
 	int res;
-	File file_from = Filestatusmanager::Instance().give_me_file(from);
-	File file_to = Filestatusmanager::Instance().give_me_file(to);
-
-	res = rename(file_from.get_remote_path().c_str(), file_to.get_remote_path().c_str());
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file_from = Filestatusmanager::Instance().give_me_file(from);
+	File *file_to = Filestatusmanager::Instance().give_me_file(to);
+	res = file_from->op_rename(file_to);
+	delete file_from;
+	delete file_to;
+	return res;
 }
 
 /**
@@ -379,14 +328,12 @@ int ofs_fuse::fuse_rename(const char *from, const char *to)
 int ofs_fuse::fuse_link(const char *from, const char *to)
 {
 	int res;
-	File file_from = Filestatusmanager::Instance().give_me_file(from);
-	File file_to = Filestatusmanager::Instance().give_me_file(to);
-
-	res = link(file_from.get_remote_path().c_str(), file_to.get_remote_path().c_str());
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file_from = Filestatusmanager::Instance().give_me_file(from);
+	File *file_to = Filestatusmanager::Instance().give_me_file(to);
+	res = file_from->op_link(file_to);
+	delete file_from;
+	delete file_to;
+	return res;
 }
 
 /**
@@ -398,13 +345,10 @@ int ofs_fuse::fuse_link(const char *from, const char *to)
 int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = chmod(file.get_remote_path().c_str(), mode);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_chmod(mode);
+	delete file;
+	return res;
 }
 
 /**
@@ -417,13 +361,10 @@ int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = lchown(file.get_remote_path().c_str(), uid, gid);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_chown(uid, gid);
+	delete file;
+	return res;
 }
 
 /**
@@ -435,13 +376,10 @@ int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 int ofs_fuse::fuse_truncate(const char *path, off_t size)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = truncate(file.get_remote_path().c_str(), size);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_truncate(size);
+	delete file;
+	return res;
 }
 
 /**
@@ -460,21 +398,16 @@ int ofs_fuse::fuse_truncate(const char *path, off_t size)
 int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
                          struct fuse_file_info *fi)
 {
-	(void) path;
 	int res;
 
-	openfile_info *fileinfo = (openfile_info *)fi->fh;
-	if (!fileinfo)
+	File *file = (File *)fi->fh;
+	if (!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
 
-	res = ftruncate(fileinfo->get_fd_remote(), size);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	return file->op_ftruncate(size);
 }
 
 /**
@@ -487,20 +420,10 @@ int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
 int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	struct timeval tv[2];
-
-	tv[0].tv_sec = ts[0].tv_sec;
-	tv[0].tv_usec = ts[0].tv_nsec / 1000;
-	tv[1].tv_sec = ts[1].tv_sec;
-	tv[1].tv_usec = ts[1].tv_nsec / 1000;
-
-	res = utimes(file.get_remote_path().c_str(), tv);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_utimens(ts);
+	delete file;
+	return res;
 }
 
 /**
@@ -516,18 +439,17 @@ int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
  * @param fi 
  * @return 
  */
-int ofs_fuse::fuse_create(const char *path, mode_t mode, struct fuse_file_info *fi)
+int ofs_fuse::fuse_create(const char *path, mode_t mode,
+	struct fuse_file_info *fi)
 {
-	int fd;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	fd = open(file.get_remote_path().c_str(), fi->flags, mode);
-	if (fd == -1)
-		return -errno;
-	
-	openfile_info *fileinfo = new openfile_info(fd, -1, file);
-	fi->fh = (unsigned long)fileinfo;
-	return 0;
+	int res;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_create(mode, fi->flags);
+	if (res < 0)
+		delete file;
+	else
+		fi->fh = (unsigned long)file;
+	return res;
 }
 
 /**
@@ -544,16 +466,14 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode, struct fuse_file_info *
  */
 int ofs_fuse::fuse_open(const char *path, struct fuse_file_info *fi)
 {
-	int fd;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	fd = open(file.get_remote_path().c_str(), fi->flags);
-	if (fd == -1)
-		return -errno;
-
-	openfile_info *fileinfo = new openfile_info(fd, -1, file);
-	fi->fh = (unsigned long)fileinfo;
-	return 0;
+	int res;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_open(fi->flags);
+	if (res < 0)
+		delete file;
+	else
+		fi->fh = (unsigned long)file;
+	return res;
 }
 
 /**
@@ -576,17 +496,14 @@ int ofs_fuse::fuse_read(const char *path, char *buf, size_t size, off_t offset,
 {
 	int res;
 	(void) path;
-	openfile_info *fileinfo = (openfile_info *)fi->fh;
-	if (!fileinfo)
+	File *file = (File *)fi->fh;
+	if (!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
 	
-	res = pread(fileinfo->get_fd_remote(), buf, size, offset);
-	if (res == -1)
-		res = -errno;
-
+	res = file->op_read(buf, size, offset);
 	return res;
 }
 
@@ -608,17 +525,13 @@ int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
 {
 	int res;
 	(void) path;
-	openfile_info *fileinfo = (openfile_info *)fi->fh;
-	if (!fileinfo)
+	File *file = (File *)fi->fh;
+	if (!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
-
-	res = pwrite(fileinfo->get_fd_remote(), buf, size, offset);
-	if (res == -1)
-		res = -errno;
-
+	res = file->op_write(buf, size, offset);
 	return res;
 }
 
@@ -633,13 +546,10 @@ int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
 int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
 {
 	int res;
-	File file = Filestatusmanager::Instance().give_me_file(path);
-
-	res = statvfs(file.get_remote_path().c_str(), stbuf);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	File *file = Filestatusmanager::Instance().give_me_file(path);
+	res = file->op_statfs(stbuf);
+	delete file;
+	return res;
 }
 
 /**
@@ -667,9 +577,9 @@ int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
  */
 int ofs_fuse::fuse_flush(const char *path, struct fuse_file_info *fi)
 {
-	int res;
-	(void) path;
-	openfile_info *fileinfo = (openfile_info *)fi->fh;
+	// TODO: Implement this
+//	int res;
+//	openfile_info *fileinfo = (openfile_info *)fi->fh;
 	/* This is called from every close on an open file, so call the
 	close on the underlying filesystem.  But since flush may be
 	called multiple times for an open file, this must not really
@@ -706,19 +616,17 @@ int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
 {
 	int res;
 	(void) path;
-	openfile_info *fileinfo = (openfile_info *)fi->fh;
-	if (!fileinfo)
+	File *file = (File *)fi->fh;
+	if (!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
-
-	if(close(fileinfo->get_fd_remote()))
-		return -errno;
-	delete fileinfo;
+	res = file->op_release();
+	delete file;
 	fi->fh = 0;
 	
-	return 0;
+	return res;
 }
 
 /**
@@ -736,25 +644,14 @@ int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
 {
 	int res;
 	(void) path;
-	openfile_info *fileinfo = (openfile_info *)fi->fh;
-	if (!fileinfo)
+	File *file = (File *)fi->fh;
+	if (!file)
 	{
 		errno = EBADF;
 		return -errno;
 	}
-
-#ifndef HAVE_FDATASYNC
-	(void) isdatasync;
-#else
-	if (isdatasync)
-		res = fdatasync(fileinfo->get_fd_remote());
-	else
-#endif
-		res = fsync(fileinfo->get_fd_remote());
-	if (res == -1)
-		return -errno;
-
-	return 0;
+	res = file->op_fsync(isdatasync);
+	return res;
 }
 
 #ifdef HAVE_SETXATTR
@@ -784,7 +681,7 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 			const char *value, size_t size, int flags)
 {
 	int res = 0;
-	File file = Filestatusmanager::Instance().give_me_file(path);
+	File *file = Filestatusmanager::Instance().give_me_file(path);
 	// offline attribute
 	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
 			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
@@ -796,9 +693,10 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 		res = -1;
 		errno = EACCES;
 	} else {
-		res = lsetxattr(file.get_remote_path().c_str(), name,
+		res = lsetxattr(file->get_remote_path().c_str(), name,
 			value, size, flags);
 	}
+	delete file;
 	if (res == -1)
 		return -errno;
 	return 0;
@@ -821,11 +719,11 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
                     size_t size)
 {
 	int res = 0;
-	File file = Filestatusmanager::Instance().give_me_file(path);
+	File *file = Filestatusmanager::Instance().give_me_file(path);
 	// offline attribute
 	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
 			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
-		if (file.get_offline_state()) {
+		if (file->get_offline_state()) {
 			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
 			if (size >= res) {
 				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
@@ -841,7 +739,7 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 	// availability attribute
 	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
 			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
-		if (file.get_availability()) {
+		if (file->get_availability()) {
 			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
 			if (size >= res) {
 				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
@@ -856,12 +754,13 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 		}
  	// unknown attribute - delegate to the underlying filesystem
 	} else {
-		res = lgetxattr(file.get_remote_path().c_str(),
+		res = lgetxattr(file->get_remote_path().c_str(),
 			name, value, size);
 		// do not return "unsupported" but "unknown attribute"
 		if(errno == ENOTSUP)
 			errno = ENOATTR;
 	} 
+	delete file;
 	if (res == -1)
 		return -errno;
 	return res;
@@ -882,7 +781,7 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 	int res = 0;
 	int fsres = 0;
 	char *fslist = NULL;
-	File file = Filestatusmanager::Instance().give_me_file(path);
+	File *file = Filestatusmanager::Instance().give_me_file(path);
 	
 	res += strlen(OFS_ATTRIBUTE_OFFLINE) + 1;
 	res += strlen(OFS_ATTRIBUTE_AVAILABLE) + 1;
@@ -893,15 +792,16 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 			OFS_ATTRIBUTE_AVAILABLE,
 			strlen(OFS_ATTRIBUTE_AVAILABLE)+1);
 		fslist = new char[size-res];		
-		fsres = llistxattr(file.get_remote_path().c_str(),
+		fsres = llistxattr(file->get_remote_path().c_str(),
 			fslist, size-res);
 		if (fsres > 0)
 			res += fsres;
 	} else {
-		fsres = llistxattr(file.get_remote_path().c_str(), fslist, 0);
+		fsres = llistxattr(file->get_remote_path().c_str(), fslist, 0);
 		if (fsres > 0)
 			res += fsres;		
 	}
+	delete file;
 	return res;
 }
 
@@ -918,7 +818,7 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 int ofs_fuse::fuse_removexattr(const char *path, const char *name)
 {
 	int res = 0;
-	File file = Filestatusmanager::Instance().give_me_file(path);
+	File *file = Filestatusmanager::Instance().give_me_file(path);
 	// offline attribute
 	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
 			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
@@ -930,8 +830,9 @@ int ofs_fuse::fuse_removexattr(const char *path, const char *name)
 		res = -1;
 		errno = EACCES;
 	} else {
-		res = lremovexattr(file.get_remote_path().c_str(), name);
+		res = lremovexattr(file->get_remote_path().c_str(), name);
 	}
+	delete file;
 	if (res == -1)
 		return -errno;
 	return 0;
@@ -1000,12 +901,4 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 	if (!pthread_create(thread, NULL, ofs_daemon::start_daemon, (void *)self))
 		perror(strerror(errno));*/
 	return NULL;
-}
-
-/*!
-    \fn ofs_fuse::fuse_self->get_absolute_path(string rel_path)
- */
-string ofs_fuse::get_absolute_path(string rel_path)
-{
-	return basepath + rel_path;
 }
