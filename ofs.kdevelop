@@ -27,10 +27,10 @@
       <mainprogram/>
       <terminal>true</terminal>
       <runarguments>
-        <ofs>/tmp/fuse</ofs>
+        <ofs>~/ofs_mountpoint</ofs>
       </runarguments>
       <debugarguments>
-        <ofs>/tmp/fuse</ofs>
+        <ofs>~/ofs_mountpoint</ofs>
       </debugarguments>
       <cwd>
         <ofs>.</ofs>

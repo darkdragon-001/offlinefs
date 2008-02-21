@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "file.h"
 #include <sys/time.h>
+#include <unistd.h>
 
 File::~File()
 {
@@ -616,4 +617,31 @@ int File::op_link(File *to)
 	if (res == -1)
 		return -errno;
 	return 0;
+}
+
+
+/*!
+ *  If this file is available on the remote machine
+ *  and has changed, update it
+ *  TODO: implement exceptions
+ *  \fn File::update_local()
+ */
+void File::update_local()
+{
+	struct stat fileinfo;
+	time_t mtime_remote, mtime_cache;
+
+	if (get_offline_state() && get_availability()) {
+		// TODO: throw exception on error
+		stat(get_remote_path().c_str(), &fileinfo);
+		mtime_remote = fileinfo.st_mtime;
+		stat(get_cache_path().c_str(), &fileinfo);
+		mtime_cache = fileinfo.st_mtime;
+		// if the remote file has changed
+		// copy it to the cache
+		// TODO: This should be more elegant
+		if (mtime_remote > mtime_cache) {
+			execl("cp", get_remote_path().c_str(), get_cache_path().c_str());
+		}
+	}
 }

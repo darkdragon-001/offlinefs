@@ -72,6 +72,7 @@ public:
     int op_rename(File *to);
     int op_link(File *from);
     int op_symlink(const char* from);
+    void update_local();
 private:
 	bool offline_state;
 	bool availability;
