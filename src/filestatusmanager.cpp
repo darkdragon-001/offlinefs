@@ -38,6 +38,6 @@ Filestatusmanager& Filestatusmanager::Instance()
  */
 File *Filestatusmanager::give_me_file(string Path)
 {
-	return new File(false, false, string(TESTING_REMOTE_PATH)+Path,
+	return new File(true, true, Path, string(TESTING_REMOTE_PATH)+Path,
 		string(TESTING_BACKING_PATH)+Path);
 }

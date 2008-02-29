@@ -36,7 +36,7 @@ using namespace std;
 */
 class File{
 public:
-	File(bool offline_state, bool availability,
+	File(bool offline_state, bool availability, string relative_path,
 		string remote_path, string cache_path);
 	File(const File &copy);
 	File& operator =(const File &copy);
@@ -72,10 +72,12 @@ public:
     int op_rename(File *to);
     int op_link(File *from);
     int op_symlink(const char* from);
-    void update_local();
+    void update_cache();
+    File * get_parent_directory();
 private:
 	bool offline_state;
 	bool availability;
+	string relative_path;
 	string remote_path;
 	string cache_path;
 	DIR *dh_cache;

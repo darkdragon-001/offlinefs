@@ -18,16 +18,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "file.h"
+#include "filestatusmanager.h"
 #include <sys/time.h>
 #include <unistd.h>
+#include <ofsexception.h>
+#include <errno.h>
+#include <iostream>
+#include <sstream>
+#include <utime.h>
 
 File::~File()
 {
 }
 
 File::File(const bool offline_state, const bool availability,
+		const string relative_path,
 		const string remote_path, const string cache_path) :
 	offline_state(offline_state), availability(availability),
+	relative_path(relative_path),
 	remote_path(remote_path), cache_path(cache_path),
 	dh_remote(NULL), dh_cache(NULL), fd_remote(0), fd_cache(0)
 {}
@@ -140,13 +148,19 @@ int File::op_getattr(struct stat *stbuf)
 int File::op_readlink(char *buf, size_t size)
 {
 	int res;
+	try {
+		update_cache();
+		
+		res = readlink(get_remote_path().c_str(), buf, size - 1);
+		if (res == -1)
+			return -errno;
 
-	res = readlink(get_remote_path().c_str(), buf, size - 1);
-	if (res == -1)
+		buf[res] = '\0';
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-
-	buf[res] = '\0';
-	return 0;
+	}
 }
 
 
@@ -313,12 +327,19 @@ int File::op_mknod(mode_t mode, dev_t rdev)
 int File::op_open(int flags)
 {
 	int fd;
-	fd = open(get_remote_path().c_str(), flags);
-	if (fd == -1)
-		return -errno;
-	fd_remote = fd;
+	try {
+		update_cache();
+		
+		fd = open(get_remote_path().c_str(), flags);
+		if (fd == -1)
+			return -errno;
+		fd_remote = fd;
 	
-	return 0;
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
+		return -errno;
+	}
 }
 
 /**
@@ -328,10 +349,16 @@ int File::op_open(int flags)
  */
 int File::op_opendir()
 {
-	dh_remote = opendir(get_remote_path().c_str());
-	if (dh_remote == NULL)
-		return -errno;	
-	return 0;
+	try {
+		update_cache();
+		dh_remote = opendir(get_remote_path().c_str());
+		if (dh_remote == NULL)
+			return -errno;	
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
+		return -errno;
+	}
 }
 
 /**
@@ -623,25 +650,101 @@ int File::op_link(File *to)
 /*!
  *  If this file is available on the remote machine
  *  and has changed, update it
- *  TODO: implement exceptions
+ *  TODO: attributes (ctime, atime etc.) have to be set
+ *        on the cache file and all directories in path
  *  \fn File::update_local()
  */
-void File::update_local()
+void File::update_cache()
 {
-	struct stat fileinfo;
-	time_t mtime_remote, mtime_cache;
-
+	struct stat fileinfo_cache;
+	struct stat fileinfo_remote;
+	bool file_exists = true;
+	int ret;
+	
+	// only if the file is marked as offline and the remote
+	// file is available we do something
 	if (get_offline_state() && get_availability()) {
-		// TODO: throw exception on error
-		stat(get_remote_path().c_str(), &fileinfo);
-		mtime_remote = fileinfo.st_mtime;
-		stat(get_cache_path().c_str(), &fileinfo);
-		mtime_cache = fileinfo.st_mtime;
+		// if the file is not yet in cache, we have to
+		// copy it anyway
+		ret = lstat(get_cache_path().c_str(), &fileinfo_cache);
+		if (ret < 0 && errno == ENOENT)
+		{
+			// make sure the parent directory is current
+			File *parent = get_parent_directory();
+			parent->update_cache();
+			delete parent;
+			file_exists = false;
+		}
+		else if (ret < 0 )
+			throw OFSException(strerror(errno), errno);
+		
+		// get info of remote file
+		ret = lstat(get_remote_path().c_str(), &fileinfo_remote);
+		if (ret < 0)
+			throw OFSException(strerror(errno), errno);
+		
 		// if the remote file has changed
 		// copy it to the cache
-		// TODO: This should be more elegant
-		if (mtime_remote > mtime_cache) {
-			execl("cp", get_remote_path().c_str(), get_cache_path().c_str());
+		// TODO: If the file gets openend for overwriting, we may skip copying it from
+		// the remote location
+		if (fileinfo_remote.st_mtime > fileinfo_cache.st_mtime) {
+			// if this is a directory, we only create it in the cache if necessary
+			if(S_ISDIR(fileinfo_remote.st_mode) && !file_exists) {
+				if(mkdir(get_cache_path().c_str(),S_IRWXU) < 0)
+					throw OFSException(strerror(errno), errno);
+			} else if (S_ISREG(fileinfo_remote.st_mode)) {
+				int fdl = open(get_cache_path().c_str(),
+					O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+				if (fdl < 0)
+					throw OFSException(strerror(errno), errno);
+				int fdr = open(get_remote_path().c_str(), O_RDONLY);
+				if (fdr < 0)
+					throw OFSException(strerror(errno), errno);
+				char buf[1024];
+				ssize_t bytesread;
+				while((bytesread = read(fdr, buf, sizeof(buf))) > 0)
+				{
+					if (write(fdl, buf, bytesread) < 0)
+						throw OFSException(strerror(errno), errno);
+				}
+				if(bytesread < 0)
+					throw new OFSException(strerror(errno), errno);
+				close(fdr);
+				close(fdl);
+			} else if (S_ISLNK(fileinfo_remote.st_mode)) {
+				char buf[1024];
+				ssize_t len;
+				len = readlink(get_remote_path().c_str(), buf, sizeof(buf)-1);
+				if (len < 0)
+					throw OFSException(strerror(errno), errno);
+				buf[len] = '\0';
+				if (symlink(buf, get_cache_path().c_str()) < 0)
+					throw OFSException(strerror(errno), errno);
+			} // TODO: Other file types
+
+			// set atime and mtime
+			struct utimbuf times;
+			times.actime = fileinfo_remote.st_atime;
+			times.modtime = fileinfo_remote.st_mtime;
+			if (utime(get_cache_path().c_str(), &times) < 0)
+				throw OFSException(strerror(errno), errno);
 		}
 	}
+}
+
+
+/*!
+    \fn File::get_parent_directory()
+	Get the File object for the parent directory
+ */
+File * File::get_parent_directory()
+{
+	size_t slashpos;
+	// find the last '/' - start searching on the second-last position
+	// because we have to ignore the '/' at the end if there is one
+	slashpos = relative_path.find_last_of('/',relative_path.length()-2);
+	if (slashpos == string::npos)
+		return NULL;
+	return Filestatusmanager::Instance().give_me_file(relative_path.substr(0, slashpos));
+	
 }

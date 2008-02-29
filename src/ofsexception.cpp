@@ -44,11 +44,19 @@ OFSException & OFSException::operator=(OFSException &e)
 	return *this;
 }
 
-
 /*!
     \fn OFSException::what() const throw()
  */
 const char * OFSException::what() const throw()
 {
 	return message.c_str();
+}
+
+
+/*!
+    \fn OFSException::get_posixerrno()
+ */
+int OFSException::get_posixerrno()
+{
+	return this->posixerrno;
 }

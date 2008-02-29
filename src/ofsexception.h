@@ -34,6 +34,7 @@ public:
     ~OFSException() throw();
     OFSException & operator=(OFSException &);
     virtual const char * what() const throw();
+    int get_posixerrno();
 private:
 	string message;
 	int posixerrno;
