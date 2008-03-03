@@ -52,6 +52,8 @@ bool File::get_offline_state() const
 
 bool File::get_availability() const
 {
+	if(!offline_state)
+		return true;
 	return availability;
 }
 
@@ -90,8 +92,10 @@ File & File::operator =(const File &copy)
 int File::op_access(int mask)
 {
 	int res;
-
-	res = access(get_remote_path().c_str(), mask);
+	if(get_availability())
+		res = access(get_remote_path().c_str(), mask);
+	else
+		res = access(get_cache_path().c_str(), mask);
 	if (res == -1)
 		return -errno;
 
@@ -107,12 +111,23 @@ int File::op_access(int mask)
 int File::op_chmod(mode_t mode)
 {
 	int res;
-
-	res = chmod(get_remote_path().c_str(), mode);
-	if (res == -1)
+	try {
+		update_cache();
+		
+		if (get_offline_state())
+			res = chmod(get_cache_path().c_str(), mode);
+		if (res == -1)
+			return -errno;
+		if (get_availability())
+			res = chmod(get_remote_path().c_str(), mode);
+		if (res == -1)
+			return -errno;
+		update_amtime();
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-
-	return 0;
+	}
 }
 
 
@@ -127,7 +142,12 @@ int File::op_chmod(mode_t mode)
 int File::op_getattr(struct stat *stbuf)
 {
 	int res;
-	res = lstat(get_remote_path().c_str(), stbuf);
+	if(get_availability())
+	{
+		res = lstat(get_remote_path().c_str(), stbuf);
+	} else {
+		res = lstat(get_cache_path().c_str(), stbuf);
+	}
 	if (res == -1)
 		return -errno;
 	return 0;
@@ -151,10 +171,14 @@ int File::op_readlink(char *buf, size_t size)
 	try {
 		update_cache();
 		
-		res = readlink(get_remote_path().c_str(), buf, size - 1);
+		if (get_availability())
+			res = readlink(get_remote_path().c_str(), buf, size - 1);
+		else
+			res = readlink(get_cache_path().c_str(), buf, size - 1);
 		if (res == -1)
 			return -errno;
-
+		
+		update_amtime();
 		buf[res] = '\0';
 		return 0;
 	} catch(OFSException &e) {
@@ -173,13 +197,25 @@ int File::op_readlink(char *buf, size_t size)
  */
 int File::op_chown(uid_t uid, gid_t gid)
 {
-	int res;
+	int res = 0;
+	try {
+		update_cache();
 
-	res = lchown(get_remote_path().c_str(), uid, gid);
-	if (res == -1)
-		return -errno;
-
-	return 0;
+		if (get_offline_state())
+			res = lchown(get_cache_path().c_str(), uid, gid);
+		if (res == -1)
+			return -errno;
+		if (get_availability())
+			res = lchown(get_remote_path().c_str(), uid, gid);
+		if (res == -1)
+			return -errno;
+		update_amtime();
+		return 0;
+		
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
+		return -errno;	
+	}
 }
 
 /**
@@ -195,13 +231,30 @@ int File::op_chown(uid_t uid, gid_t gid)
  */
 int File::op_create(mode_t mode, int flags)
 {
-	int fd;
-	fd = open(get_remote_path().c_str(), flags, mode);
-	if (fd == -1)
-		return -errno;
-	fd_remote = fd;	
-	return 0;
+	int fdr, fdc;
+	try {		
+		update_cache();
 
+		if (get_offline_state()) {
+			fdc = open(get_cache_path().c_str(), flags, mode);
+			if (fdc == -1)
+				return -errno;
+		}
+		if (get_availability()) {
+			fdr = open(get_remote_path().c_str(), flags, mode);
+			if (fdr == -1) {
+				close(fdc);
+				return -errno;
+			}
+		}
+		fd_remote = fdr;
+		fd_cache = fdc;
+		
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
+		return -errno;	
+	}
 }
 
 /**
@@ -217,8 +270,10 @@ int File::op_create(mode_t mode, int flags)
 int File::op_fgetattr(struct stat *stbuf)
 {
 	int res;
-
-	res = fstat(fd_remote, stbuf);
+	if(get_availability())
+		res = fstat(fd_remote, stbuf);
+	else
+		res = fstat(fd_cache, stbuf);
 	if (res == -1)
 		return -errno;
 	return 0;
@@ -255,12 +310,13 @@ int File::op_flush()
  *
  * If the datasync parameter is non-zero, then only the user data should be
  * flushed, not the meta data.
+ * TODO: Implement this
  * @param isdatasync 
  * @return 
  */
 int File::op_fsync(int isdatasync)
 {
-	int res;
+/*	int res;
 #ifndef HAVE_FDATASYNC
 	(void) isdatasync;
 #else
@@ -271,7 +327,7 @@ int File::op_fsync(int isdatasync)
 		res = fsync(fd_remote);
 	if (res == -1)
 		return -errno;
-	return 0;
+	return 0;*/
 }
 
 /**
@@ -282,10 +338,25 @@ int File::op_fsync(int isdatasync)
 int File::op_mkdir(mode_t mode)
 {
 	int res;
-	res = mkdir(get_remote_path().c_str(), mode);
-	if (res == -1)
+	try {
+		update_cache();
+		
+		if(get_availability()) {
+			res = mkdir(get_remote_path().c_str(), mode);
+			if (res == -1)
+				return -errno;
+		}
+		if (get_offline_state()) {
+			res = mkdir(get_cache_path().c_str(), mode);
+			if (res == -1)
+				return -errno;
+		}
+		
+		update_amtime();
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-
+	}
 	return 0;
 }
 
@@ -302,16 +373,41 @@ int File::op_mkdir(mode_t mode)
 int File::op_mknod(mode_t mode, dev_t rdev)
 {
 	int res;
-	string remotepath = get_remote_path();
-
-	if (S_ISFIFO(mode))
-		res = mkfifo(remotepath.c_str(), mode);
-	else
-		res = mknod(remotepath.c_str(), mode, rdev);
-	if (res == -1)
+	try {
+		update_cache();
+		string remotepath = get_remote_path();
+		string cachepath = get_cache_path();
+		if (S_ISFIFO(mode)) {
+			if(get_availability()) {
+				res = mkfifo(remotepath.c_str(), mode);
+				if (res == -1)
+					return -errno;
+			}
+			if(get_offline_state()) {
+				res = mkfifo(cachepath.c_str(), mode);
+				if(res == -1)
+					return -errno;
+			}			
+		}
+		else
+		{
+			if(get_availability()) {
+				res = mknod(remotepath.c_str(), mode, rdev);
+				if (res == -1)
+					return -errno;
+			}
+			if(get_offline_state()) {
+				res = mknod(cachepath.c_str(), mode, rdev);
+				if(res == -1)
+					return -errno;
+			}
+		}
+		update_amtime();
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-
-	return 0;
+	}
 }
 
 /**
@@ -326,15 +422,26 @@ int File::op_mknod(mode_t mode, dev_t rdev)
  */
 int File::op_open(int flags)
 {
-	int fd;
+	int fdc;
+	int fdr;
 	try {
 		update_cache();
+
+		if (get_offline_state()) {
+			fdc = open(get_cache_path().c_str(), flags);
+			if (fdc == -1)
+				return -errno;
+		}
+		if (get_availability()) {
+			fdr = open(get_remote_path().c_str(), flags);
+			if (fdr == -1) {
+				close(fdc);
+				return -errno;
+			}
+		}
+		fd_remote = fdr;
+		fd_cache = fdc;
 		
-		fd = open(get_remote_path().c_str(), flags);
-		if (fd == -1)
-			return -errno;
-		fd_remote = fd;
-	
 		return 0;
 	} catch(OFSException &e) {
 		errno = e.get_posixerrno();
@@ -351,9 +458,20 @@ int File::op_opendir()
 {
 	try {
 		update_cache();
-		dh_remote = opendir(get_remote_path().c_str());
-		if (dh_remote == NULL)
-			return -errno;	
+		if(get_availability()) {
+			dh_remote = opendir(get_remote_path().c_str());
+			if (dh_remote == NULL)
+				return -errno;	
+		}
+		if(get_offline_state()) {
+			dh_cache = opendir(get_cache_path().c_str());
+			if (dh_cache == NULL)
+			{
+				closedir(dh_remote);
+				return -errno;	
+			}
+		}
+		update_amtime();
 		return 0;
 	} catch(OFSException &e) {
 		errno = e.get_posixerrno();
@@ -378,7 +496,10 @@ int File::op_opendir()
 int File::op_read(char *buf, size_t size, off_t offset)
 {
 	int res;
-	res = pread(fd_remote, buf, size, offset);
+	if(fd_remote)
+		res = pread(fd_remote, buf, size, offset);
+	else
+		res = pread(fd_cache, buf, size, offset);
 	if (res == -1)
 		res = -errno;
 	return res;
@@ -409,22 +530,41 @@ int File::op_read(char *buf, size_t size, off_t offset)
  */
 int File::op_readdir(void *buf, fuse_fill_dir_t filler, off_t offset)
 {
-	if (dh_remote == NULL)
-	{
-		errno = EBADF;
+	bool cache;
+	long loc;
+	
+	if (dh_remote)
+		cache = false;
+	else if(dh_cache)
+		cache = true;
+	else {
+		errno = ENOENT;
 		return -errno;
 	}
-
+	
 	struct dirent *de;
-
-	seekdir(dh_remote, offset);
-	while ((de = readdir(dh_remote)) != NULL) {
+	if (cache) {
+		seekdir(dh_cache, offset);
+		de = readdir(dh_cache);
+	} else	{
+		seekdir(dh_remote, offset);
+		de = readdir(dh_remote);
+	}
+	while (de != NULL) {
 		struct stat st;
 		memset(&st, 0, sizeof(st));
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
-		if (filler(buf, de->d_name, &st, telldir(dh_remote)))
+		if(cache)
+			loc = telldir(dh_cache);
+		else
+			loc = telldir(dh_remote);
+		if (filler(buf, de->d_name, &st, loc))
 			break;
+		if (cache)
+			de = readdir(dh_cache);
+		else
+			de = readdir(dh_remote);
 	}
 	return 0;
 }
@@ -447,10 +587,20 @@ int File::op_release()
 {
 	int res;
 	
-	if(close(fd_remote))
+	if(!fd_remote && !fd_cache) {
+		errno = EBADF;
 		return -errno;
+	}
+	if(fd_remote)
+		if(close(fd_remote) < 0)
+			return -errno;
+	if(fd_cache)
+		if(close(fd_remote) < 0)
+			return -errno;
+
 	fd_remote = 0;
-	
+	fd_cache = 0;
+	update_amtime();
 	return 0;
 }
 
@@ -460,13 +610,20 @@ int File::op_release()
  */
 int File::op_releasedir()
 {
-	if (!dh_remote)
+	if (!dh_remote && !dh_cache)
 	{
 		errno = EBADF;
 		return -errno;
 	}
+	if(dh_remote)
+		if(closedir(dh_remote))
+			return -errno;
+	if(dh_cache)
+		if(closedir(dh_cache))
+			return -errno;
 	
-	return closedir(dh_remote);
+	update_amtime();
+	return 0;
 }
 
 /**
@@ -476,10 +633,25 @@ int File::op_releasedir()
 int File::op_rmdir()
 {
 	int res;
-	res = rmdir(get_remote_path().c_str());
-	if (res == -1)
+	try {
+		update_cache();
+		if(get_availability()) {
+			res = rmdir(get_remote_path().c_str());
+			if (res == -1)
+				return -errno;
+		}
+		if(get_offline_state()) {
+			res = rmdir(get_cache_path().c_str());
+			if (res == -1)
+				return -errno;
+		}
+		update_amtime();
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-	return 0;
+	}
+
 }
 
 /**
@@ -492,7 +664,10 @@ int File::op_rmdir()
 int File::op_statfs(struct statvfs *stbuf)
 {
 	int res;
-	res = statvfs(get_remote_path().c_str(), stbuf);
+	if(get_availability())
+		res = statvfs(get_remote_path().c_str(), stbuf);
+	else
+		res = statvfs(get_cache_path().c_str(), stbuf);
 	if (res == -1)
 		return -errno;
 	return 0;
@@ -507,10 +682,25 @@ int File::op_statfs(struct statvfs *stbuf)
 int File::op_truncate(off_t size)
 {
 	int res;
-	res = truncate(get_remote_path().c_str(), size);
-	if (res == -1)
+	try {
+		update_cache();
+		
+		if(get_availability()) {
+			res = truncate(get_remote_path().c_str(), size);
+			if (res == -1)
+				return -errno;
+		}
+		if(get_offline_state()) {
+			res = truncate(get_cache_path().c_str(), size);
+			if (res == -1)
+				return -errno;
+		}
+		update_amtime();
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-	return 0;
+	}
 }
 
 /**
@@ -522,15 +712,22 @@ int File::op_ftruncate(off_t size)
 {
 	int res;
 	
-	if (!fd_remote)
+	if (!fd_remote && !fd_cache)
 	{
 		errno = EBADF;
 		return -errno;
 	}
-
-	res = ftruncate(fd_remote, size);
-	if (res == -1)
-		return -errno;
+	
+	if (fd_remote) {
+		res = ftruncate(fd_remote, size);
+		if (res == -1)
+			return -errno;
+	}
+	if (fd_cache) {
+		res = ftruncate(fd_cache, size);
+		if (res == -1)
+			return -errno;
+	}
 
 	return 0;
 }
@@ -542,11 +739,24 @@ int File::op_ftruncate(off_t size)
 int File::op_unlink()
 {
 	int res;
-	res = unlink(get_remote_path().c_str());
-	if (res == -1)
-		return -errno;
+	try {
+		update_cache();
 
-	return 0;
+		if(get_availability()) {
+			res = unlink(get_remote_path().c_str());
+			if (res == -1)
+				return -errno;
+		}
+		if(get_offline_state()) {
+			res = unlink(get_cache_path().c_str());
+			if (res == -1)
+				return -errno;
+		}
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
+		return -errno;
+	}
 }
 
 /**
@@ -565,12 +775,25 @@ int File::op_utimens(const struct timespec ts[2])
 	tv[0].tv_usec = ts[0].tv_nsec / 1000;
 	tv[1].tv_sec = ts[1].tv_sec;
 	tv[1].tv_usec = ts[1].tv_nsec / 1000;
-
-	res = utimes(get_remote_path().c_str(), tv);
-	if (res == -1)
+	
+	try {
+		update_cache();
+		if(get_availability()) {
+			res = utimes(get_remote_path().c_str(), tv);
+			if (res == -1)
+				return -errno;
+		}
+		if(get_offline_state()) {
+			res = utimes(get_cache_path().c_str(), tv);
+			if (res == -1)
+				return -errno;
+		}	
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
+	}
 
-	return 0;
 }
 
 /**
@@ -587,10 +810,21 @@ int File::op_utimens(const struct timespec ts[2])
 int File::op_write(const char *buf, size_t size, off_t offset)
 {
 	int res;
-	res = pwrite(fd_remote, buf, size, offset);
-	if (res == -1)
-		res = -errno;
-	return res;
+	if(!fd_remote && !fd_cache) {
+		errno = EBADF;
+		return -errno;
+	}
+	if(fd_remote) {
+		res = pwrite(fd_remote, buf, size, offset);
+		if (res == -1)
+			res = -errno;
+	}
+	if(fd_cache) {
+		res = pwrite(fd_cache, buf, size, offset);
+		if (res == -1)
+			res = -errno;
+	}
+	return 0;
 }
 
 
@@ -606,10 +840,17 @@ int File::op_write(const char *buf, size_t size, off_t offset)
 int File::op_symlink(const char* from)
 {
 	int res;
-
-	res = symlink(from, get_remote_path().c_str());
-	if (res == -1)
-		return -errno;
+	
+	if(get_availability()) {
+		res = symlink(from, get_remote_path().c_str());
+		if (res == -1)
+			return -errno;
+	}
+	if(get_offline_state()) {
+		res = symlink(from, get_cache_path().c_str());
+		if (res == -1)
+			return -errno;
+	}
 	return 0;
 }
 
@@ -622,11 +863,26 @@ int File::op_symlink(const char* from)
 int File::op_rename(File *to)
 {
 	int res;
-	res = rename(get_remote_path().c_str(), to->get_remote_path().c_str());
-	if (res == -1)
+	try {
+		update_cache();
+		if(get_availability()) {
+			res = rename(get_remote_path().c_str(), 
+				to->get_remote_path().c_str());
+			if (res == -1)
+				return -errno;
+		}
+		if(get_offline_state()) {
+			res = rename(get_cache_path().c_str(), 
+				to->get_cache_path().c_str());
+			if (res == -1)
+				return -errno;		
+		}
+		update_amtime();
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-
-	return 0;
+	}
 }
 
 
@@ -639,11 +895,27 @@ int File::op_rename(File *to)
 int File::op_link(File *to)
 {
 	int res;
-	res = link(get_remote_path().c_str(),
-		to->get_remote_path().c_str());
-	if (res == -1)
+	try {
+		update_cache();
+		
+		if(get_availability()) {
+			res = link(get_remote_path().c_str(),
+				to->get_remote_path().c_str());
+			if(res == -1)
+				return -errno;
+		}
+		if(get_offline_state()) {
+			res = link(get_cache_path().c_str(),
+				to->get_cache_path().c_str());
+			if(res == -1)
+				return -errno;	
+		}
+		update_amtime();
+		return 0;
+	} catch(OFSException &e) {
+		errno = e.get_posixerrno();
 		return -errno;
-	return 0;
+	}
 }
 
 
@@ -660,34 +932,45 @@ void File::update_cache()
 	struct stat fileinfo_remote;
 	bool file_exists = true;
 	int ret;
-	
+
 	// only if the file is marked as offline and the remote
 	// file is available we do something
 	if (get_offline_state() && get_availability()) {
-		// if the file is not yet in cache, we have to
-		// copy it anyway
+		// get info of remote file
+		ret = lstat(get_remote_path().c_str(), &fileinfo_remote);
+		if (ret < 0 && errno == ENOENT) {
+			errno = 0;
+			// if the remote file does not exist, we only make sure,
+			// the parent directory is current
+			File *parent = get_parent_directory();
+			if (parent)
+				parent->update_cache();
+			delete parent;
+			return;
+		}
+		else if (ret < 0)
+			throw OFSException(strerror(errno), errno);
+
+		// receive file information
 		ret = lstat(get_cache_path().c_str(), &fileinfo_cache);
 		if (ret < 0 && errno == ENOENT)
 		{
+			errno = 0;
 			// make sure the parent directory is current
 			File *parent = get_parent_directory();
-			parent->update_cache();
+			if(parent)
+				parent->update_cache();
 			delete parent;
 			file_exists = false;
 		}
 		else if (ret < 0 )
 			throw OFSException(strerror(errno), errno);
 		
-		// get info of remote file
-		ret = lstat(get_remote_path().c_str(), &fileinfo_remote);
-		if (ret < 0)
-			throw OFSException(strerror(errno), errno);
-		
-		// if the remote file has changed
-		// copy it to the cache
+		// if the remote file is not in cache or has changed 
+		// we have to copy it to the cache
 		// TODO: If the file gets openend for overwriting, we may skip copying it from
 		// the remote location
-		if (fileinfo_remote.st_mtime > fileinfo_cache.st_mtime) {
+		if (!file_exists || fileinfo_remote.st_mtime > fileinfo_cache.st_mtime) {
 			// if this is a directory, we only create it in the cache if necessary
 			if(S_ISDIR(fileinfo_remote.st_mode) && !file_exists) {
 				if(mkdir(get_cache_path().c_str(),S_IRWXU) < 0)
@@ -714,20 +997,20 @@ void File::update_cache()
 			} else if (S_ISLNK(fileinfo_remote.st_mode)) {
 				char buf[1024];
 				ssize_t len;
+				// remove the old link if it exists
+				unlink(get_cache_path().c_str());
+				errno = 0;
+				// create the new link
 				len = readlink(get_remote_path().c_str(), buf, sizeof(buf)-1);
 				if (len < 0)
 					throw OFSException(strerror(errno), errno);
 				buf[len] = '\0';
 				if (symlink(buf, get_cache_path().c_str()) < 0)
 					throw OFSException(strerror(errno), errno);
-			} // TODO: Other file types
+			} // TODO: Other file types 
 
 			// set atime and mtime
-			struct utimbuf times;
-			times.actime = fileinfo_remote.st_atime;
-			times.modtime = fileinfo_remote.st_mtime;
-			if (utime(get_cache_path().c_str(), &times) < 0)
-				throw OFSException(strerror(errno), errno);
+			//update_amtime();
 		}
 	}
 }
@@ -747,4 +1030,30 @@ File * File::get_parent_directory()
 		return NULL;
 	return Filestatusmanager::Instance().give_me_file(relative_path.substr(0, slashpos));
 	
+}
+
+
+/*!
+    \fn File::update_amtime()
+	Update the access and modify times of the cache file
+	by using the info from the remote file (if possible)
+ */
+void File::update_amtime()
+{
+	if (get_offline_state() && get_availability()) {
+		struct stat fileinfo_remote;
+		struct utimbuf times;
+	
+		if(lstat(get_remote_path().c_str(), &fileinfo_remote) < 0)
+			throw OFSException(strerror(errno), errno);
+		
+		// utime can not be used with symbolic links because there
+		// is no possibility to prevent it from following the link
+		if(!S_ISLNK(fileinfo_remote.st_mode)) {
+			times.actime = fileinfo_remote.st_atime;
+			times.modtime = fileinfo_remote.st_mtime;
+			if(utime(get_cache_path().c_str(), &times) < 0)
+				throw OFSException(strerror(errno), errno);
+		}
+	}
 }

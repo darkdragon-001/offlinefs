@@ -74,6 +74,7 @@ public:
     int op_symlink(const char* from);
     void update_cache();
     File * get_parent_directory();
+    void update_amtime();
 private:
 	bool offline_state;
 	bool availability;
