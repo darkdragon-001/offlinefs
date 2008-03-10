@@ -36,8 +36,8 @@ Filestatusmanager& Filestatusmanager::Instance()
  * @param Path The file path, relative to the current ofs mountpoint
  * @return Information about the requested file
  */
-File *Filestatusmanager::give_me_file(string Path)
+File Filestatusmanager::give_me_file(string Path)
 {
-	return new File(true, true, Path, string(TESTING_REMOTE_PATH)+Path,
+	return File(true, true, Path, string(TESTING_REMOTE_PATH)+Path,
 		string(TESTING_BACKING_PATH)+Path);
 }

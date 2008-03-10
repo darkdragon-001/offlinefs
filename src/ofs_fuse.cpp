@@ -32,6 +32,7 @@
 #include <attr/xattr.h>
 
 #include "filestatusmanager.h"
+#include "ofsfile.h"
 
 using namespace std;
 //ofs_fuse::fuse_ofs_fuse()
@@ -64,7 +65,7 @@ ofs_fuse::ofs_fuse () :
 int ofs_fuse::fuse_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_getattr(stbuf);
 	delete file;
 	return res;
@@ -87,7 +88,7 @@ int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
 {
 	int res;
 	(void) path;
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
@@ -112,7 +113,7 @@ int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
 int ofs_fuse::fuse_access(const char *path, int mask)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_access(mask);
 	delete file;
 	return res;
@@ -133,7 +134,7 @@ int ofs_fuse::fuse_access(const char *path, int mask)
 int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_readlink(buf, size);
 	delete file;
 	return res;
@@ -150,7 +151,7 @@ int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
 int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_opendir();
 	if (res < 0)
 		delete file;
@@ -188,7 +189,7 @@ int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 {
 	(void) path;
 	int res;
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if(!file)
 	{
 		errno = EBADF;
@@ -208,7 +209,7 @@ int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
 {
 	(void) path;
 	int res;
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
@@ -235,7 +236,7 @@ int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
 int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_mknod(mode, rdev);
 	delete file;
 	return res;
@@ -250,7 +251,7 @@ int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_mkdir(mode);
 	delete file;
 	return res;
@@ -264,7 +265,7 @@ int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 int ofs_fuse::fuse_unlink(const char *path)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_unlink();
 	delete file;
 	return res;
@@ -278,7 +279,7 @@ int ofs_fuse::fuse_unlink(const char *path)
 int ofs_fuse::fuse_rmdir(const char *path)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_rmdir();
 	delete file;
 	return res;
@@ -296,7 +297,7 @@ int ofs_fuse::fuse_rmdir(const char *path)
 int ofs_fuse::fuse_symlink(const char *from, const char *to)
 {
 	int res;
-	File *file_to = Filestatusmanager::Instance().give_me_file(to);
+	OFSFile *file_to = new OFSFile(to);
 	res = file_to->op_symlink(from);
 	delete file_to;
 	return res;
@@ -311,8 +312,8 @@ int ofs_fuse::fuse_symlink(const char *from, const char *to)
 int ofs_fuse::fuse_rename(const char *from, const char *to)
 {
 	int res;
-	File *file_from = Filestatusmanager::Instance().give_me_file(from);
-	File *file_to = Filestatusmanager::Instance().give_me_file(to);
+	OFSFile *file_from = new OFSFile(from);
+	OFSFile *file_to = new OFSFile(to);
 	res = file_from->op_rename(file_to);
 	delete file_from;
 	delete file_to;
@@ -328,8 +329,8 @@ int ofs_fuse::fuse_rename(const char *from, const char *to)
 int ofs_fuse::fuse_link(const char *from, const char *to)
 {
 	int res;
-	File *file_from = Filestatusmanager::Instance().give_me_file(from);
-	File *file_to = Filestatusmanager::Instance().give_me_file(to);
+	OFSFile *file_from = new OFSFile(from);
+	OFSFile *file_to = new OFSFile(to);
 	res = file_from->op_link(file_to);
 	delete file_from;
 	delete file_to;
@@ -345,7 +346,7 @@ int ofs_fuse::fuse_link(const char *from, const char *to)
 int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_chmod(mode);
 	delete file;
 	return res;
@@ -361,7 +362,7 @@ int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_chown(uid, gid);
 	delete file;
 	return res;
@@ -376,7 +377,7 @@ int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 int ofs_fuse::fuse_truncate(const char *path, off_t size)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_truncate(size);
 	delete file;
 	return res;
@@ -400,7 +401,7 @@ int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
 {
 	int res;
 
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
@@ -420,7 +421,7 @@ int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
 int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_utimens(ts);
 	delete file;
 	return res;
@@ -443,7 +444,7 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode,
 	struct fuse_file_info *fi)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_create(mode, fi->flags);
 	if (res < 0)
 		delete file;
@@ -467,7 +468,7 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode,
 int ofs_fuse::fuse_open(const char *path, struct fuse_file_info *fi)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_open(fi->flags);
 	if (res < 0)
 		delete file;
@@ -496,7 +497,7 @@ int ofs_fuse::fuse_read(const char *path, char *buf, size_t size, off_t offset,
 {
 	int res;
 	(void) path;
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
@@ -525,7 +526,7 @@ int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
 {
 	int res;
 	(void) path;
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
@@ -546,7 +547,7 @@ int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
 int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
 {
 	int res;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	res = file->op_statfs(stbuf);
 	delete file;
 	return res;
@@ -616,7 +617,7 @@ int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
 {
 	int res;
 	(void) path;
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
@@ -644,7 +645,7 @@ int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
 {
 	int res;
 	(void) path;
-	File *file = (File *)fi->fh;
+	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
@@ -681,7 +682,7 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 			const char *value, size_t size, int flags)
 {
 	int res = 0;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	// offline attribute
 	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
 			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
@@ -719,7 +720,7 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
                     size_t size)
 {
 	int res = 0;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	// offline attribute
 	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
 			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
@@ -781,7 +782,7 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 	int res = 0;
 	int fsres = 0;
 	char *fslist = NULL;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	
 	res += strlen(OFS_ATTRIBUTE_OFFLINE) + 1;
 	res += strlen(OFS_ATTRIBUTE_AVAILABLE) + 1;
@@ -818,7 +819,7 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 int ofs_fuse::fuse_removexattr(const char *path, const char *name)
 {
 	int res = 0;
-	File *file = Filestatusmanager::Instance().give_me_file(path);
+	OFSFile *file = new OFSFile(path);
 	// offline attribute
 	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
 			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {

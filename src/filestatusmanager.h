@@ -24,6 +24,7 @@
 #include <map>
 #include "mutex.h"
 #include "mutexlocker.h"
+
 using namespace std;
 
 #define TESTING_REMOTE_PATH "/usr"
@@ -36,7 +37,7 @@ using namespace std;
 */
 class Filestatusmanager{
 public:
-	File *give_me_file(string Path);
+	File give_me_file(string Path);
 	static Filestatusmanager& Instance();
 	~Filestatusmanager();
 protected:
