@@ -7,4 +7,5 @@ AC_LANG_CPLUSPLUS
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 
-AC_OUTPUT(Makefile src/Makefile src/hash/Makefile)
+AC_OUTPUT(Makefile libraries/Makefile libraries/libofsconf/Makefile \
+	libraries/libofshash/Makefile mounthelper/Makefile src/Makefile)
