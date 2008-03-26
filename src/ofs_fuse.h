@@ -20,6 +20,10 @@
 #ifndef OFS_FUSE_H
 #define OFS_FUSE_H
 
+// name of attribute which indicates whether a file is offline
+#define OFS_ATTRIBUTE_ISOFFLLINE "offline"
+#define HAVE_SETXATTR
+
 #include <fusexx.hpp>
 #include <string>
 #include <dirent.h>

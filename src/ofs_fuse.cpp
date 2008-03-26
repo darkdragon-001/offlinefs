@@ -655,9 +655,8 @@ int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
 	return res;
 }
 
+
 #ifdef HAVE_SETXATTR
-/* xattr operations are optional and can safely be left unimplemented 
-  TODO: This has to be implemented in order to set the 'offline' flag*/
 /**
  * Set an extended attribute
  *

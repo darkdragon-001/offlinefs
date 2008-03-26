@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,27 +17,36 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef BACKINGTREEPERSISTENCE_H
+#define BACKINGTREEPERSISTENCE_H
+#include "persistencemanager.h"
+#include "mutexlocker.h"
+#include <list>
+#define CONFIGKEY_BACKINGTREES "backingtrees"
+#define PERSISTENCE_MODULE_NAME "backingtrees"
+
+/**
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
+ */
+class BackingtreePersistence : public PersistenceManager {
+public:
+    static BackingtreePersistence& Instance();
+    ~BackingtreePersistence();
+    void backingtrees(const list<string>);
+    list<string> backingtrees() const;
+protected:
+    BackingtreePersistence();
+    virtual cfg_opt_t * init_parser();
+    virtual string get_persistence();
+    virtual void read_values();
+
+private:
+    list<string> p_backingtrees;
+
+    static std::auto_ptr<BackingtreePersistence> theBackingtreePersistenceInstance;
+    static Mutex m;
 
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
+};
+
 #endif
-
-#include <iostream>
-#include <cstdlib>
-#include "ofs_fuse.h"
-#include "backingtreepersistence.h"
-
-using namespace std;
-
-int main(int argc, char *argv[])
-{
-	ofs_fuse my_ofs;
-	cout << "Starting" << endl;
-	BackingtreePersistence bp = BackingtreePersistence::Instance();
-	bp.make_persistent();
-//
-return my_ofs.main(argc, argv, NULL, &my_ofs);
-
-  //return EXIT_SUCCESS;
-}

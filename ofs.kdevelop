@@ -24,7 +24,7 @@
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
-      <mainprogram/>
+      <mainprogram>/home/tobias/ofsproject/ofs/debug</mainprogram>
       <terminal>true</terminal>
       <runarguments>
         <ofs>~/ofs_mountpoint</ofs>
@@ -54,7 +54,7 @@
       </optimized>
       <debug>
         <configargs>--enable-debug=full</configargs>
-        <builddir/>
+        <builddir>debug</builddir>
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevg77options</f77compiler>
@@ -63,8 +63,8 @@
         <topsourcedir/>
         <cppflags/>
         <ldflags/>
-        <ccompilerbinary/>
-        <cxxcompilerbinary/>
+        <ccompilerbinary>gcc</ccompilerbinary>
+        <cxxcompilerbinary>g++</cxxcompilerbinary>
         <f77compilerbinary/>
         <cflags/>
         <f77flags/>

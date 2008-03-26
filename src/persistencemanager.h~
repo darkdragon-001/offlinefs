@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,27 +17,41 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifndef PERSISTENCEMANAGER_H
+#define PERSISTENCEMANAGER_H
 
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <iostream>
-#include <cstdlib>
-#include "ofs_fuse.h"
-#include "backingtreepersistence.h"
-
+#define PERSISTENCE_PATH "/var/ofs"
+#include <confuse.h>
+#include <string>
 using namespace std;
 
-int main(int argc, char *argv[])
-{
-	ofs_fuse my_ofs;
-	cout << "Starting" << endl;
-	BackingtreePersistence bp = BackingtreePersistence::Instance();
-	bp.make_persistent();
-//
-return my_ofs.main(argc, argv, NULL, &my_ofs);
+/**
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
+	
+	Manages files, which hold persisent data.
+	Each subclass gets its own file to store the data
+*/
+class PersistenceManager{
+public:
 
-  //return EXIT_SUCCESS;
-}
+    virtual ~PersistenceManager();
+    void make_persistent();
+    void reload();
+
+protected:
+    PersistenceManager(string modname);
+    virtual cfg_opt_t *init_parser() = 0;
+    virtual string get_persistence() = 0;
+    virtual void read_values() = 0;
+    string get_filename();
+    void init();
+
+protected:
+    cfg_opt_t *opts;
+    cfg_t *cfg;
+
+private:
+    string filename;
+};
+
+#endif

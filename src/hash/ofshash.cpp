@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,27 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "ofshash.h"
+#include "sha1.h"
+#include "base64.h"
 
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <iostream>
-#include <cstdlib>
-#include "ofs_fuse.h"
-#include "backingtreepersistence.h"
-
-using namespace std;
-
-int main(int argc, char *argv[])
-{
-	ofs_fuse my_ofs;
-	cout << "Starting" << endl;
-	BackingtreePersistence bp = BackingtreePersistence::Instance();
-	bp.make_persistent();
-//
-return my_ofs.main(argc, argv, NULL, &my_ofs);
-
-  //return EXIT_SUCCESS;
+string ofs_hash(string str) {
+	unsigned char sha1hash[20];
+	string hash;
+	sha1((unsigned char *)str.c_str(), str.length(), sha1hash);
+	hash = base64_encode(sha1hash, 20);
+	hash = hash.substr(0, hash.length() - 1);
+	return hash;
 }
