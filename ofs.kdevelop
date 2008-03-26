@@ -20,23 +20,20 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>mounthelper/mounthelper</activetarget>
+      <activetarget>src/ofs</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
-      <mainprogram>/home/tobias/ofsproject/ofs/debug</mainprogram>
+      <mainprogram/>
       <terminal>true</terminal>
       <runarguments>
         <ofs>~/ofs_mountpoint</ofs>
-        <mounthelper/>
       </runarguments>
       <debugarguments>
         <ofs>~/ofs_mountpoint</ofs>
-        <mounthelper/>
       </debugarguments>
       <cwd>
         <ofs>.</ofs>
-        <mounthelper>/home/tobias/ofsproject/ofs/debug/./src</mounthelper>
       </cwd>
       <programargs/>
       <globaldebugarguments/>
@@ -57,7 +54,7 @@
       </optimized>
       <debug>
         <configargs>--enable-debug=full</configargs>
-        <builddir>debug</builddir>
+        <builddir/>
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevg77options</f77compiler>
@@ -66,8 +63,8 @@
         <topsourcedir/>
         <cppflags/>
         <ldflags/>
-        <ccompilerbinary>gcc</ccompilerbinary>
-        <cxxcompilerbinary>g++</cxxcompilerbinary>
+        <ccompilerbinary/>
+        <cxxcompilerbinary/>
         <f77compilerbinary/>
         <cflags/>
         <f77flags/>

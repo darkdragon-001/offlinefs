@@ -195,9 +195,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  libraries/libofsconf/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  libraries/libofsconf/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  libraries/libofsconf/Makefile
+	  $(AUTOMAKE) --foreign  libraries/libofsconf/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

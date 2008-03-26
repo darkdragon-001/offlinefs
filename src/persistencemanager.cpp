@@ -54,7 +54,7 @@ PersistenceManager::~PersistenceManager()
  */
 void PersistenceManager::reload()
 {
-	if(cfg_parse(cfg, "") == CFG_PARSE_ERROR) {
+	if(cfg_parse(cfg, get_filename().c_str()) == CFG_PARSE_ERROR) {
 		cfg_parse_buf(cfg, "");
 	}
 	read_values();
@@ -79,7 +79,6 @@ string PersistenceManager::get_filename()
 	return filename;
 }
 
-
 /**
  * This method has to be called by each subclass on initialization.
  * Reason: Methods, called in the constructor are not called polymorph
@@ -88,8 +87,8 @@ void PersistenceManager::init()
 {
 	opts = init_parser();
 	cfg = cfg_init(opts, CFGF_NONE);
+	reload();
 }
-
 
 /*!
     \fn PersistenceManager::get_modname()

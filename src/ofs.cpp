@@ -34,8 +34,6 @@ int main(int argc, char *argv[])
 {
 	ofs_fuse my_ofs;
 	cout << "Starting" << endl;
-	BackingtreePersistence bp = BackingtreePersistence::Instance();
-	bp.make_persistent();
 //
 return my_ofs.main(argc, argv, NULL, &my_ofs);
 

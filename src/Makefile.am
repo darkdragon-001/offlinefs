@@ -12,5 +12,4 @@ ofs_LDFLAGS = $(all_libraries) `pkg-config fuse --libs` -lconfuse
 noinst_HEADERS = backingtreepersistence.h file.h fileref.h filestatusmanager.h \
 	mutex.h mutexlocker.h ofs_fuse.h ofsexception.h ofsfile.h persistencemanager.h
 AM_CXXFLAGS = `pkg-config fuse --cflags-only-other`
-ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
-	$(top_builddir)/src/hash/libofshash.la
+ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la

@@ -59,9 +59,15 @@ string BackingtreePersistence::get_persistence()
 	stringstream pers;
 	pers << CONFIGKEY_BACKINGTREES << " = {" << endl;
 	list<string>::iterator it;
-	for ( it=p_backingtrees.begin() ; it != p_backingtrees.end(); it++ )
-		pers << "\"" << *it << "\"" << endl;
-	pers << "}" << endl;
+	bool first = true;
+	for ( it=p_backingtrees.begin() ; it != p_backingtrees.end(); it++ ) {
+		if(first)
+			first = false;
+		else
+			pers << "," << endl;
+		pers << "\"" << *it << "\"";
+	}
+	pers << endl << "}" << endl;
 	return pers.str();
 }
 
@@ -79,6 +85,7 @@ list<string> BackingtreePersistence::backingtrees() const
 void BackingtreePersistence::backingtrees(const list<string> backingt)
 {
 	p_backingtrees = backingt;
+	make_persistent();
 }
 
 /**
