@@ -24,6 +24,13 @@
 #define MOUNT_REMOTE_PATHS_TO_VARNAME "mountRemotePathsTo"
 #define REMOTE_SHARE_VARNAME "remoteShare"
 
+OFSConf* OFSConf::m_pInstance = 0;
+#ifdef ENABLE_SINGLETON_DESTRUCTION
+    #ifdef _DEBUG
+        bool OFSConf::m_bFirstInstance = true;
+    #endif  // _DEBUG
+#endif  // ENABLE_SINGLETON_DESTRUCTION
+
 //////////////////////////////////////////////////////////////////////////////
 // KONSTRUKTION/ DESTRUKTION
 //////////////////////////////////////////////////////////////////////////////
@@ -42,6 +49,55 @@ OFSConf::~OFSConf()
     if (m_pRemoteShareList != 0)
         delete[] m_pRemoteShareList;
 }
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//! Gibt einen Zeiger auf das einzige OFSConf-Objekt zurück.<p>
+//! Beim ersten Aufruf wird eine Instanz des Objekts erzeugt.<p>
+//! Es wird nur ein Objekt erzeugt, d.h. bei einem erneuten Aufruf,
+//! wird ein Zeiger auf die vorhandene Instanz zurückgegeben.
+//!
+//! \result Zeiger auf die vorhandene Instanz
+//
+//////////////////////////////////////////////////////////////////////////////
+OFSConf* OFSConf::GetInstance()
+{
+#ifdef ENABLE_SINGLETON_DESTRUCTION
+    assert(m_bFirstInstance);
+#endif  // ENABLE_SINGLETON_DESTRUCTION
+
+    if (m_pInstance == 0)
+    {
+        m_pInstance = new OFSConf;
+    }
+
+    return m_pInstance;
+}
+
+#ifdef ENABLE_SINGLETON_DESTRUCTION
+//////////////////////////////////////////////////////////////////////////////
+//
+//! Zerstört das einzige OFSConf-Objekt.
+//!
+//! \remark Diese Funktion darf erst beim Beenden des Hauptprogramms
+//!     aufgerufen werden, da sonst beim nächsten Aufruf von GetInstance()
+//!     ein neues Objekt erzeugt wird.
+//
+//////////////////////////////////////////////////////////////////////////////
+void OFSConf::DestroyInstance()
+{
+    if (m_pInstance != 0)
+    {
+#ifdef _DEBUG
+        m_bFirstInstance = false;
+#endif  // _DEBUG
+
+        // Zerstört das OFSConf-Objekt.
+        delete m_pInstance;
+        m_pInstance = 0;
+    }
+}
+#endif  // ENABLE_SINGLETON_DESTRUCTION
 
 //////////////////////////////////////////////////////////////////////////////
 // OEFFENTLICHE METHODEN
@@ -142,6 +198,6 @@ int OFSConf::GetIndexOfRemoteShare(const string& strName)
             break;
         }
     }
-//    assert(nIndex != -1);
+    assert(nIndex != -1);
     return nIndex;
 }
