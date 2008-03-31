@@ -28,12 +28,15 @@ using namespace std;
 */
 class OFSConf
 {
-public:
+protected:
     OFSConf();
 
+public:
     ~OFSConf();
 
 public:
+    static OFSConf* GetInstance();
+
     bool ParseFile();
 
     int GetNumberOfRemoteShares();
@@ -49,6 +52,24 @@ protected:
     bool m_bFileParsed;
     cfg_t* m_pCFG;
 //    cfg_t* m_cfgShare;
+
+    //! Zeiger auf das einzige OFSConf-Objekt.<br>
+    //! (Wird nach dem Singleton-Pattern verwendet.)
+    static OFSConf* m_pInstance;
+
+#ifdef ENABLE_SINGLETON_DESTRUCTION
+private:
+    static void DestroyInstance();
+
+#ifdef _DEBUG
+	//!	Legt fest, ob mit GetInstance() die erste Instanz ermittelt wird.
+	//!
+	static bool m_bFirstInstance;
+#endif	// _DEBUG
+
+	// Die einzige Funktion, von der DestroyInstance() aufgerufen werden darf.
+	friend int CFoo::Foo();
+#endif	// ENABLE_SINGLETON_DESTRUCTION
 
 private:
     string* m_pRemoteShareList;
