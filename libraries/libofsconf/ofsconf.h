@@ -19,12 +19,15 @@
  ***************************************************************************/
 #ifndef OFSCONF_H
 #define OFSCONF_H
-#include <confuse.h>
+
 #include <string>
+
+struct cfg_t;
+class Mutex;
 using namespace std;
 
 /**
-	@author Tobias Jähnel,,, <tobias@gmail.com>
+	@author Frank Gsellmann,,, <frank.gsellmann@gmx.de>
 */
 class OFSConf
 {
@@ -35,7 +38,7 @@ public:
     ~OFSConf();
 
 public:
-    static OFSConf* GetInstance();
+    static OFSConf& GetInstance();
 
     bool ParseFile();
 
@@ -51,29 +54,14 @@ protected:
 
     bool m_bFileParsed;
     cfg_t* m_pCFG;
-//    cfg_t* m_cfgShare;
 
-    //! Zeiger auf das einzige OFSConf-Objekt.<br>
+    //! Automatischer Zeiger auf das einzige OFSConf-Objekt.<br>
     //! (Wird nach dem Singleton-Pattern verwendet.)
-    static OFSConf* m_pInstance;
-
-#ifdef ENABLE_SINGLETON_DESTRUCTION
-private:
-    static void DestroyInstance();
-
-#ifdef _DEBUG
-	//!	Legt fest, ob mit GetInstance() die erste Instanz ermittelt wird.
-	//!
-	static bool m_bFirstInstance;
-#endif	// _DEBUG
-
-	// Die einzige Funktion, von der DestroyInstance() aufgerufen werden darf.
-	friend int CFoo::Foo();
-#endif	// ENABLE_SINGLETON_DESTRUCTION
+    static std::auto_ptr<OFSConf> theOFSConfInstance;
 
 private:
     string* m_pRemoteShareList;
-//    bool* m_pRemoteShareList;
+    static Mutex m_mutex;
 };
 
 #endif

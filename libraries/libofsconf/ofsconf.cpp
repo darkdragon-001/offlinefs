@@ -19,17 +19,19 @@
  ***************************************************************************/
 #include "ofsconf.h"
 #include <assert.h>
+#include "../../src/mutexlocker.h"
+#include <confuse.h>
 
 #define BACKING_TREE_PATH_VARNAME "backingTreePath"
 #define MOUNT_REMOTE_PATHS_TO_VARNAME "mountRemotePathsTo"
 #define REMOTE_SHARE_VARNAME "remoteShare"
 
-OFSConf* OFSConf::m_pInstance = 0;
-#ifdef ENABLE_SINGLETON_DESTRUCTION
-    #ifdef _DEBUG
-        bool OFSConf::m_bFirstInstance = true;
-    #endif  // _DEBUG
-#endif  // ENABLE_SINGLETON_DESTRUCTION
+#define BACKING_TREE_PATH_DEFAULT "/var/ofs/backing"
+#define MOUNT_REMOTE_PATHS_TO_DEFAULT "/var/ofs/remote"
+
+// Initialisiert die Klassenattribute.
+std::auto_ptr<OFSConf> OFSConf::theOFSConfInstance;
+Mutex OFSConf::m_mutex;
 
 //////////////////////////////////////////////////////////////////////////////
 // KONSTRUKTION/ DESTRUKTION
@@ -52,52 +54,24 @@ OFSConf::~OFSConf()
 
 //////////////////////////////////////////////////////////////////////////////
 //
-//! Gibt einen Zeiger auf das einzige OFSConf-Objekt zurück.<p>
+//! Gibt einen autom. Zeiger auf das einzige OFSConf-Objekt zurï¿½ck.<p>
 //! Beim ersten Aufruf wird eine Instanz des Objekts erzeugt.<p>
 //! Es wird nur ein Objekt erzeugt, d.h. bei einem erneuten Aufruf,
-//! wird ein Zeiger auf die vorhandene Instanz zurückgegeben.
+//! wird ein Zeiger auf die vorhandene Instanz zurï¿½ckgegeben.
 //!
 //! \result Zeiger auf die vorhandene Instanz
 //
 //////////////////////////////////////////////////////////////////////////////
-OFSConf* OFSConf::GetInstance()
+OFSConf& OFSConf::GetInstance()
 {
-#ifdef ENABLE_SINGLETON_DESTRUCTION
-    assert(m_bFirstInstance);
-#endif  // ENABLE_SINGLETON_DESTRUCTION
-
-    if (m_pInstance == 0)
+    MutexLocker obtainLock(m_mutex);
+    if (theOFSConfInstance.get() == 0)
     {
-        m_pInstance = new OFSConf;
+        theOFSConfInstance.reset(new OFSConf);
     }
 
-    return m_pInstance;
+    return *theOFSConfInstance;
 }
-
-#ifdef ENABLE_SINGLETON_DESTRUCTION
-//////////////////////////////////////////////////////////////////////////////
-//
-//! Zerstört das einzige OFSConf-Objekt.
-//!
-//! \remark Diese Funktion darf erst beim Beenden des Hauptprogramms
-//!     aufgerufen werden, da sonst beim nächsten Aufruf von GetInstance()
-//!     ein neues Objekt erzeugt wird.
-//
-//////////////////////////////////////////////////////////////////////////////
-void OFSConf::DestroyInstance()
-{
-    if (m_pInstance != 0)
-    {
-#ifdef _DEBUG
-        m_bFirstInstance = false;
-#endif  // _DEBUG
-
-        // Zerstört das OFSConf-Objekt.
-        delete m_pInstance;
-        m_pInstance = 0;
-    }
-}
-#endif  // ENABLE_SINGLETON_DESTRUCTION
 
 //////////////////////////////////////////////////////////////////////////////
 // OEFFENTLICHE METHODEN
@@ -114,8 +88,8 @@ bool OFSConf::ParseFile()
     cfg_opt_t shareOpts[] =
     {
         // Parst innerhalb der Gruppe.
-        CFG_STR(BACKING_TREE_PATH_VARNAME, "", CFGF_NONE),
-        CFG_STR(MOUNT_REMOTE_PATHS_TO_VARNAME, "", CFGF_NONE),
+        CFG_STR(BACKING_TREE_PATH_VARNAME, BACKING_TREE_PATH_DEFAULT, CFGF_NONE),
+        CFG_STR(MOUNT_REMOTE_PATHS_TO_VARNAME, MOUNT_REMOTE_PATHS_TO_DEFAULT, CFGF_NONE),
         CFG_END()
     };
     cfg_opt_t opts[] =
@@ -146,7 +120,6 @@ int OFSConf::GetNumberOfRemoteShares()
 string OFSConf::GetRemoteShareName(const int nIndex)
 {
     if (m_pRemoteShareList[nIndex] == "")
-//        return m_pRemoteShareList[nIndex];
     {
         cfg_t* pcfgShare = cfg_getnsec(m_pCFG, REMOTE_SHARE_VARNAME, nIndex);
         assert(pcfgShare != 0);
