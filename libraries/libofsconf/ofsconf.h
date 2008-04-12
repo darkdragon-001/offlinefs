@@ -38,7 +38,7 @@ public:
     ~OFSConf();
 
 public:
-    static OFSConf& GetInstance();
+    static OFSConf& Instance();
 
     bool ParseFile();
 

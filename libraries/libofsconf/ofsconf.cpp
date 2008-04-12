@@ -62,7 +62,7 @@ OFSConf::~OFSConf()
 //! \result Zeiger auf die vorhandene Instanz
 //
 //////////////////////////////////////////////////////////////////////////////
-OFSConf& OFSConf::GetInstance()
+OFSConf& OFSConf::Instance()
 {
     MutexLocker obtainLock(m_mutex);
     if (theOFSConfInstance.get() == 0)
