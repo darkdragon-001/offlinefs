@@ -32,12 +32,16 @@ public:
     register_filesystem(string MountPath, string TempMount);
     remove_filesystem(string MountPath, string TempMount);
     Filesystem give_me_Filesystem_to_File(string Path);
+    bool isAvailable();
+    void filesystemError();
 protected:
     FilesystemStatusManager();
   private:
     static std::auto_ptr<FilesystemStatusManager> theFilesystemStatusManagerInstance;
 	vector<Filesystem> fslist;
 
+protected:
+    bool available;
     static Mutex m; 
 };
 #endif

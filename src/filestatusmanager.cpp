@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "filestatusmanager.h"
+#include "filesystemstatusmanager.h"
 #include "ofsconf.h"
 
 std::auto_ptr<Filestatusmanager> Filestatusmanager::theFilestatusmanagerInstance;
@@ -39,7 +40,6 @@ Filestatusmanager& Filestatusmanager::Instance()
  */
 File Filestatusmanager::give_me_file(string Path)
 {
-	
-	return File(true, true, Path, string(TESTING_REMOTE_PATH)+Path,
+	return File(true, FilesystemStatusManager::Instance().isAvailable(), Path, string(TESTING_REMOTE_PATH)+Path,
 		string(TESTING_BACKING_PATH)+Path);
 }

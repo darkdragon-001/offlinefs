@@ -21,7 +21,7 @@
 
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
-FilesystemStatusManager::FilesystemStatusManager(){}
+FilesystemStatusManager::FilesystemStatusManager() : available(true) {}
 FilesystemStatusManager::~FilesystemStatusManager(){}
 FilesystemStatusManager& FilesystemStatusManager::Instance()
 {
@@ -31,3 +31,22 @@ FilesystemStatusManager& FilesystemStatusManager::Instance()
     return *theFilesystemStatusManagerInstance;
 }
 
+
+
+/*!
+    \fn FilesystemStatusManager::isAvailable()
+    Is the current remote filesystem available?
+ */
+bool FilesystemStatusManager::isAvailable()
+{
+	return available;
+}
+
+
+/*!
+    \fn FilesystemStatusManager::filesystemError()
+ */
+void FilesystemStatusManager::filesystemError()
+{
+	available=false;
+}
