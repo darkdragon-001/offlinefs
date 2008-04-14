@@ -19,26 +19,32 @@
  ***************************************************************************/
 #ifndef FILESYSTEMSTATUSMANAGER_H
 #define FILESYSTEMSTATUSMANAGER_H
+#include "mutex.h"
 #include "mutexlocker.h"
-#include "filesystem.h"
+//#include "filesystem.h"
 #include <string>
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
+	This Class monitors the availability of the mounted fielsystem.
+	Note that this class only contains hacks and has to be rewritten.
 */
 class FilesystemStatusManager{
 public:
     static FilesystemStatusManager& Instance();
     ~FilesystemStatusManager(); 
-    register_filesystem(string MountPath, string TempMount);
-    remove_filesystem(string MountPath, string TempMount);
-    Filesystem give_me_Filesystem_to_File(string Path);
+//    void register_filesystem(string MountPath, string TempMount);
+//    void remove_filesystem(string MountPath, string TempMount);
+//    Filesystem give_me_Filesystem_to_File(string Path);
     bool isAvailable();
     void filesystemError();
+    void startDbusListener();
+    static void *DbusListenerRun(void *);
 protected:
     FilesystemStatusManager();
   private:
     static std::auto_ptr<FilesystemStatusManager> theFilesystemStatusManagerInstance;
-	vector<Filesystem> fslist;
+//    vector<Filesystem> fslist;
 
 protected:
     bool available;

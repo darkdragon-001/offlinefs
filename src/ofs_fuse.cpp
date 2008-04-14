@@ -33,6 +33,7 @@
 
 #include "filestatusmanager.h"
 #include "ofsfile.h"
+#include "filesystemstatusmanager.h"
 
 using namespace std;
 //ofs_fuse::fuse_ofs_fuse()
@@ -900,5 +901,6 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 /*	pthread_t *thread = new pthread_t();
 	if (!pthread_create(thread, NULL, ofs_daemon::start_daemon, (void *)self))
 		perror(strerror(errno));*/
+	FilesystemStatusManager::Instance().startDbusListener();
 	return NULL;
 }

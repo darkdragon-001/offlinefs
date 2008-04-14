@@ -27,11 +27,13 @@
 #include <sstream>
 #include <utime.h>
 
-OFSFile::OFSFile(const string path) :
+OFSFile::OFSFile(const string path) : dh_cache(NULL), dh_remote(NULL),
+	fd_cache(0), fd_remote(0),
 	fileinfo(Filestatusmanager::Instance().give_me_file(path.c_str()))
 {}
 
-OFSFile::OFSFile(const char *path) :
+OFSFile::OFSFile(const char *path) : dh_cache(NULL), dh_remote(NULL),
+	fd_cache(0), fd_remote(0),
 	fileinfo(Filestatusmanager::Instance().give_me_file(path))
 {}
 
@@ -193,7 +195,7 @@ int OFSFile::op_chown(uid_t uid, gid_t gid)
  */
 int OFSFile::op_create(mode_t mode, int flags)
 {
-	int fdr, fdc;
+	int fdr=0, fdc=0;
 	try {		
 		update_cache();
 
@@ -384,8 +386,8 @@ int OFSFile::op_mknod(mode_t mode, dev_t rdev)
  */
 int OFSFile::op_open(int flags)
 {
-	int fdc;
-	int fdr;
+	int fdc=0;
+	int fdr=0;
 	try {
 		update_cache();
 

@@ -17,10 +17,26 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <pthread.h>
+#define DBUS_API_SUBJECT_TO_CHANGE
+#include <dbus/dbus.h>
+#include <sys/time.h>
+#include <time.h>
+#include <errno.h>
+#include <iostream>
+using namespace std;
+
 #include "filesystemstatusmanager.h"
 
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
+
 FilesystemStatusManager::FilesystemStatusManager() : available(true) {}
 FilesystemStatusManager::~FilesystemStatusManager(){}
 FilesystemStatusManager& FilesystemStatusManager::Instance()
@@ -49,4 +65,66 @@ bool FilesystemStatusManager::isAvailable()
 void FilesystemStatusManager::filesystemError()
 {
 	available=false;
+}
+
+/*!
+    \fn FilesystemStatusManager::startDbusListener()
+ */
+void FilesystemStatusManager::startDbusListener()
+{
+	pthread_t *thread = new pthread_t;
+	pthread_create(thread, NULL, FilesystemStatusManager::DbusListenerRun, NULL);
+}
+
+/*!
+    \fn FilesystemStatusManager::DbusListenerRun
+ */
+void *FilesystemStatusManager::DbusListenerRun(void *)
+{
+	DBusConnection *bus;
+	DBusError error;
+	DBusMessage *message;
+	string filter_string;
+
+	dbus_error_init (&error);
+	bus = dbus_bus_get (DBUS_BUS_SYSTEM, &error);
+	if (!bus) {
+		printf ("Failed to connect to the D-BUS daemon: %s", error.message);
+		dbus_error_free (&error);
+		pthread_exit(NULL);
+		return NULL;
+	}
+	filter_string=string("type='signal',path=/org/freedesktop/NetworkManager,interface=org.freedesktop.NetworkManager,member=DeviceNoLongerActive");
+	
+	dbus_bus_add_match (bus, filter_string.c_str(), NULL);
+/////////////////////////////////////////////////////
+	dbus_connection_read_write(bus, -1);      
+	message = dbus_connection_pop_message(bus);
+	dbus_message_unref(message);
+   	while (1) {
+
+      		// non blocking read of the next available message
+	      	dbus_connection_read_write(bus, -1);
+	      	message = dbus_connection_pop_message(bus);
+
+	      	// loop again if we haven't read a message
+	      	if (NULL == message) { 
+        		sleep(1);
+         		continue;
+	      	} else {
+			const char*  Msg_Path;
+			char* senderid;
+			Msg_Path=dbus_message_get_path(message);
+			dbus_message_get_args (message, &error, DBUS_TYPE_STRING, &senderid,DBUS_TYPE_INVALID);
+			FilesystemStatusManager::Instance().available=false;
+		}
+
+	    	DBusError error;
+
+    		dbus_error_init (&error);
+
+	      	dbus_message_unref(message);
+	}
+	pthread_exit(NULL);
+	return NULL;
 }

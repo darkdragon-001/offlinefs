@@ -40,6 +40,8 @@ Filestatusmanager& Filestatusmanager::Instance()
  */
 File Filestatusmanager::give_me_file(string Path)
 {
-	return File(true, FilesystemStatusManager::Instance().isAvailable(), Path, string(TESTING_REMOTE_PATH)+Path,
+	FilesystemStatusManager fssm = FilesystemStatusManager::Instance();
+	return File(true, fssm.isAvailable(),
+		Path, string(TESTING_REMOTE_PATH)+Path,
 		string(TESTING_BACKING_PATH)+Path);
 }
