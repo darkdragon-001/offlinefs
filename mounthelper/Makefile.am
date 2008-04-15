@@ -1,2 +1,4 @@
 INCLUDES = 
 METASOURCES = AUTO
+SUBDIRS = src
+bin_PROGRAMS = ofsmount

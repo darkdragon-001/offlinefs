@@ -42,15 +42,11 @@ public:
 
     bool ParseFile();
 
-    int GetNumberOfRemoteShares();
     string GetRemoteShareName(const int nIndex);
-    string GetRemotePathByIndex(const int nIndex);
-    string GetRemotePathByName(const string& strName);
-    string GetBackingTreePathByIndex(const int nIndex);
-    string GetBackingTreePathByName(const string& strName);
+    string GetRemotePath();
+    string GetBackingTreePath();
 
 protected:
-    int GetIndexOfRemoteShare(const string& strName);
 
     bool m_bFileParsed;
     cfg_t* m_pCFG;
@@ -60,7 +56,6 @@ protected:
     static std::auto_ptr<OFSConf> theOFSConfInstance;
 
 private:
-    string* m_pRemoteShareList;
     static Mutex m_mutex;
 };
 

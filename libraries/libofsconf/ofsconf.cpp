@@ -41,15 +41,12 @@ OFSConf::OFSConf()
 {
     m_bFileParsed = false;
     m_pCFG = 0;
-    m_pRemoteShareList = 0;
 }
 
 OFSConf::~OFSConf()
 {
     if (m_bFileParsed && m_pCFG != 0)
         cfg_free(m_pCFG);
-    if (m_pRemoteShareList != 0)
-        delete[] m_pRemoteShareList;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -92,85 +89,27 @@ bool OFSConf::ParseFile()
         CFG_STR(MOUNT_REMOTE_PATHS_TO_VARNAME, MOUNT_REMOTE_PATHS_TO_DEFAULT, CFGF_NONE),
         CFG_END()
     };
-    cfg_opt_t opts[] =
-    {
-        // Parst die einzelnen Gruppen.
-        CFG_SEC(REMOTE_SHARE_VARNAME, shareOpts, CFGF_TITLE | CFGF_MULTI),
-        CFG_END()
-    };
 
     // Initialisiert den Parser.
-    m_pCFG = cfg_init(opts, CFGF_NONE);
+    m_pCFG = cfg_init(shareOpts, CFGF_NONE);
 
     // Parst die Datei.
     if (cfg_parse(m_pCFG, "/etc/ofs.conf") == CFG_PARSE_ERROR)
         return false;
 
     m_bFileParsed = true;
-    m_pRemoteShareList = new string[GetNumberOfRemoteShares()];
 
     return true;
 }
 
-int OFSConf::GetNumberOfRemoteShares()
+string OFSConf::GetRemotePath()
 {
-    return cfg_size(m_pCFG, REMOTE_SHARE_VARNAME);
+    assert(m_pCFG != 0);
+    return cfg_getstr(m_pCFG, MOUNT_REMOTE_PATHS_TO_VARNAME);
 }
 
-string OFSConf::GetRemoteShareName(const int nIndex)
+string OFSConf::GetBackingTreePath()
 {
-    if (m_pRemoteShareList[nIndex] == "")
-    {
-        cfg_t* pcfgShare = cfg_getnsec(m_pCFG, REMOTE_SHARE_VARNAME, nIndex);
-        assert(pcfgShare != 0);
-        m_pRemoteShareList[nIndex] = cfg_title(pcfgShare);
-    }
-
-    return m_pRemoteShareList[nIndex];
-}
-
-string OFSConf::GetRemotePathByIndex(const int nIndex)
-{
-    cfg_t* pcfgShare = cfg_getnsec(m_pCFG, REMOTE_SHARE_VARNAME, nIndex);
-    assert(pcfgShare != 0);
-    return cfg_getstr(pcfgShare, MOUNT_REMOTE_PATHS_TO_VARNAME);
-}
-
-string OFSConf::GetRemotePathByName(const string& strName)
-{
-    int nIndex = GetIndexOfRemoteShare(strName);
-    return GetRemotePathByIndex(nIndex);
-}
-
-string OFSConf::GetBackingTreePathByIndex(const int nIndex)
-{
-    cfg_t* pcfgShare = cfg_getnsec(m_pCFG, REMOTE_SHARE_VARNAME, nIndex);
-    assert(pcfgShare != 0);
-    return cfg_getstr(pcfgShare, BACKING_TREE_PATH_VARNAME);
-}
-
-string OFSConf::GetBackingTreePathByName(const string& strName)
-{
-    int nIndex = GetIndexOfRemoteShare(strName);
-    return GetBackingTreePathByIndex(nIndex);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// GESCHUETZTE METHODEN
-//////////////////////////////////////////////////////////////////////////////
-
-int OFSConf::GetIndexOfRemoteShare(const string& strName)
-{
-    int nIndex = -1;
-    const int nCount = GetNumberOfRemoteShares();
-    for (int i = 0; i < nCount; i++)
-    {
-        if (strName == GetRemoteShareName(i))
-        {
-            nIndex = i;
-            break;
-        }
-    }
-    assert(nIndex != -1);
-    return nIndex;
+    assert(m_pCFG != 0);
+    return cfg_getstr(m_pCFG, BACKING_TREE_PATH_VARNAME);
 }

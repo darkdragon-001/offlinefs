@@ -20,7 +20,7 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>src/ofs</activetarget>
+      <activetarget>libraries/libofsconf/libofsconf.a</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
