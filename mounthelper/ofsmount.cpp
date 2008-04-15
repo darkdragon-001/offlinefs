@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Tobias Jähnel,,,   *
- *   tobias@gmail.com   *
+ *   Copyright (C) 2008 by Frank Gsellmann,,,   *
+ *   frank@frank-laptop   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,46 +17,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef OFSCONF_H
-#define OFSCONF_H
 
-#include <string>
-#include <confuse.h>
-#include <mutexlocker.h>
 
-using namespace std;
-
-/**
-	@author Frank Gsellmann,,, <frank.gsellmann@gmx.de>
-*/
-class OFSConf
-{
-protected:
-    OFSConf();
-
-public:
-    ~OFSConf();
-
-public:
-    static OFSConf& Instance();
-
-    bool ParseFile();
-
-    string GetRemoteShareName(const int nIndex);
-    string GetRemotePath();
-    string GetBackingTreePath();
-
-protected:
-
-    bool m_bFileParsed;
-    cfg_t* m_pCFG;
-
-    //! Automatischer Zeiger auf das einzige OFSConf-Objekt.<br>
-    //! (Wird nach dem Singleton-Pattern verwendet.)
-    static std::auto_ptr<OFSConf> theOFSConfInstance;
-
-private:
-    static Mutex m_mutex;
-};
-
+#ifdef HAVE_CONFIG_H
+#include <config.h>
 #endif
+
+//#include <iostream>
+#include <cstdlib>
+#include <ofsconf.h>
+#include "options.h"
+
+//using namespace std;
+
+#define MAX_PATH 1024
+
+int main(int argc, char *argv[])
+{
+    // Ermittelt die Optionen aus der Kommandozeile.
+    char szOptions[10];
+    char* pszOptions = szOptions;
+//    my_options(argc - 2, &argv[2], &pszOptions);
+    my_options(argc, argv, &pszOptions);
+
+    // Oeffnet die Konfigurationsdatei.
+    OFSConf& conf = OFSConf::Instance();
+    conf.ParseFile();
+    char* pArgumente[3];
+    pArgumente[0] = new char[MAX_PATH + 1];
+    pArgumente[1] = new char[MAX_PATH + 1];
+
+    // Ermittelt die Backing-Tree- und Remote-Pfade.
+    // ZU ERLEDIGEN: Muß noch verhasht werden.
+    strncpy(pArgumente[0], conf.GetBackingTreePath().c_str(), MAX_PATH);
+    strncpy(pArgumente[1], conf.GetRemotePath().c_str(), MAX_PATH);
+
+    pArgumente[2] = szOptions;
+
+    // Ruft das Offline-Filesystem auf.
+    return execv("ofs", pArgumente);
+}

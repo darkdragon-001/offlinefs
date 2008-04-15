@@ -1,3 +1,3 @@
 INCLUDES = 
 METASOURCES = AUTO
-SUBDIRS = libofsconf libofshash
+SUBDIRS = libofs libofsconf libofshash

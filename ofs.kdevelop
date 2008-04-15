@@ -20,7 +20,7 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>libraries/libofsconf/libofsconf.a</activetarget>
+      <activetarget>src/ofs</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
@@ -29,14 +29,17 @@
       <runarguments>
         <ofs>~/ofs_mountpoint</ofs>
         <mounthelper/>
+        <ofsmount></ofsmount>
       </runarguments>
       <debugarguments>
         <ofs>~/ofs_mountpoint</ofs>
         <mounthelper/>
+        <ofsmount></ofsmount>
       </debugarguments>
       <cwd>
         <ofs>.</ofs>
         <mounthelper>/home/tobias/ofsproject/ofs/debug/./src</mounthelper>
+        <ofsmount>/home/frank/IT-Projekt/debug/./</ofsmount>
       </cwd>
       <programargs/>
       <globaldebugarguments/>

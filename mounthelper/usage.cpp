@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Tobias Jähnel,,,   *
- *   tobias@gmail.com   *
+ *   Copyright (C) 2007 by ,,,   *
+ *   xxx@blacktron2   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,46 +17,20 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef OFSCONF_H
-#define OFSCONF_H
 
-#include <string>
-#include <confuse.h>
-#include <mutexlocker.h>
-
-using namespace std;
-
-/**
-	@author Frank Gsellmann,,, <frank.gsellmann@gmx.de>
-*/
-class OFSConf
+#include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+void print_usage (FILE* stream, int exit_code)
 {
-protected:
-    OFSConf();
+fprintf(stream, "Usage: auto_test options\n");
+fprintf(stream, "-m --max Maximal Packet size in the test\n");
+fprintf(stream, "-i --min Minimal Packet size in the test\n");
+fprintf(stream, "-r --repetitions Repetitions of every Packet size per at once\n");
+fprintf(stream, "-o --overalrep overal repetitions \n");
+fprintf(stream, "-f --footstep Footstep size \n");
+fprintf(stream, "-s --sleep sleep between packetsizes\n");
+fprintf(stream, "-h --help Display this usage information.\n");
 
-public:
-    ~OFSConf();
-
-public:
-    static OFSConf& Instance();
-
-    bool ParseFile();
-
-    string GetRemoteShareName(const int nIndex);
-    string GetRemotePath();
-    string GetBackingTreePath();
-
-protected:
-
-    bool m_bFileParsed;
-    cfg_t* m_pCFG;
-
-    //! Automatischer Zeiger auf das einzige OFSConf-Objekt.<br>
-    //! (Wird nach dem Singleton-Pattern verwendet.)
-    static std::auto_ptr<OFSConf> theOFSConfInstance;
-
-private:
-    static Mutex m_mutex;
+exit (exit_code);
 };
-
-#endif

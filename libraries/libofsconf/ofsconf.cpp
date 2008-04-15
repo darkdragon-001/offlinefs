@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "ofsconf.h"
 #include <assert.h>
-#include "../../src/mutexlocker.h"
+#include <mutexlocker.h>
 #include <confuse.h>
 
 #define BACKING_TREE_PATH_VARNAME "backingTreePath"
