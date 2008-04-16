@@ -98,12 +98,11 @@ public:
                     struct flock *lock);*/
 	static void *fuse_init (struct fuse_conn_info *conn);
 
-	std::string m_strHelloWorld;
-
 private:
 	// Private variables
 	// Notice that they aren't static, i.e. they belong to an instantiated object
-	std::string m_strPath;
+	std::string cachepath;
+	std::string remotepath;
 	int cntnr;
 	
 	string basepath;

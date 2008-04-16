@@ -46,9 +46,7 @@ ofs_fuse::~ofs_fuse()
 {
 }
 
-ofs_fuse::ofs_fuse () :
-                m_strHelloWorld ("Hello World!\n"),
-                m_strPath ("/hello"), cntnr (0),
+ofs_fuse::ofs_fuse () : cntnr (0),
 		basepath ("/usr") { 
         // all we're doing is initialize the member variables
 }

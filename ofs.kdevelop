@@ -27,14 +27,14 @@
       <mainprogram>/home/tobias/ofsproject/ofs/debug</mainprogram>
       <terminal>true</terminal>
       <runarguments>
-        <ofs>~/ofs_mountpoint</ofs>
+        <ofs>~/ofs_mountpoint ~/ofs_mountpoint ~/ofsproject ~/ofscache</ofs>
         <mounthelper/>
-        <ofsmount></ofsmount>
+        <ofsmount/>
       </runarguments>
       <debugarguments>
-        <ofs>~/ofs_mountpoint</ofs>
+        <ofs>~/ofs_mountpoint ~/ofs_mountpoint ~/ofsproject ~/ofscache</ofs>
         <mounthelper/>
-        <ofsmount></ofsmount>
+        <ofsmount/>
       </debugarguments>
       <cwd>
         <ofs>.</ofs>

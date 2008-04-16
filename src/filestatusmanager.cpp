@@ -20,6 +20,8 @@
 #include "filestatusmanager.h"
 #include "filesystemstatusmanager.h"
 #include "ofsconf.h"
+#include <iostream>
+using namespace std;
 
 std::auto_ptr<Filestatusmanager> Filestatusmanager::theFilestatusmanagerInstance;
 Mutex Filestatusmanager::m;
@@ -42,6 +44,6 @@ File Filestatusmanager::give_me_file(string Path)
 {
 	FilesystemStatusManager fssm = FilesystemStatusManager::Instance();
 	return File(true, fssm.isAvailable(),
-		Path, string(TESTING_REMOTE_PATH)+Path,
-		string(TESTING_BACKING_PATH)+Path);
+		Path, fssm.getRemoteMountpoint()+Path,
+		fssm.getCachePath()+Path);
 }

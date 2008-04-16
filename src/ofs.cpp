@@ -27,15 +27,22 @@
 #include <cstdlib>
 #include "ofs_fuse.h"
 #include "backingtreepersistence.h"
+#include "filesystemstatusmanager.h"
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
 	ofs_fuse my_ofs;
+	FilesystemStatusManager::Instance().setRemoteMountpoint(argv[2]);
+	FilesystemStatusManager::Instance().setCachePath(argv[3]);
 	cout << "Starting" << endl;
+	char *args[3];
+	args[0] = argv[0];
+	args[1] = argv[1];
+	args[2] = NULL;
 //
-return my_ofs.main(argc, argv, NULL, &my_ofs);
+return my_ofs.main(2, args, NULL, &my_ofs);
 
   //return EXIT_SUCCESS;
 }

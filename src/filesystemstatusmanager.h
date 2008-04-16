@@ -23,6 +23,10 @@
 #include "mutexlocker.h"
 //#include "filesystem.h"
 #include <string>
+
+#define TESTING_REMOTE_PATH "/usr/bin"
+#define TESTING_BACKING_PATH "/tmp/ofsbacking"
+
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
 	@author Tobias Jaehnel <tjaehnel@gmail.com>
@@ -40,12 +44,17 @@ public:
     void filesystemError();
     void startDbusListener();
     static void *DbusListenerRun(void *);
+    void setCachePath(string cachePath);
+    void setRemoteMountpoint(string remoteMountpoint);
+    string getCachePath();
+    string getRemoteMountpoint();
 protected:
     FilesystemStatusManager();
   private:
     static std::auto_ptr<FilesystemStatusManager> theFilesystemStatusManagerInstance;
 //    vector<Filesystem> fslist;
-
+    string remoteMountpoint;
+    string cachePath;
 protected:
     bool available;
     static Mutex m; 
