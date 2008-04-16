@@ -19,11 +19,12 @@
  ***************************************************************************/
 #ifndef __OPTIONS_H__
 #define __OPTIONS_H__
-
+/*
 #include <stdlib.h>
 #include <stdio.h>
 #include <getopt.h>
 #include <time.h>
+*/
 #ifdef OPTIONS_C
 #define PUBLIC
 #else

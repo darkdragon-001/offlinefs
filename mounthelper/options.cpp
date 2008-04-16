@@ -20,6 +20,7 @@
 
 #include "printusage.h"
 #include <string.h>
+#include <getopt.h>
 
 int my_options(int argc, char* argv[], char** ppszOptions)
 {

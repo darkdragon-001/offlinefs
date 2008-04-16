@@ -27,8 +27,10 @@
 #include <cstdlib>
 #include <ofsconf.h>
 #include "options.h"
-
-//using namespace std;
+#include <assert.h>
+#include <ofshash.h>
+#include <iostream>
+using namespace std;
 
 #define MAX_PATH 1024
 
@@ -43,6 +45,50 @@ int main(int argc, char *argv[])
     // Oeffnet die Konfigurationsdatei.
     OFSConf& conf = OFSConf::Instance();
     conf.ParseFile();
+
+    //////////////////////////////////////////////////////////////////////////
+    // MOUNT
+    //////////////////////////////////////////////////////////////////////////
+
+    char* pMountArgumente[4];
+    char szDateisystem[] = "-t";
+    pMountArgumente[0] = szDateisystem;
+    pMountArgumente[1] = new char[MAX_PATH + 1];
+    pMountArgumente[2] = new char[MAX_PATH + 1];
+    pMountArgumente[3] = new char[MAX_PATH + 1];
+
+    // Ermittelt die Backing-Tree- und Remote-Pfade.
+    // ZU ERLEDIGEN: Muß noch verhasht werden.
+    cout << argv[0] << endl;
+    char* pchDoppelPunktPos = strchr(argv[0], ':');
+    assert(pchDoppelPunktPos != NULL);
+    int nDoppelPunktIndex = int (pchDoppelPunktPos - argv[0]);
+
+    // Legt das Dateisystem fest.
+    strncpy(pMountArgumente[1], argv[0], nDoppelPunktIndex);
+
+    // Legt die Server-Share fest.
+    strncpy(pMountArgumente[2], &((argv[0])[nDoppelPunktIndex + 3]), MAX_PATH);
+    strncpy(pMountArgumente[3], conf.GetRemotePath().c_str(), MAX_PATH);
+
+//    pArgumente[2] = szOptions;
+
+    string strHash = ofs_hash(pMountArgumente[2]);
+    strcat(pMountArgumente[3], "/");
+    strcat(pMountArgumente[3], strHash.c_str());
+
+    cout << pMountArgumente[0] << endl;
+    cout << pMountArgumente[1] << endl;
+    cout << pMountArgumente[2] << endl;
+    cout << pMountArgumente[3] << endl;
+
+    // Mountet die Share, die vom Benutzer übergeben wurde.
+    return execv("mount", pMountArgumente);
+
+    //////////////////////////////////////////////////////////////////////////
+    // OFS
+    //////////////////////////////////////////////////////////////////////////
+
     char* pArgumente[3];
     pArgumente[0] = new char[MAX_PATH + 1];
     pArgumente[1] = new char[MAX_PATH + 1];
@@ -54,6 +100,9 @@ int main(int argc, char *argv[])
 
     pArgumente[2] = szOptions;
 
-    // Ruft das Offline-Filesystem auf.
+    cout << pArgumente[0] << endl;
+    cout << pArgumente[1] << endl;
+
+    // Ruft das Offline-Dateisystem auf.
     return execv("ofs", pArgumente);
 }
