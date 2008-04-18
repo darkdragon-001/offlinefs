@@ -274,24 +274,24 @@ int OFSFile::op_flush()
  *
  * If the datasync parameter is non-zero, then only the user data should be
  * flushed, not the meta data.
- * TODO: Implement this
+ * TODO: Implement this!!
  * @param isdatasync 
  * @return 
  */
 int OFSFile::op_fsync(int isdatasync)
 {
-/*	int res;
+	int res;
 #ifndef HAVE_FDATASYNC
 	(void) isdatasync;
 #else
 	if (isdatasync)
-		res = fdatasync(fd_remote);
+		res = fdatasync(fd_cache);
 	else
 #endif
-		res = fsync(fd_remote);
+		res = fsync(fd_cache);
 	if (res == -1)
 		return -errno;
-	return 0;*/
+	return 0;
 }
 
 /**
@@ -788,10 +788,8 @@ int OFSFile::op_write(const char *buf, size_t size, off_t offset)
 		if (res == -1)
 			res = -errno;
 	}
-	return 0;
+	return res;
 }
-
-
 
 /**
  * Create a symbolic link
