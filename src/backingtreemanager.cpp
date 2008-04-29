@@ -20,6 +20,7 @@
 #include "backingtreemanager.h"
 
 std::auto_ptr<BackingtreeManager> BackingtreeManager::theBackingtreeManagerInstance;
+list<Backingtree> BackingtreeManager::backinglist;
 Mutex BackingtreeManager::m;
 BackingtreeManager::BackingtreeManager(){}
 BackingtreeManager::~BackingtreeManager(){}
@@ -30,4 +31,29 @@ BackingtreeManager& BackingtreeManager::Instance()
       theBackingtreeManagerInstance.reset(new BackingtreeManager);
     return *theBackingtreeManagerInstance;
 }
+void BackingtreeManager::register_Backingtree(string relative_Path){
+Backingtree b=Backingtree::Backingtree(relative_Path);
+bool already_an_included_path=false;
+MutexLocker obtain_lock(m);
+if(!is_already_registered(b)){
+this->backinglist.push_back(b);
+}
+}
 
+void BackingtreeManager::remove_Backingtree(string Relative_Path){
+Backingtree b=Backingtree::Backingtree(Relative_Path);
+for (list<Backingtree>::iterator it = backinglist.begin();
+        it != backinglist.end(); ++it) {
+      if((*it)==Relative_Path){
+	backinglist.erase(it);
+}
+   }
+}
+
+bool BackingtreeManager::is_already_registered(Backingtree Relative_Path)
+{
+ for (list<Backingtree>::iterator it = backinglist.begin();
+        it != backinglist.end(); ++it) {
+      return (*it)==Relative_Path;
+   }
+}

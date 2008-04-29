@@ -41,6 +41,7 @@ using namespace std;
 
 /**
 	@author Tobias Jaehnel <tjaehnel@gmail.com>
+	@author Carsten Kolassa <Carsten@Kolassa.de>
 	
 	This class is based on the example 'fusexmp', which is located 
 	in the 'example' subdirectory of the fuse sourcecode distribution

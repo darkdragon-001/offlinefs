@@ -40,6 +40,7 @@ public:
 	File& operator =(const File &copy);
 	bool get_offline_state() const;
 	bool get_availability() const;
+	bool get_sync_state();
 	string get_remote_path() const;
 	string get_cache_path() const;
         string get_relative_path() const;

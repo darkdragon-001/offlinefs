@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "filestatusmanager.h"
 #include "filesystemstatusmanager.h"
+#include "backingtreemanager.h"
 #include "ofsconf.h"
 #include <iostream>
 using namespace std;
@@ -43,6 +44,7 @@ Filestatusmanager& Filestatusmanager::Instance()
 File Filestatusmanager::give_me_file(string Path)
 {
 	FilesystemStatusManager fssm = FilesystemStatusManager::Instance();
+	BackingtreeManager btmm = BackingtreeManager::Instance();
 	return File(true, fssm.isAvailable(),
 		Path, fssm.getRemoteMountpoint()+Path,
 		fssm.getCachePath()+Path);

@@ -19,13 +19,23 @@
  ***************************************************************************/
 #include "backingtree.h"
 
-Backingtree::Backingtree()
+Backingtree::Backingtree(string Path)
 {
+this->relative_path=Path;
 }
 
 
 Backingtree::~Backingtree()
 {
+}
+
+const bool Backingtree::operator==(Backingtree const b)
+{
+if (this->relative_path==b.relative_path){
+return true;
+}
+else
+return false;
 }
 
 

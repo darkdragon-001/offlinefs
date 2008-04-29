@@ -31,14 +31,14 @@ using namespace std;
 */
 class Backingtree{
 public:
-    Backingtree();
-
+    Backingtree(string Path);
     ~Backingtree();
+    const bool operator== (Backingtree const b);
+protected:
+    string relative_path;
+
 private:
-string MountPath;
-string TempMount;
-vector<Fileref> Files;
-Mutex m;
+
 };
 
 #endif
