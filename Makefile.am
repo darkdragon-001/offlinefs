@@ -2,4 +2,4 @@
 # have all needed files, that a GNU package needs
 AUTOMAKE_OPTIONS = foreign 1.4
 
-SUBDIRS = libraries mounthelper src
+SUBDIRS = libraries mounthelper ofs-gui src

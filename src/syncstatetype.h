@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,31 +17,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "backingtree.h"
+#ifndef SYNCSTATETYPE_H
+#define SYNCSTATETYPE_H
 
-Backingtree::Backingtree(string Path)
-{
-this->relative_path=Path;
-}
+/**
+	@author Carsten Kolassa <Carsten@Kolassa.de>
+*/
+typedef enum syncsateenum {no-state-avail=0,filesystem-not-available=1,changed-on-server=2} syncstate;
 
-
-Backingtree::~Backingtree()
-{
-}
-
-const bool Backingtree::operator==(Backingtree const b)
-{
-if (this->relative_path==b.relative_path){
-return true;
-}
-else
-return false;
-}
-
-
-
-
-const string Backingtree::get_relative_path()
-{
-return this->relative_path;
-}
+#endif

@@ -21,25 +21,32 @@
 #define BACKINGTREEMANAGER_H
 #include "mutexlocker.h"
 #include "backingtree.h"
+#include "persistable.h"
+#include "backingtreepersistence.h"
 #include <string>
 #include <list>
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
 */
-class BackingtreeManager{
+class BackingtreeManager: public persistable{
 public:
     static BackingtreeManager& Instance();
     ~BackingtreeManager(); 
     void register_Backingtree(string relative_Path);
     void remove_Backingtree(string relative_Path);
-    static string set_Remote_Path(string Remote_Path);
-    static string set_Cache_Path(string Cache_path);
+    string set_Remote_Path(string Remote_Path);
+    string set_Cache_Path(string Cache_path);
+    string get_Remote_Path();
+    string get_Cache_Path();
     static Backingtree Search_Backingtree_via_Path(string Relative_Path);
+    bool Is_in_Backingtree(string path);
+    virtual void persist() const;
+    virtual void reinstate() const;
 protected:
     BackingtreeManager();
   private:
-    static string Remote_Path;
-    static string Cache_path;
+    string Remote_Path;
+    string Cache_path;
     static std::auto_ptr<BackingtreeManager> theBackingtreeManagerInstance;
     static list<Backingtree> backinglist;
     static bool is_already_registered(Backingtree Relative_Path);

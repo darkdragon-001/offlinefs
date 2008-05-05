@@ -8,4 +8,5 @@ AC_PROG_CXX
 AM_PROG_LIBTOOL
 
 AC_OUTPUT(Makefile libraries/Makefile libraries/libofs/Makefile \
-	libraries/libofsconf/Makefile libraries/libofshash/Makefile mounthelper/Makefile src/Makefile)
+	libraries/libofsconf/Makefile libraries/libofshash/Makefile mounthelper/Makefile ofs-gui/Makefile \
+	src/Makefile)

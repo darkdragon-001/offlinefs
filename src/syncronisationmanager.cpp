@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,31 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "backingtree.h"
+#include "syncronisationmanager.h"
 
-Backingtree::Backingtree(string Path)
-{
-this->relative_path=Path;
-}
-
-
-Backingtree::~Backingtree()
+SyncronisationManager::SyncronisationManager()
 {
 }
 
-const bool Backingtree::operator==(Backingtree const b)
+
+SyncronisationManager::~SyncronisationManager()
 {
-if (this->relative_path==b.relative_path){
-return true;
-}
-else
-return false;
 }
 
 
-
-
-const string Backingtree::get_relative_path()
-{
-return this->relative_path;
-}

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "backingtreemanager.h"
 
+
 std::auto_ptr<BackingtreeManager> BackingtreeManager::theBackingtreeManagerInstance;
 list<Backingtree> BackingtreeManager::backinglist;
 Mutex BackingtreeManager::m;
@@ -56,4 +57,33 @@ bool BackingtreeManager::is_already_registered(Backingtree Relative_Path)
         it != backinglist.end(); ++it) {
       return (*it)==Relative_Path;
    }
+}
+
+string BackingtreeManager::get_Remote_Path()
+{
+return Remote_Path;
+}
+bool BackingtreeManager::Is_in_Backingtree(string path){
+ for (list<Backingtree>::iterator it = backinglist.begin();
+        it != backinglist.end(); ++it) {
+	string s=(*it).get_relative_path();
+      return (strcmp(s.c_str(), path.c_str())==strlen(s.c_str()));
+   }
+}
+string BackingtreeManager::get_Cache_Path()
+{
+return Cache_path;
+}
+
+void BackingtreeManager::persist() const
+{
+	BackingtreePersistence btp = BackingtreePersistence::Instance();
+	
+	//btp.backingtrees(backinglist);
+}
+
+void BackingtreeManager::reinstate() const
+{
+BackingtreePersistence btp = BackingtreePersistence::Instance();
+	//backinglist=btp.backingtrees();
 }

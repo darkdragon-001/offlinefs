@@ -34,6 +34,7 @@ public:
     Backingtree(string Path);
     ~Backingtree();
     const bool operator== (Backingtree const b);
+    const string get_relative_path();
 protected:
     string relative_path;
 
