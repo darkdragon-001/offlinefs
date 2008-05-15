@@ -19,17 +19,33 @@
  ***************************************************************************/
 #ifndef SYNCRONISATIONMANAGER_H
 #define SYNCRONISATIONMANAGER_H
-
+#include "file_sync.h"
+#include "file.h"
+#include "syncstatetype.h"
+#include "persistable.h"
+#include "mutexlocker.h"
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
 */
-class SyncronisationManager{
+class SyncronisationManager:public persistable{
 public:
-    SyncronisationManager();
-
-    ~SyncronisationManager();
-
-
+static SyncronisationManager& Instance();
+syncstate has_been_modified(string path);
+syncstate has_been_deleted(string path);
+syncstate store_state(string path);
+~SyncronisationManager();
+virtual void persist() const;
+virtual void reinstate() const;
+protected:
+SyncronisationManager();
+private:
+static map<string,file_sync> filesmod;
+static std::auto_ptr<SyncronisationManager> theSyncronisationManagerInstance;
+static Mutex m; 
 };
 
 #endif

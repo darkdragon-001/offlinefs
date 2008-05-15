@@ -17,23 +17,26 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "syncronisationmanager.h"
+#ifndef FILE_SYNC_H
+#define FILE_SYNC_H
+#include <time.h>
+#include <string>
+/**
+	@author Carsten Kolassa <Carsten@Kolassa.de>
+*/
+using namespace std;
 
-SyncronisationManager::SyncronisationManager()
-{
-}
+class file_sync{
+public:
+    file_sync(string new_path ,struct tm new_time, bool new_created, bool new_deleted, bool new_modified);
+    ~file_sync();
+protected:
+string path;
+bool created;
+bool deleted;
+bool modified;
+struct tm time;
 
+};
 
-SyncronisationManager::~SyncronisationManager()
-{
-}
-
-void SyncronisationManager::persist() const
-{
-}
-
-void SyncronisationManager::reinstate() const
-{
-}
-
-
+#endif

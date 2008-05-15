@@ -17,23 +17,25 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "syncronisationmanager.h"
+#include "file_sync.h"
 
-SyncronisationManager::SyncronisationManager()
+
+
+
+file_sync::~file_sync()
 {
 }
 
-
-SyncronisationManager::~SyncronisationManager()
+file_sync::file_sync(string new_path ,struct tm new_time, bool new_created, bool new_deleted, bool new_modified)
 {
+path=new_path;
+created=new_created;
+deleted=new_deleted;
+modified=new_modified;
+time=new_time;
+
 }
 
-void SyncronisationManager::persist() const
-{
-}
 
-void SyncronisationManager::reinstate() const
-{
-}
 
 
