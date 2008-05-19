@@ -30,15 +30,37 @@
 */
 class BackingtreeManager: public persistable{
 public:
+    /**
+     * Returns a Pointer to the Instance of the Backingtree Manager part of the Singleton Pattern
+     * @return Pointer to the Instance of the Backingtree Manager
+     */
     static BackingtreeManager& Instance();
     ~BackingtreeManager(); 
+    /**
+     * Registers a relative path in the managed directory tree as backing tree
+     * @param relative_Path The relative path that should be registered
+     */
     void register_Backingtree(string relative_Path);
+    /**
+     * Removes a relative Path from the BackingtreeManager
+     * @param relative_Path 
+     */
     void remove_Backingtree(string relative_Path);
     string set_Remote_Path(string Remote_Path);
     string set_Cache_Path(string Cache_path);
     string get_Remote_Path();
     string get_Cache_Path();
+    /**
+     * Function to get the Backingtree to a given Path
+     * @param Relative_Path Path of the Backingtree
+     * @return Backingtree that manages the Path given
+     */
     static Backingtree Search_Backingtree_via_Path(string Relative_Path);
+    /**
+     * Determines if a given file is in a Backingpath or not
+     * @param path Path of the file
+     * @return Boolean variable true if the file is in the backingtree false if it isn not
+     */
     bool Is_in_Backingtree(string path);
     virtual void persist() const;
     virtual void reinstate() const;
