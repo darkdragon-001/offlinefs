@@ -31,13 +31,33 @@ using namespace std;
 */
 class Backingtree{
 public:
-    Backingtree(string Path);
+    /**
+     * Constructor of Backingtree takes the relative position of the backingtree as argument
+     * @param rPath 
+     */
+    Backingtree(string rPath);
+    /**
+     * Destructor
+     */
     ~Backingtree();
+    /**
+     * Equals operator to compare 
+     * @param b The Backingtree to compare to
+     * @return true if equal false otherwise
+     */
     const bool operator== (Backingtree const b);
+    /**
+     * Getter fot the relative path of the backing Tree
+     * @return 
+     */
     const string get_relative_path();
+    /**
+     * Getter for the complete path of the backing Tree.
+     * @return 
+     */
+    const string get_complete_path();
 protected:
     string relative_path;
-
 private:
 
 };

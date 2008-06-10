@@ -35,18 +35,56 @@
 */
 class FilesystemStatusManager{
 public:
+    /**
+     * 
+     * @return 
+     */
     static FilesystemStatusManager& Instance();
+    /**
+     * 
+     */
     ~FilesystemStatusManager(); 
 //    void register_filesystem(string MountPath, string TempMount);
 //    void remove_filesystem(string MountPath, string TempMount);
 //    Filesystem give_me_Filesystem_to_File(string Path);
+    /**
+     * 
+     * @return 
+     */
     bool isAvailable();
+    /**
+     * 
+     */
     void filesystemError();
+    /**
+     * 
+     */
     void startDbusListener();
+    /**
+     * 
+     * @param  
+     * @return 
+     */
     static void *DbusListenerRun(void *);
+    /**
+     * 
+     * @param cachePath 
+     */
     void setCachePath(string cachePath);
+    /**
+     * 
+     * @param remoteMountpoint 
+     */
     void setRemoteMountpoint(string remoteMountpoint);
+    /**
+     * 
+     * @return 
+     */
     string getCachePath();
+    /**
+     * 
+     * @return 
+     */
     string getRemoteMountpoint();
 protected:
     FilesystemStatusManager();

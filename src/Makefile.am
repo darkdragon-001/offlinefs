@@ -17,3 +17,4 @@ noinst_HEADERS = backingtreepersistence.h file.h file_sync.h fileref.h \
 AM_CXXFLAGS = `pkg-config fuse --cflags-only-other` `pkg-config dbus-1 --cflags-only-other`
 ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
 	$(top_builddir)/libraries/libofsconf/libofsconf.a $(top_builddir)/libraries/libofs/libofs.la
+SUBDIRS = testing

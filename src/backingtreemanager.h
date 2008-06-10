@@ -35,6 +35,9 @@ public:
      * @return Pointer to the Instance of the Backingtree Manager
      */
     static BackingtreeManager& Instance();
+    /**
+     * Destructor of the Backingtree Manager
+     */
     ~BackingtreeManager(); 
     /**
      * Registers a relative path in the managed directory tree as backing tree
@@ -46,9 +49,27 @@ public:
      * @param relative_Path 
      */
     void remove_Backingtree(string relative_Path);
+    /**
+     * 
+     * @param Remote_Path 
+     * @return 
+     */
     string set_Remote_Path(string Remote_Path);
+    /**
+     *  Setter to set the remote Path
+     * @param Cache_path 
+     * @return 
+     */
     string set_Cache_Path(string Cache_path);
+    /**
+     *  Getter to retrieve the Remote Path
+     * @return 
+     */
     string get_Remote_Path();
+    /**
+     *  Getter to retrieve the Cache Path
+     * @return 
+     */
     string get_Cache_Path();
     /**
      * Function to get the Backingtree to a given Path
@@ -62,7 +83,13 @@ public:
      * @return Boolean variable true if the file is in the backingtree false if it isn not
      */
     bool Is_in_Backingtree(string path);
+    /**
+     * Writes all the stored Backingtrees to the disk
+     */
     virtual void persist() const;
+    /**
+     * Reads all the stored Backingtrees from the disk
+     */
     virtual void reinstate() const;
 protected:
     BackingtreeManager();

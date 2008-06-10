@@ -34,11 +34,32 @@ using namespace std;
 class SyncronisationManager:public persistable{
 public:
 static SyncronisationManager& Instance();
+/**
+ * Determines if the file has been modified on the server
+ * @param path 
+ * @return 
+ */
 syncstate has_been_modified(string path);
+/**
+ * Determines if the file has been deleted on the server
+ * @param path 
+ * @return 
+ */
 syncstate has_been_deleted(string path);
+/**
+ * Determines the local modification state
+ * @param path 
+ * @return 
+ */
 syncstate store_state(string path);
 ~SyncronisationManager();
+/**
+ * Writes the local states to the disk
+ */
 virtual void persist() const;
+/**
+ * Reads the local states from the disk
+ */
 virtual void reinstate() const;
 protected:
 SyncronisationManager();

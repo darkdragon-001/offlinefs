@@ -19,9 +19,10 @@
  ***************************************************************************/
 #include "backingtree.h"
 
-Backingtree::Backingtree(string Path)
+Backingtree::Backingtree(string rPath)
 {
-this->relative_path=Path;
+this->relative_path=rPath;
+
 }
 
 

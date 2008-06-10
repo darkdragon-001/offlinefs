@@ -35,8 +35,20 @@ using namespace std;
 */
 class Filestatusmanager{
 public:
+	/**
+	 * Function to query the status of a File
+	 * @param Path The Path to the File as string
+	 * @return File Object that corresponds to the Path, which was given as parameter.
+	 */
 	File give_me_file(string Path);
+	/**
+	 * Returns a Pointer to the Instance of the Filestatusmanager part of the Singleton Pattern
+	 * @return Pointer to the Filestatusmanager
+	 */
 	static Filestatusmanager& Instance();
+	/**
+	 * 
+	 */
 	~Filestatusmanager();
 protected:
 	Filestatusmanager();
