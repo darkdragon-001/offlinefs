@@ -28,7 +28,7 @@
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
 */
-class BackingtreeManager: public persistable{
+class BackingtreeManager: public persistable {
 public:
     /**
      * Returns a Pointer to the Instance of the Backingtree Manager part of the Singleton Pattern

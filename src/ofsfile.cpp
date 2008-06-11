@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "ofsfile.h"
 #include "filestatusmanager.h"
+#include "backingtreemanager.h"
 #include <sys/time.h>
 #include <unistd.h>
 #include <ofsexception.h>
@@ -26,6 +27,7 @@
 #include <iostream>
 #include <sstream>
 #include <utime.h>
+#include <attr/xattr.h>
 
 OFSFile::OFSFile(const string path) : dh_cache(NULL), dh_remote(NULL),
 	fd_cache(0), fd_remote(0),
@@ -1021,3 +1023,141 @@ void OFSFile::update_amtime()
 }
 
 
+
+
+/*!
+    \fn OFSFile::op_getxattr(const char *name, char *value,
+size_t size)
+ */
+int OFSFile::op_getxattr(const char *name, char *value,
+size_t size)
+{
+	int res = 0;
+	// offline attribute
+	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
+		if (get_offline_state()) {
+			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
+					strlen(OFS_ATTRIBUTE_VALUE_YES) );
+			}
+		} else {
+			res = strlen(OFS_ATTRIBUTE_VALUE_NO);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_NO,
+					strlen(OFS_ATTRIBUTE_VALUE_NO) );
+			}
+		}
+	// availability attribute
+	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
+		if (get_availability()) {
+			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
+					strlen(OFS_ATTRIBUTE_VALUE_YES) );
+			}
+		} else {
+			res = strlen(OFS_ATTRIBUTE_VALUE_NO);
+			if (size >= res) {
+				strncpy(value, OFS_ATTRIBUTE_VALUE_NO,
+					strlen(OFS_ATTRIBUTE_VALUE_NO) );
+			}
+		}
+ 	// unknown attribute - delegate to the underlying filesystem
+	} else { // TODO: By now this is only for remote files
+		res = lgetxattr(get_remote_path().c_str(),
+			name, value, size);
+		// do not return "unsupported" but "unknown attribute"
+		if(errno == ENOTSUP)
+			errno = ENOATTR;
+	} 
+	if (res == -1)
+		return -errno;
+	return res;
+}
+
+
+/*!
+    \fn OFSFile::op_setxattr(const char *value, size_t size, int flags)
+ */
+int OFSFile::op_setxattr(const char *name, const char *value, size_t size, int flags)
+{
+	int res = 0;
+	// offline attribute
+	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
+		BackingtreeManager::Instance().register_Backingtree(get_relative_path());
+	// availability attribute
+	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
+		// readonly -> error
+		res = -1;
+		errno = EACCES;
+	} else { // other attribute - delegate to underlying filesystem
+		res = lsetxattr(get_remote_path().c_str(), name,
+			value, size, flags);
+	}
+	if (res == -1)
+		return -errno;
+	return 0;
+}
+
+
+/*!
+    \fn OFSFile::op_listxattr(char *list, size_t size)
+ */
+int OFSFile::op_listxattr(char *list, size_t size)
+{
+	int res = 0;
+	int fsres = 0;
+	char *fslist = NULL;
+	
+	res += strlen(OFS_ATTRIBUTE_OFFLINE) + 1;
+	res += strlen(OFS_ATTRIBUTE_AVAILABLE) + 1;
+	if (size > 0) { // copy available attributes into the buffer
+		strncpy(list, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1);
+		strncpy(list+strlen(OFS_ATTRIBUTE_OFFLINE)+1,
+			OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE)+1);
+		fslist = new char[size-res];		
+		fsres = llistxattr(get_remote_path().c_str(),
+			fslist, size-res);
+		if (fsres > 0)
+			res += fsres;
+	} else { // no buffer - only calculate length
+		fsres = llistxattr(get_remote_path().c_str(), fslist, 0);
+		if (fsres > 0)
+			res += fsres;		
+	}
+	return res;
+}
+
+
+/*!
+    \fn OFSFile::op_removexattr(const char *name)
+	TODO: Use local file is remote file is not available
+	      no dot allow changing cache status when offline
+ */
+int OFSFile::op_removexattr(const char *name)
+{
+	int res = 0;
+	// offline attribute
+	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
+			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
+		BackingtreeManager::Instance().remove_Backingtree(get_relative_path());
+	// availability attribute
+	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
+			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
+		// readonly -> error
+		res = -1;
+		errno = EACCES;
+	} else {
+		res = lremovexattr(get_remote_path().c_str(), name);
+	}
+	if (res == -1)
+		return -errno;
+	return 0;
+}

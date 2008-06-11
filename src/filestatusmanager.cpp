@@ -43,9 +43,26 @@ Filestatusmanager& Filestatusmanager::Instance()
  */
 File Filestatusmanager::give_me_file(string Path)
 {
+	bool offline;
+	bool available;
+	string Remote_Path;
+	string Cache_Path;
 	FilesystemStatusManager fssm = FilesystemStatusManager::Instance();
-	BackingtreeManager btmm = BackingtreeManager::Instance();
-	return File(true, fssm.isAvailable(),
-		Path, fssm.getRemoteMountpoint()+Path,
-		fssm.getCachePath()+Path);
+	BackingtreeManager btm = BackingtreeManager::Instance();
+	
+	offline = btm.Is_in_Backingtree(Path);
+	available = fssm.isAvailable();
+	if(offline) {
+//		Cache_Path = btm.get_Cache_Path()+"/"+Path;
+		Cache_Path = "/tmp/ofscache/"+Path;
+	} else {
+		Cache_Path = "";
+	}
+	if(available) {
+		Remote_Path = fssm.getRemoteMountpoint()+Path;
+	} else {
+		Remote_Path = "";
+	}
+	
+	return File(offline, available, Path, Remote_Path, Cache_Path);
 }

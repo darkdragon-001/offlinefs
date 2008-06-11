@@ -33,7 +33,7 @@ BackingtreePersistence& BackingtreePersistence::Instance()
 {
     MutexLocker obtain_lock(m);
     if (theBackingtreePersistenceInstance.get() == 0) {
-    	theBackingtreePersistenceInstance.reset(new BackingtreePersistence);
+    	theBackingtreePersistenceInstance.reset(new BackingtreePersistence());
         theBackingtreePersistenceInstance->init();
     }
     return *theBackingtreePersistenceInstance;
@@ -58,14 +58,14 @@ string BackingtreePersistence::get_persistence()
 {
 	stringstream pers;
 	pers << CONFIGKEY_BACKINGTREES << " = {" << endl;
-	list<string>::iterator it;
+	list<Backingtree>::iterator it;
 	bool first = true;
 	for ( it=p_backingtrees.begin() ; it != p_backingtrees.end(); it++ ) {
 		if(first)
 			first = false;
 		else
 			pers << "," << endl;
-		pers << "\"" << *it << "\"";
+		pers << "\"" << it->get_relative_path() << "\"";
 	}
 	pers << endl << "}" << endl;
 	return pers.str();
@@ -74,15 +74,16 @@ string BackingtreePersistence::get_persistence()
 /**
  * get a list of backingtrees
  */
-list<string> BackingtreePersistence::backingtrees() const
+list<Backingtree> BackingtreePersistence::backingtrees()
 {
+	reload();
 	return p_backingtrees;
 }
 
 /**
  * set the list of backingtrees and make persistent
  */
-void BackingtreePersistence::backingtrees(const list<string> backingt)
+void BackingtreePersistence::backingtrees(const list<Backingtree> backingt)
 {
 	p_backingtrees = backingt;
 	make_persistent();
@@ -95,7 +96,7 @@ void BackingtreePersistence::read_values()
 {
 	p_backingtrees.clear();
 	for(int i = 0; i < cfg_size(cfg, CONFIGKEY_BACKINGTREES); i++) {
-		p_backingtrees.push_back(string(
-			cfg_getnstr(cfg, CONFIGKEY_BACKINGTREES, i)));
+		p_backingtrees.push_back(Backingtree(string(
+			cfg_getnstr(cfg, CONFIGKEY_BACKINGTREES, i))));
 	}
 }

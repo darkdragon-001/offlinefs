@@ -20,8 +20,6 @@
 #ifndef OFS_FUSE_H
 #define OFS_FUSE_H
 
-// name of attribute which indicates whether a file is offline
-#define OFS_ATTRIBUTE_ISOFFLLINE "offline"
 #define HAVE_SETXATTR
 
 #include <fusexx.hpp>
@@ -31,13 +29,6 @@
 #include "file.h"
 
 using namespace std;
-#define HAVE_SETXATTR
-// when calling getfattr -d filename attributes are only shown
-// when starting with 'user.' - this might be a FUSE bug
-#define OFS_ATTRIBUTE_OFFLINE "ofs.offline"
-#define OFS_ATTRIBUTE_AVAILABLE "ofs.available"
-#define OFS_ATTRIBUTE_VALUE_YES "yes"
-#define OFS_ATTRIBUTE_VALUE_NO "no"
 
 /**
 	@author Tobias Jaehnel <tjaehnel@gmail.com>

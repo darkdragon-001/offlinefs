@@ -21,6 +21,7 @@
 #define BACKINGTREEPERSISTENCE_H
 #include "persistencemanager.h"
 #include "mutexlocker.h"
+#include "backingtree.h"
 #include <list>
 #define CONFIGKEY_BACKINGTREES "backingtrees"
 #define PERSISTENCE_MODULE_NAME "backingtrees"
@@ -32,8 +33,8 @@ class BackingtreePersistence : public PersistenceManager {
 public:
     static BackingtreePersistence& Instance();
     ~BackingtreePersistence();
-    void backingtrees(const list<string>);
-    list<string> backingtrees() const;
+    void backingtrees(const list<Backingtree>);
+    list<Backingtree> backingtrees();
 protected:
     BackingtreePersistence();
     virtual cfg_opt_t * init_parser();
@@ -41,7 +42,7 @@ protected:
     virtual void read_values();
 
 private:
-    list<string> p_backingtrees;
+    list<Backingtree> p_backingtrees;
 
     static std::auto_ptr<BackingtreePersistence> theBackingtreePersistenceInstance;
     static Mutex m;

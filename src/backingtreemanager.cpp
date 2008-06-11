@@ -29,26 +29,30 @@ BackingtreeManager& BackingtreeManager::Instance()
 {
     MutexLocker obtain_lock(m);
     if (theBackingtreeManagerInstance.get() == 0)
-      theBackingtreeManagerInstance.reset(new BackingtreeManager);
+      theBackingtreeManagerInstance.reset(new BackingtreeManager());
     return *theBackingtreeManagerInstance;
 }
 void BackingtreeManager::register_Backingtree(string relative_Path){
-Backingtree b=Backingtree::Backingtree(relative_Path);
-bool already_an_included_path=false;
-MutexLocker obtain_lock(m);
-if(!is_already_registered(b)){
-this->backinglist.push_back(b);
-}
+    Backingtree b=Backingtree::Backingtree(relative_Path);
+    bool already_an_included_path=false;
+    MutexLocker obtain_lock(m);
+    if(!is_already_registered(b)){
+        this->backinglist.push_back(b);
+    }
+    persist();
 }
 
-void BackingtreeManager::remove_Backingtree(string Relative_Path){
-Backingtree b=Backingtree::Backingtree(Relative_Path);
-for (list<Backingtree>::iterator it = backinglist.begin();
-        it != backinglist.end(); ++it) {
-      if((*it)==Relative_Path){
-	backinglist.erase(it);
-}
-   }
+void BackingtreeManager::remove_Backingtree(string Relative_Path) {
+	backinglist.remove(Relative_Path);
+/*	Backingtree b=Backingtree::Backingtree(Relative_Path);
+	for (list<Backingtree>::iterator it = backinglist.begin();
+	     it != backinglist.end(); ++it) {
+		if((*it)==Relative_Path){
+			backinglist.erase(it);
+			break; // need to break here, because
+		}
+	}*/
+	persist();
 }
 
 bool BackingtreeManager::is_already_registered(Backingtree Relative_Path)
@@ -79,11 +83,11 @@ void BackingtreeManager::persist() const
 {
 	BackingtreePersistence btp = BackingtreePersistence::Instance();
 	
-	//btp.backingtrees(backinglist);
+	btp.backingtrees(backinglist);
 }
 
 void BackingtreeManager::reinstate() const
 {
-BackingtreePersistence btp = BackingtreePersistence::Instance();
-	//backinglist=btp.backingtrees();
+	BackingtreePersistence btp = BackingtreePersistence::Instance();
+	backinglist=btp.backingtrees();
 }

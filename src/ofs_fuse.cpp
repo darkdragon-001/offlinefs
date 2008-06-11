@@ -29,13 +29,14 @@
 #include <sys/file.h>
 #include <ulockmgr.h>
 #include <sys/time.h>
-#include <attr/xattr.h>
 
 #include "filestatusmanager.h"
 #include "ofsfile.h"
 #include "filesystemstatusmanager.h"
+#include "backingtreemanager.h"
 
 using namespace std;
+
 //ofs_fuse::fuse_ofs_fuse()
 // : fusexx::fuse<ofs_fuse> ()
 //{
@@ -680,25 +681,8 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 			const char *value, size_t size, int flags)
 {
 	int res = 0;
-	OFSFile *file = new OFSFile(path);
-	// offline attribute
-	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
-			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
-		// TODO: make path offline
-	// availability attribute
-	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
-			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
-		// readonly -> error
-		res = -1;
-		errno = EACCES;
-	} else {
-		res = lsetxattr(file->get_remote_path().c_str(), name,
-			value, size, flags);
-	}
-	delete file;
-	if (res == -1)
-		return -errno;
-	return 0;
+	OFSFile file = OFSFile(path);
+	return file.op_setxattr(name, value, size, flags);
 }
 
 /**
@@ -717,52 +701,8 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
                     size_t size)
 {
-	int res = 0;
-	OFSFile *file = new OFSFile(path);
-	// offline attribute
-	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
-			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
-		if (file->get_offline_state()) {
-			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
-			if (size >= res) {
-				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
-					strlen(OFS_ATTRIBUTE_VALUE_YES) );
-			}
-		} else {
-			res = strlen(OFS_ATTRIBUTE_VALUE_NO);
-			if (size >= res) {
-				strncpy(value, OFS_ATTRIBUTE_VALUE_NO,
-					strlen(OFS_ATTRIBUTE_VALUE_NO) );
-			}
-		}
-	// availability attribute
-	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
-			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
-		if (file->get_availability()) {
-			res = strlen(OFS_ATTRIBUTE_VALUE_YES);
-			if (size >= res) {
-				strncpy(value, OFS_ATTRIBUTE_VALUE_YES,
-					strlen(OFS_ATTRIBUTE_VALUE_YES) );
-			}
-		} else {
-			res = strlen(OFS_ATTRIBUTE_VALUE_NO);
-			if (size >= res) {
-				strncpy(value, OFS_ATTRIBUTE_VALUE_NO,
-					strlen(OFS_ATTRIBUTE_VALUE_NO) );
-			}
-		}
- 	// unknown attribute - delegate to the underlying filesystem
-	} else {
-		res = lgetxattr(file->get_remote_path().c_str(),
-			name, value, size);
-		// do not return "unsupported" but "unknown attribute"
-		if(errno == ENOTSUP)
-			errno = ENOATTR;
-	} 
-	delete file;
-	if (res == -1)
-		return -errno;
-	return res;
+	OFSFile file = OFSFile(path);
+	return file.op_getxattr(name, value, size);
 }
 
 /**
@@ -777,31 +717,8 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
  */
 int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 {
-	int res = 0;
-	int fsres = 0;
-	char *fslist = NULL;
-	OFSFile *file = new OFSFile(path);
-	
-	res += strlen(OFS_ATTRIBUTE_OFFLINE) + 1;
-	res += strlen(OFS_ATTRIBUTE_AVAILABLE) + 1;
-	if (size > 0) {
-		strncpy(list, OFS_ATTRIBUTE_OFFLINE,
-			strlen(OFS_ATTRIBUTE_OFFLINE)+1);
-		strncpy(list+strlen(OFS_ATTRIBUTE_OFFLINE)+1,
-			OFS_ATTRIBUTE_AVAILABLE,
-			strlen(OFS_ATTRIBUTE_AVAILABLE)+1);
-		fslist = new char[size-res];		
-		fsres = llistxattr(file->get_remote_path().c_str(),
-			fslist, size-res);
-		if (fsres > 0)
-			res += fsres;
-	} else {
-		fsres = llistxattr(file->get_remote_path().c_str(), fslist, 0);
-		if (fsres > 0)
-			res += fsres;		
-	}
-	delete file;
-	return res;
+	OFSFile file = OFSFile(path);
+	return file.op_listxattr(list, size);
 }
 
 /**
@@ -817,24 +734,8 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 int ofs_fuse::fuse_removexattr(const char *path, const char *name)
 {
 	int res = 0;
-	OFSFile *file = new OFSFile(path);
-	// offline attribute
-	if (strncmp(name, OFS_ATTRIBUTE_OFFLINE,
-			strlen(OFS_ATTRIBUTE_OFFLINE)+1) == 0) {
-		// TODO: clear cache
-	// availability attribute
-	} else if(strncmp(name, OFS_ATTRIBUTE_AVAILABLE,
-			strlen(OFS_ATTRIBUTE_AVAILABLE + 1)) == 0 ) {
-		// readonly -> error
-		res = -1;
-		errno = EACCES;
-	} else {
-		res = lremovexattr(file->get_remote_path().c_str(), name);
-	}
-	delete file;
-	if (res == -1)
-		return -errno;
-	return 0;
+	OFSFile file = OFSFile(path);
+	return file.op_removexattr(name);
 }
 #endif /* HAVE_SETXATTR */
 
@@ -900,5 +801,8 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 	if (!pthread_create(thread, NULL, ofs_daemon::start_daemon, (void *)self))
 		perror(strerror(errno));*/
 	FilesystemStatusManager::Instance().startDbusListener();
+	BackingtreeManager btm = BackingtreeManager::Instance();
+//	btm.set_Cache_Path("/tmp/ofscache/");
+	btm.reinstate();
 	return NULL;
 }

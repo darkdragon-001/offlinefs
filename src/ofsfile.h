@@ -25,6 +25,13 @@
 #include <fusexx.hpp>
 #include <dirent.h>
 
+// when calling getfattr -d filename attributes are only shown
+// when starting with 'user.' - this might be a FUSE bug
+#define OFS_ATTRIBUTE_OFFLINE "ofs.offline"
+#define OFS_ATTRIBUTE_AVAILABLE "ofs.available"
+#define OFS_ATTRIBUTE_VALUE_YES "yes"
+#define OFS_ATTRIBUTE_VALUE_NO "no"
+
 /**
 	@author Tobias Jaehnel <tjaehnel@gmail.com>
 	The Object represents one open file. It holds file/directory
@@ -68,12 +75,16 @@ public:
     void update_cache();
     OFSFile * get_parent_directory();
     void update_amtime();
+    int op_getxattr(const char *name, char *value, size_t size);
+    int op_setxattr(const char *name, const char *value, size_t size, int flags);
     ~OFSFile();
     inline string get_remote_path() { return fileinfo.get_remote_path(); }
     inline string get_cache_path() { return fileinfo.get_cache_path(); }
     inline bool get_availability() { return fileinfo.get_availability(); }
     inline bool get_offline_state() { return fileinfo.get_offline_state(); }
     inline string get_relative_path() { return fileinfo.get_relative_path(); }
+    int op_removexattr(const char *name);
+    int op_listxattr(char *list, size_t size);
 private:
     File fileinfo;
     DIR *dh_cache;
