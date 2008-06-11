@@ -30,21 +30,55 @@ using namespace std;
 	
 	Manages files, which hold persisent data.
 	Each subclass gets its own file to store the data
+	and is identified by 
 */
 class PersistenceManager{
 public:
 
     virtual ~PersistenceManager();
+    /**
+     * write persistence file
+     */
     void make_persistent();
+    /**
+     * Reload the persistence file
+     */
     void reload();
+    /**
+     * Get name of persistence-module
+     * @return name of module
+     */
     string get_modname();
 
 protected:
+    /**
+     * ctor
+     * @param modname Name of the module - is used for the filename
+     */
     PersistenceManager(string modname);
+    /**
+     * Set the parser options
+     * @return array of parser options
+     */
     virtual cfg_opt_t *init_parser() = 0;
+    /**
+     * get the string which has to be written to the persistence file
+     * @return persistence content
+     */
     virtual string get_persistence() = 0;
+    /**
+     * read the config values
+     */
     virtual void read_values() = 0;
+    /**
+     * get the filename of the persistence file
+     * @return the filename
+     */
     string get_filename();
+    /**
+     * This method has to be called by each subclass on initialization.
+     * Reason: Methods, called in the constructor are not called polymorph
+     */
     void init();
 
 protected:

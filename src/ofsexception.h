@@ -24,8 +24,9 @@
 using namespace std;
 
 /**
-	@author 
-*/
+ * @author Tobias Jaehnel <tjaehnel@gmail.com>
+ * Base class for OFS related exceptions
+ */
 class OFSException : public exception {
 public:
     OFSException(string message, int posixerrno);

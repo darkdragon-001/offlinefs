@@ -28,9 +28,10 @@
 using namespace std;
 
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-	@author Tobias Jaehnel <tjaehnel@gmail.com>
-	@brief Singleton which gives us the corresponding File-Object to a 
+	@author Carsten Kolassa <Carsten@Kolassa.de>, 
+		Tobias Jaehnel <tjaehnel@gmail.com>
+
+	Singleton which gives us the corresponding File-Object to a 
 	given file path
 */
 class Filestatusmanager{

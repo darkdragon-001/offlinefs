@@ -27,15 +27,32 @@
 #define PERSISTENCE_MODULE_NAME "backingtrees"
 
 /**
-	@author Tobias Jaehnel <tjaehnel@gmail.com>
+ * @author Tobias Jaehnel <tjaehnel@gmail.com>
+ * Defines a interface for the Backingtreemanager to make
+ * the list of backingtrees persistent and reload them
  */
 class BackingtreePersistence : public PersistenceManager {
 public:
+    /**
+     * Get singleton instance
+     * @return singleton instance
+     */
     static BackingtreePersistence& Instance();
     ~BackingtreePersistence();
-    void backingtrees(const list<Backingtree>);
+    /**
+     * make backingtrees persistent
+     * @param trees list of backingtrees
+     */
+    void backingtrees(const list<Backingtree> trees);
+    /**
+     * load backingtrees
+     * @return list of backingtrees
+     */
     list<Backingtree> backingtrees();
 protected:
+    /**
+     * ctor
+     */
     BackingtreePersistence();
     virtual cfg_opt_t * init_parser();
     virtual string get_persistence();

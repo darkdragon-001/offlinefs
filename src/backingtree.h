@@ -27,8 +27,10 @@
 #include "mutex.h"
 using namespace std;
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-*/
+ *	@author Carsten Kolassa <Carsten@Kolassa.de>
+ *
+ *	Represents one Tree in the filesystem, the user marked as offline
+ */
 class Backingtree{
 public:
     /**

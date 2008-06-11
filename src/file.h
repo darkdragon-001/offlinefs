@@ -23,26 +23,69 @@
 
 using namespace std;
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-	@author Tobias Jaehnel <tjaehnel@gmail.com>
+	@author Carsten Kolassa <Carsten@Kolassa.de>,
+		Tobias Jaehnel <tjaehnel@gmail.com>
 	The file Object represents one file in the filesystem. It holds all
 	ofs-specific infomation and is responsible for performing the
 	operations on this file.
 	Most of the methods are called by the ofs_fuse callback functionss
 	
 	Instances are created and filled by the filestatusmanager.
+	
+	Immutable
 */
 class File {
 public:
+	/**
+	 * ctor - initialize the values
+	 * @param offline_state should be available offline
+	 * @param availability  remote share available
+	 * @param relative_path path relative to mountpoint
+	 * @param remote_path absolute path in mountpoint
+	 * @param cache_path absolute path in cache
+	 */
 	File(bool offline_state, bool availability, string relative_path,
 		string remote_path, string cache_path);
+	/**
+	 * copy ctor
+	 * @param copy object to copy
+	 */
 	File(const File &copy);
+	/**
+	 * assignment operator
+	 * @param copy object to copy
+	 * @return a reference to the current object
+	 */
 	File& operator =(const File &copy);
+	/**
+	 * is available offline
+	 * @return offline flag
+	 */
 	bool get_offline_state() const;
+	/**
+	 * remote share available
+	 * @return availability
+	 */
 	bool get_availability() const;
+	/**
+	 * 
+	 * @return 
+	 */
 	bool get_sync_state();
+	/**
+	 * get absolute path in mountpoint
+	 * @return path
+	 */
 	string get_remote_path() const;
+	/**
+	 * get absolute path in cache
+	 * @return path
+	 */
 	string get_cache_path() const;
+        /**
+         * get path relative to mountpoint
+         * @return path
+         */
         string get_relative_path() const;
 	~File();
 

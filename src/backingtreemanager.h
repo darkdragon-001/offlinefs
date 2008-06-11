@@ -26,8 +26,10 @@
 #include <string>
 #include <list>
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-*/
+ *	@author Carsten Kolassa <Carsten@Kolassa.de>
+ *
+ *	Manages the list of #Backingtree s
+ */
 class BackingtreeManager: public persistable {
 public:
     /**

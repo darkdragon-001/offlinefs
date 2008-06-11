@@ -39,9 +39,7 @@ BackingtreePersistence& BackingtreePersistence::Instance()
     return *theBackingtreePersistenceInstance;
 }
 
-/**
- * Set the parser options
- */
+
 cfg_opt_t *BackingtreePersistence::init_parser()
 {
 	cfg_opt_t *opts = new cfg_opt_t[2];
@@ -51,9 +49,6 @@ cfg_opt_t *BackingtreePersistence::init_parser()
 	return opts;
 }
 
-/**
- * get the string which has to be written to the persistence file
- */
 string BackingtreePersistence::get_persistence()
 {
 	stringstream pers;
@@ -71,27 +66,19 @@ string BackingtreePersistence::get_persistence()
 	return pers.str();
 }
 
-/**
- * get a list of backingtrees
- */
+
 list<Backingtree> BackingtreePersistence::backingtrees()
 {
 	reload();
 	return p_backingtrees;
 }
 
-/**
- * set the list of backingtrees and make persistent
- */
 void BackingtreePersistence::backingtrees(const list<Backingtree> backingt)
 {
 	p_backingtrees = backingt;
 	make_persistent();
 }
 
-/**
- * read the config values
- */
 void BackingtreePersistence::read_values()
 {
 	p_backingtrees.clear();

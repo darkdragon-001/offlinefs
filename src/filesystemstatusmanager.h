@@ -28,16 +28,16 @@
 #define TESTING_BACKING_PATH "/tmp/ofsbacking"
 
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-	@author Tobias Jaehnel <tjaehnel@gmail.com>
+	@author Carsten Kolassa <Carsten@Kolassa.de>,
+		Tobias Jaehnel <tjaehnel@gmail.com>
 	This Class monitors the availability of the mounted fielsystem.
 	Note that this class only contains hacks and has to be rewritten.
 */
 class FilesystemStatusManager{
 public:
     /**
-     * 
-     * @return 
+     * Get the singleton instange
+     * @return The singleton instance
      */
     static FilesystemStatusManager& Instance();
     /**
@@ -48,8 +48,8 @@ public:
 //    void remove_filesystem(string MountPath, string TempMount);
 //    Filesystem give_me_Filesystem_to_File(string Path);
     /**
-     * 
-     * @return 
+     * Is the remote share currently available or are we offline?
+     * @return true if the share is available, false otherwise
      */
     bool isAvailable();
     /**
@@ -57,33 +57,34 @@ public:
      */
     void filesystemError();
     /**
-     * 
+     * Runs the Dbus listener which monitors the network connection
+     * in the background
      */
     void startDbusListener();
     /**
-     * 
-     * @param  
+     * Monitors the network connection via DBUS
+     * @param 
      * @return 
      */
     static void *DbusListenerRun(void *);
     /**
-     * 
-     * @param cachePath 
+     * Set the path to the filesystem cache (backing)
+     * @param cachePath Root of backing
      */
     void setCachePath(string cachePath);
     /**
-     * 
-     * @param remoteMountpoint 
+     * Set the directory, the remote share is mounted to
+     * @param remoteMountpoint Mountpoint of remote share
      */
     void setRemoteMountpoint(string remoteMountpoint);
     /**
-     * 
-     * @return 
+     * Get the path to the filesystem cache (backing)
+     * @return Root of backing
      */
     string getCachePath();
     /**
-     * 
-     * @return 
+     * Get the directory, the remote share is mounted to
+     * @return Mountpoint of remote share
      */
     string getRemoteMountpoint();
 protected:

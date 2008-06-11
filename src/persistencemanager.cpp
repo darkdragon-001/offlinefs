@@ -26,10 +26,6 @@
 
 using namespace std;
 
-/**
- * ctor
- * @param modname Name of the module - is used for the filename
- */
 PersistenceManager::PersistenceManager(string modname)
 {
 	stringstream str;
@@ -49,9 +45,6 @@ PersistenceManager::~PersistenceManager()
 	delete opts;
 }
 
-/**
- * Reload the persistence file
- */
 void PersistenceManager::reload()
 {
 	if(cfg_parse(cfg, get_filename().c_str()) == CFG_PARSE_ERROR) {
@@ -60,9 +53,6 @@ void PersistenceManager::reload()
 	read_values();
 }
 
-/**
- * write persistence file
- */
 void PersistenceManager::make_persistent()
 {
 	ofstream persfile(get_filename().c_str(), ios::out | ios::trunc);
@@ -71,18 +61,11 @@ void PersistenceManager::make_persistent()
 	persfile.close();
 }
 
-/**
- * get the filename of the persistence file
- */
 string PersistenceManager::get_filename()
 {
 	return filename;
 }
 
-/**
- * This method has to be called by each subclass on initialization.
- * Reason: Methods, called in the constructor are not called polymorph
- */
 void PersistenceManager::init()
 {
 	opts = init_parser();
@@ -90,9 +73,6 @@ void PersistenceManager::init()
 	reload();
 }
 
-/*!
-    \fn PersistenceManager::get_modname()
- */
 string PersistenceManager::get_modname()
 {
 	return modname;
