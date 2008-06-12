@@ -21,7 +21,6 @@
 
 
 std::auto_ptr<BackingtreeManager> BackingtreeManager::theBackingtreeManagerInstance;
-list<Backingtree> BackingtreeManager::backinglist;
 Mutex BackingtreeManager::m;
 BackingtreeManager::BackingtreeManager(){}
 BackingtreeManager::~BackingtreeManager(){}
@@ -33,34 +32,26 @@ BackingtreeManager& BackingtreeManager::Instance()
     return *theBackingtreeManagerInstance;
 }
 void BackingtreeManager::register_Backingtree(string relative_Path){
-    Backingtree b=Backingtree::Backingtree(relative_Path);
-    bool already_an_included_path=false;
-    MutexLocker obtain_lock(m);
-    if(!is_already_registered(b)){
-        this->backinglist.push_back(b);
-    }
-    persist();
+	MutexLocker obtain_lock(m);
+	if(!Is_in_Backingtree(relative_Path)) {
+		// if there are backingtrees below this one, remove them,
+		// because the new one is the new root
+		list<Backingtree> subtrees = getBackingtreesBelow(relative_Path);
+		for (list<Backingtree>::iterator it = subtrees.begin();
+        		it != subtrees.end(); ++it) {
+			// I do not call the remove_Backingtree method here
+			// because this would always trigger persistation
+			backinglist.remove(*it);
+		}
+		// add the new backingtree and make list persistent
+		backinglist.push_back(Backingtree(relative_Path));
+		persist();
+ 	}
 }
 
 void BackingtreeManager::remove_Backingtree(string Relative_Path) {
 	backinglist.remove(Relative_Path);
-/*	Backingtree b=Backingtree::Backingtree(Relative_Path);
-	for (list<Backingtree>::iterator it = backinglist.begin();
-	     it != backinglist.end(); ++it) {
-		if((*it)==Relative_Path){
-			backinglist.erase(it);
-			break; // need to break here, because
-		}
-	}*/
 	persist();
-}
-
-bool BackingtreeManager::is_already_registered(Backingtree Relative_Path)
-{
- for (list<Backingtree>::iterator it = backinglist.begin();
-        it != backinglist.end(); ++it) {
-      return (*it)==Relative_Path;
-   }
 }
 
 string BackingtreeManager::get_Remote_Path()
@@ -70,9 +61,10 @@ return Remote_Path;
 bool BackingtreeManager::Is_in_Backingtree(string path){
  for (list<Backingtree>::iterator it = backinglist.begin();
         it != backinglist.end(); ++it) {
-	string s=(*it).get_relative_path();
-      return (strcmp(s.c_str(), path.c_str())==strlen(s.c_str()));
+	if(it->is_in_backingtree(path))
+		return true;
    }
+   return false;
 }
 string BackingtreeManager::get_Cache_Path()
 {
@@ -81,13 +73,24 @@ return Cache_path;
 
 void BackingtreeManager::persist() const
 {
-	BackingtreePersistence btp = BackingtreePersistence::Instance();
+	BackingtreePersistence &btp = BackingtreePersistence::Instance();
 	
 	btp.backingtrees(backinglist);
 }
 
-void BackingtreeManager::reinstate() const
+void BackingtreeManager::reinstate()
 {
-	BackingtreePersistence btp = BackingtreePersistence::Instance();
+	BackingtreePersistence &btp = BackingtreePersistence::Instance();
 	backinglist=btp.backingtrees();
+}
+
+list<Backingtree> BackingtreeManager::getBackingtreesBelow(string path)
+{
+	list<Backingtree> trees;
+	for (list<Backingtree>::iterator it = backinglist.begin();
+		it != backinglist.end(); ++it) {
+		if(it->backingtree_is_in(path))
+			trees.push_back(*it);
+	}
+	return trees;
 }

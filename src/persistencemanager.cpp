@@ -31,7 +31,9 @@ PersistenceManager::PersistenceManager(string modname)
 	stringstream str;
 	unsigned char sha1hash[20];
 	string hash;
-
+	
+	cfg=NULL;
+	opts=NULL;
 	this->modname = modname;	
 
 	// TODO: put the remote path here
@@ -42,7 +44,7 @@ PersistenceManager::PersistenceManager(string modname)
 PersistenceManager::~PersistenceManager()
 {
 	cfg_free(cfg);
-	delete opts;
+	delete [] opts;
 }
 
 void PersistenceManager::reload()

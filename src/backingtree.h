@@ -58,6 +58,18 @@ public:
      * @return 
      */
     const string get_complete_path();
+    /**
+     * Check if the given (relative) path is below the root of this backing tree
+     * @param path file or directory path to check
+     * @return true if path is in backingtree, false if not
+     */
+    bool is_in_backingtree(string path);
+    /**
+     * Check if the given (relative) path is a parent of the backingtree
+     * @param path directory path to check
+     * @return true if backingtree is below path, false if not
+     */
+    bool backingtree_is_in(string path);
 protected:
     string relative_path;
 private:

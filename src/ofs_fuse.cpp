@@ -801,7 +801,7 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 	if (!pthread_create(thread, NULL, ofs_daemon::start_daemon, (void *)self))
 		perror(strerror(errno));*/
 	FilesystemStatusManager::Instance().startDbusListener();
-	BackingtreeManager btm = BackingtreeManager::Instance();
+	BackingtreeManager &btm = BackingtreeManager::Instance();
 //	btm.set_Cache_Path("/tmp/ofscache/");
 	btm.reinstate();
 	return NULL;

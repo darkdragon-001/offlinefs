@@ -78,7 +78,7 @@ public:
      * @param Relative_Path Path of the Backingtree
      * @return Backingtree that manages the Path given
      */
-    static Backingtree Search_Backingtree_via_Path(string Relative_Path);
+    Backingtree Search_Backingtree_via_Path(string Relative_Path);
     /**
      * Determines if a given file is in a Backingpath or not
      * @param path Path of the file
@@ -92,15 +92,20 @@ public:
     /**
      * Reads all the stored Backingtrees from the disk
      */
-    virtual void reinstate() const;
+    virtual void reinstate();
+    /**
+     * Get all registered backingtrees, which have its roots below path
+     * @param path the directory
+     * @return A list of backingtrees - may be an empty list but not NULL
+     */
+    list<Backingtree> getBackingtreesBelow(string path);
 protected:
     BackingtreeManager();
   private:
     string Remote_Path;
     string Cache_path;
     static std::auto_ptr<BackingtreeManager> theBackingtreeManagerInstance;
-    static list<Backingtree> backinglist;
-    static bool is_already_registered(Backingtree Relative_Path);
+    list<Backingtree> backinglist;
     static Mutex m; 
 };
 #endif

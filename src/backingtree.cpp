@@ -46,3 +46,18 @@ const string Backingtree::get_relative_path()
 {
 return this->relative_path;
 }
+
+
+bool Backingtree::is_in_backingtree(string path)
+{
+	if(path.length() >= relative_path.length() && path.substr(0,relative_path.length()) == relative_path) {
+		return true;
+	}
+	return false;
+}
+
+
+bool Backingtree::backingtree_is_in(string path)
+{
+    /// @todo implement me
+}

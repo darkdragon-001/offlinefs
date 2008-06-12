@@ -32,7 +32,7 @@ virtual void persist() const=0;
 /**
  * \brief virtual function which will be implemented by any Class that is persistable. It is used to read the state of the class from the disk.
  */
-virtual void reinstate() const=0;
+virtual void reinstate() =0;
 };
 
 #endif
