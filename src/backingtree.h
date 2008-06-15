@@ -29,15 +29,19 @@ using namespace std;
 /**
  *	@author Carsten Kolassa <Carsten@Kolassa.de>
  *
- *	Represents one Tree in the filesystem, the user marked as offline
+ *	Represents one Tree in the filesystem, the user marked as offline.
+ *      Note: This class also holds the absolute path to the tree in cache
+ *            This enables us to save the backingtrees in different paths
+ *            and avoid rebuilding the complete remote tree in the cache later
  */
 class Backingtree{
 public:
     /**
-     * Constructor of Backingtree takes the relative position of the backingtree as argument
+     * Constructor of Backingtree takes the relative position
+     * of the backingtree as argument
      * @param rPath 
      */
-    Backingtree(string rPath);
+    Backingtree(string rPath, string cPath);
     /**
      * Destructor
      */
@@ -49,15 +53,15 @@ public:
      */
     const bool operator== (Backingtree const b);
     /**
-     * Getter fot the relative path of the backing Tree
-     * @return 
+     * Getter for the relative path of the backing Tree
+     * @return path relative to the mounted share
      */
     const string get_relative_path();
     /**
-     * Getter for the complete path of the backing Tree.
-     * @return 
+     * Getter for the cache path of the backing Tree.
+     * @return absolute path to the cache on harddisk
      */
-    const string get_complete_path();
+    const string get_cache_path();
     /**
      * Check if the given (relative) path is below the root of this backing tree
      * @param path file or directory path to check
@@ -70,8 +74,15 @@ public:
      * @return true if backingtree is below path, false if not
      */
     bool backingtree_is_in(string path);
+    /**
+     * Get the absolute path to the given file in cache
+     * @param path the path relative to the remote share root
+     * @return the absolute path in the cache or NULL if not in this backingtree
+     */
+    string get_cache_path(string path);
 protected:
     string relative_path;
+    string cache_path;
 private:
 
 };

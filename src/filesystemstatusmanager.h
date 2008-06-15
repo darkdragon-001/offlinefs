@@ -44,9 +44,6 @@ public:
      * 
      */
     ~FilesystemStatusManager(); 
-//    void register_filesystem(string MountPath, string TempMount);
-//    void remove_filesystem(string MountPath, string TempMount);
-//    Filesystem give_me_Filesystem_to_File(string Path);
     /**
      * Is the remote share currently available or are we offline?
      * @return true if the share is available, false otherwise
@@ -68,32 +65,23 @@ public:
      */
     static void *DbusListenerRun(void *);
     /**
-     * Set the path to the filesystem cache (backing)
-     * @param cachePath Root of backing
-     */
-    void setCachePath(string cachePath);
-    /**
-     * Set the directory, the remote share is mounted to
-     * @param remoteMountpoint Mountpoint of remote share
-     */
-    void setRemoteMountpoint(string remoteMountpoint);
-    /**
-     * Get the path to the filesystem cache (backing)
-     * @return Root of backing
-     */
-    string getCachePath();
-    /**
      * Get the directory, the remote share is mounted to
      * @return Mountpoint of remote share
      */
     string getRemoteMountpoint();
+    /**
+     * Get the location of the given file or directory in the
+     * mounted remote share
+     * @param path the path, relative to the share root
+     * @return the absolute path to the file below the mountpoint
+     */
+    string getRemote(string path);
 protected:
     FilesystemStatusManager();
   private:
-    static std::auto_ptr<FilesystemStatusManager> theFilesystemStatusManagerInstance;
-//    vector<Filesystem> fslist;
-    string remoteMountpoint;
-    string cachePath;
+    static std::auto_ptr<FilesystemStatusManager> 
+		theFilesystemStatusManagerInstance;
+
 protected:
     bool available;
     static Mutex m; 

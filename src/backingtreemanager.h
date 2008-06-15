@@ -26,21 +26,23 @@
 #include <string>
 #include <list>
 /**
- *	@author Carsten Kolassa <Carsten@Kolassa.de>
+ *	@author Carsten Kolassa <Carsten@Kolassa.de>,
+ *		Tobias Jaehnel <tjaehnel@gmail.com>
  *
  *	Manages the list of #Backingtree s
  */
 class BackingtreeManager: public persistable {
 public:
     /**
-     * Returns a Pointer to the Instance of the Backingtree Manager part of the Singleton Pattern
+     * Returns a Pointer to the Instance of the Backingtree Manager
+     * part of the Singleton Pattern
      * @return Pointer to the Instance of the Backingtree Manager
      */
     static BackingtreeManager& Instance();
     /**
      * Destructor of the Backingtree Manager
      */
-    ~BackingtreeManager(); 
+    ~BackingtreeManager();
     /**
      * Registers a relative path in the managed directory tree as backing tree
      * @param relative_Path The relative path that should be registered
@@ -52,23 +54,6 @@ public:
      */
     void remove_Backingtree(string relative_Path);
     /**
-     * 
-     * @param Remote_Path 
-     * @return 
-     */
-    string set_Remote_Path(string Remote_Path);
-    /**
-     *  Setter to set the remote Path
-     * @param Cache_path 
-     * @return 
-     */
-    string set_Cache_Path(string Cache_path);
-    /**
-     *  Getter to retrieve the Remote Path
-     * @return 
-     */
-    string get_Remote_Path();
-    /**
      *  Getter to retrieve the Cache Path
      * @return 
      */
@@ -76,13 +61,13 @@ public:
     /**
      * Function to get the Backingtree to a given Path
      * @param Relative_Path Path of the Backingtree
-     * @return Backingtree that manages the Path given
+     * @return Backingtree that manages the Path given or NULL of none
      */
-    Backingtree Search_Backingtree_via_Path(string Relative_Path);
+    Backingtree *Search_Backingtree_via_Path(string Relative_Path);
     /**
      * Determines if a given file is in a Backingpath or not
      * @param path Path of the file
-     * @return Boolean variable true if the file is in the backingtree false if it isn not
+     * @return true if the file is in a backingtree false if it is not
      */
     bool Is_in_Backingtree(string path);
     /**
@@ -102,8 +87,6 @@ public:
 protected:
     BackingtreeManager();
   private:
-    string Remote_Path;
-    string Cache_path;
     static std::auto_ptr<BackingtreeManager> theBackingtreeManagerInstance;
     list<Backingtree> backinglist;
     static Mutex m; 

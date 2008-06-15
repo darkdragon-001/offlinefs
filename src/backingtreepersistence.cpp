@@ -20,6 +20,7 @@
 #include "backingtreepersistence.h"
 #include <iostream>
 #include <sstream>
+#include "ofsenvironment.h"
 using namespace std;
 
 std::auto_ptr<BackingtreePersistence> BackingtreePersistence::theBackingtreePersistenceInstance;
@@ -80,9 +81,15 @@ void BackingtreePersistence::backingtrees(const list<Backingtree> backingt)
 
 void BackingtreePersistence::read_values()
 {
+	string relpath;
 	p_backingtrees.clear();
 	for(int i = 0; i < cfg_size(cfg, CONFIGKEY_BACKINGTREES); i++) {
-		p_backingtrees.push_back(Backingtree(string(
-			cfg_getnstr(cfg, CONFIGKEY_BACKINGTREES, i))));
+		//TODO: We should also place the absolute path in config file
+		relpath = string(cfg_getnstr(cfg, CONFIGKEY_BACKINGTREES, i));
+		p_backingtrees.push_back(
+			Backingtree(relpath, 
+			OFSEnvironment::Instance().getCachePath()
+				+relpath)
+			);
 	}
 }

@@ -41,6 +41,11 @@ OFSConf::OFSConf()
 {
     m_bFileParsed = false;
     m_pCFG = 0;
+    // set default config values
+    remotePath = MOUNT_REMOTE_PATHS_TO_DEFAULT;
+    backingPath = BACKING_TREE_PATH_DEFAULT;
+    
+    ParseFile();
 }
 
 OFSConf::~OFSConf()
@@ -98,18 +103,18 @@ bool OFSConf::ParseFile()
         return false;
 
     m_bFileParsed = true;
+    remotePath = cfg_getstr(m_pCFG, MOUNT_REMOTE_PATHS_TO_VARNAME);
+    backingPath = cfg_getstr(m_pCFG, BACKING_TREE_PATH_VARNAME);
 
     return true;
 }
 
 string OFSConf::GetRemotePath()
 {
-    assert(m_pCFG != 0);
-    return cfg_getstr(m_pCFG, MOUNT_REMOTE_PATHS_TO_VARNAME);
+	return remotePath;
 }
 
 string OFSConf::GetBackingTreePath()
 {
-    assert(m_pCFG != 0);
-    return cfg_getstr(m_pCFG, BACKING_TREE_PATH_VARNAME);
+	return backingPath;
 }

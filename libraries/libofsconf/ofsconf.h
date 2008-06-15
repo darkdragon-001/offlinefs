@@ -57,6 +57,8 @@ protected:
 
 private:
     static Mutex m_mutex;
+    string remotePath;
+    string backingPath;
 };
 
 #endif

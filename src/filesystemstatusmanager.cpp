@@ -33,12 +33,12 @@
 using namespace std;
 
 #include "filesystemstatusmanager.h"
+#include "ofsenvironment.h"
 
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
 
-FilesystemStatusManager::FilesystemStatusManager() : available(true),
-	remoteMountpoint(""), cachePath("") {}
+FilesystemStatusManager::FilesystemStatusManager() : available(true) {}
 FilesystemStatusManager::~FilesystemStatusManager(){}
 FilesystemStatusManager& FilesystemStatusManager::Instance()
 {
@@ -130,38 +130,12 @@ void *FilesystemStatusManager::DbusListenerRun(void *)
 	return NULL;
 }
 
-
-/*!
-    \fn FilesystemStatusManager::setCachePath(string cachePath)
- */
-void FilesystemStatusManager::setCachePath(string cachePath)
-{
-	this->cachePath = cachePath;
-}
-
-
-/*!
-    \fn FilesystemStatusManager::setRemoteMountpoint(string remoteMountpoint)
- */
-void FilesystemStatusManager::setRemoteMountpoint(string remoteMountpoint)
-{
-	this->remoteMountpoint = remoteMountpoint;
-}
-
-
-/*!
-    \fn FilesystemStatusManager::getCachePath()
- */
-string FilesystemStatusManager::getCachePath()
-{
-	return cachePath;
-}
-
-
-/*!
-    \fn FilesystemStatusManager::getRemoteMountpoint()
- */
 string FilesystemStatusManager::getRemoteMountpoint()
 {
-	return remoteMountpoint;
+	return OFSEnvironment::Instance().getRemotePath();
+}
+
+string FilesystemStatusManager::getRemote(string path)
+{
+	return OFSEnvironment::Instance().getRemotePath()+path;
 }

@@ -95,9 +95,6 @@ private:
 	// Notice that they aren't static, i.e. they belong to an instantiated object
 	std::string cachepath;
 	std::string remotepath;
-	int cntnr;
-	
-	string basepath;
 
 };
 

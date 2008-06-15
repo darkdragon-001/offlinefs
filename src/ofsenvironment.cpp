@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,31 +17,53 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#include <iostream>
-#include <cstdlib>
-#include "ofs_fuse.h"
-#include "backingtreepersistence.h"
-#include "filesystemstatusmanager.h"
 #include "ofsenvironment.h"
+#include "ofsexception.h"
+#include "ofsconf.h"
 
-using namespace std;
+std::auto_ptr<OFSEnvironment> OFSEnvironment::theOFSEnvironmentInstance;
+Mutex OFSEnvironment::m;
+Mutex OFSEnvironment::initm;
+bool OFSEnvironment::initialized = false;
 
-int main(int argc, char *argv[])
+OFSEnvironment& OFSEnvironment::Instance()
 {
-	ofs_fuse my_ofs;
-	cout << "Starting" << endl;
-	char *args[3];
-	args[0] = argv[0];
-	args[1] = argv[1];
-	args[2] = NULL;
-	OFSEnvironment::init();
-//
-return my_ofs.main(2, argv, NULL, &my_ofs);
+    if(!initialized)
+        throw new OFSException("OFS Environment not initialized", 1);
+    MutexLocker obtain_lock(m);
+    if (theOFSEnvironmentInstance.get() == 0)
+      theOFSEnvironmentInstance.reset(new OFSEnvironment());
+    return *theOFSEnvironmentInstance;
+}
 
-  //return EXIT_SUCCESS;
+OFSEnvironment::OFSEnvironment()
+{
+}
+
+
+OFSEnvironment::~OFSEnvironment()
+{
+}
+
+void OFSEnvironment::init()
+{
+	MutexLocker obtain_lock(initm);
+	initialized = true;
+	OFSEnvironment &env = Instance();
+	// config file
+	OFSConf &ofsconf = OFSConf::Instance();
+	env.remotePath = ofsconf.GetRemotePath();
+	env.cachePath = ofsconf.GetBackingTreePath();
+	// TODO: command line (via parameter)
+	// TODO: cache-and remote path have to be custom for each share
+}
+
+string OFSEnvironment::getRemotePath()
+{
+	return remotePath;
+}
+
+string OFSEnvironment::getCachePath()
+{
+	return cachePath;
 }

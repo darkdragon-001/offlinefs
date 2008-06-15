@@ -34,6 +34,7 @@
 #include "ofsfile.h"
 #include "filesystemstatusmanager.h"
 #include "backingtreemanager.h"
+#include "ofsenvironment.h"
 
 using namespace std;
 
@@ -47,9 +48,7 @@ ofs_fuse::~ofs_fuse()
 {
 }
 
-ofs_fuse::ofs_fuse () : cntnr (0),
-		basepath ("/usr") { 
-        // all we're doing is initialize the member variables
+ofs_fuse::ofs_fuse () { 
 }
 
 

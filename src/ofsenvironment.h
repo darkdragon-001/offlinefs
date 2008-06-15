@@ -17,55 +17,55 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "filestatusmanager.h"
-#include "filesystemstatusmanager.h"
-#include "backingtreemanager.h"
-#include "ofsconf.h"
-#include <iostream>
+#ifndef OFSENVIRONMENT_H
+#define OFSENVIRONMENT_H
+#include "mutexlocker.h"
+#include <string>
+#include <list>
 using namespace std;
 
-#include "ofsenvironment.h"
-
-std::auto_ptr<Filestatusmanager> Filestatusmanager::theFilestatusmanagerInstance;
-Mutex Filestatusmanager::m;
-Filestatusmanager::Filestatusmanager(){}
-Filestatusmanager::~Filestatusmanager(){}
-Filestatusmanager& Filestatusmanager::Instance()
-{
-    MutexLocker obtain_lock(m);
-    if (theFilestatusmanagerInstance.get() == 0)
-      theFilestatusmanagerInstance.reset(new Filestatusmanager);
-    return *theFilestatusmanagerInstance;
-}
-
 /**
- * Create a File object, which holds all information about the requested file
- * @param Path The file path, relative to the current ofs mountpoint
- * @return Information about the requested file
+ * @author Tobias Jaehnel <tjaehnel@gmail.com>
+ *
+ * Manages configuration values for the current process. Those are determined
+ * - from configuration file via OFSConf
+ * - from the command line, which overrides the config file
  */
-File Filestatusmanager::give_me_file(string Path)
-{
-	bool offline;
-	bool available;
-	string Remote_Path;
-	string Cache_Path;
-	FilesystemStatusManager fssm = FilesystemStatusManager::Instance();
-	BackingtreeManager btm = BackingtreeManager::Instance();
-	
-	Backingtree *back = btm.Search_Backingtree_via_Path(Path);
-	
-	offline = (back != NULL);
-	available = fssm.isAvailable();
-	if(offline) {
-		Cache_Path = back->get_cache_path(Path);
-	} else {
-		Cache_Path = "";
-	}
-	if(available) {
-		Remote_Path = fssm.getRemote(Path);
-	} else {
-		Remote_Path = "";
-	}
-	
-	return File(offline, available, Path, Remote_Path, Cache_Path);
-}
+class OFSEnvironment{
+public:
+    /**
+     * Get singleton instance
+     * @return singleton instance
+     */
+    static OFSEnvironment& Instance();
+
+    ~OFSEnvironment();
+    /**
+     * Initialize the Environment
+     * load data from config file
+     * and parse commandline
+     * @param args Commandline parameters
+     */
+    static void init();
+    /**
+     * Get the path, the remote share is mounted to
+     * @return remote share path
+     */
+    string getRemotePath();
+    /**
+     * Get the root of the backingtree path
+     * @return backingtree path
+     */
+    string getCachePath();
+protected:
+    OFSEnvironment();
+private:
+    static std::auto_ptr<OFSEnvironment> theOFSEnvironmentInstance;
+    static Mutex m;
+    static Mutex initm;
+    string remotePath;
+    string cachePath;
+    static bool initialized;
+};
+
+#endif

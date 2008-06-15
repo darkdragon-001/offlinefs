@@ -1,8 +1,8 @@
 <?xml version = '1.0'?>
 <kdevelop>
   <general>
-    <author></author>
-    <email></email>
+    <author/>
+    <email/>
     <version>0.1</version>
     <projectmanagement>KDevAutoProject</projectmanagement>
     <primarylanguage>C++</primarylanguage>
@@ -15,8 +15,8 @@
     <projectname>ofs</projectname>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description></description>
-    <defaultencoding></defaultencoding>
+    <description/>
+    <defaultencoding/>
   </general>
   <kdevautoproject>
     <general>
@@ -24,16 +24,22 @@
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
-      <mainprogram/>
+      <mainprogram>/home/tobias/ofsproject/ofs/debug</mainprogram>
       <terminal>true</terminal>
       <runarguments>
-        <ofs>~/ofs_mountpoint</ofs>
+        <ofs>~/ofs_mountpoint ~/ofsproject ~/ofs_cache</ofs>
+        <mounthelper/>
+        <ofsmount/>
       </runarguments>
       <debugarguments>
-        <ofs>~/ofs_mountpoint</ofs>
+        <ofs>~/ofs_mountpoint ~/ofsproject ~/ofs_cache</ofs>
+        <mounthelper/>
+        <ofsmount/>
       </debugarguments>
       <cwd>
         <ofs>.</ofs>
+        <mounthelper>/home/tobias/ofsproject/ofs/debug/./src</mounthelper>
+        <ofsmount>/home/frank/IT-Projekt/debug/./</ofsmount>
       </cwd>
       <programargs/>
       <globaldebugarguments/>
@@ -54,7 +60,7 @@
       </optimized>
       <debug>
         <configargs>--enable-debug=full</configargs>
-        <builddir/>
+        <builddir>debug</builddir>
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevg77options</f77compiler>
@@ -63,8 +69,8 @@
         <topsourcedir/>
         <cppflags/>
         <ldflags/>
-        <ccompilerbinary/>
-        <cxxcompilerbinary/>
+        <ccompilerbinary>gcc</ccompilerbinary>
+        <cxxcompilerbinary>g++</cxxcompilerbinary>
         <f77compilerbinary/>
         <cflags/>
         <f77flags/>
@@ -153,7 +159,7 @@
     <projectdoc>
       <docsystem>Doxygen Documentation Collection</docsystem>
       <docurl>ofs.tag</docurl>
-      <usermanualurl></usermanualurl>
+      <usermanualurl/>
     </projectdoc>
   </kdevdocumentation>
   <substmap>
@@ -205,7 +211,7 @@
       <includePaths>.;</includePaths>
     </codecompletion>
     <creategettersetter>
-      <prefixGet></prefixGet>
+      <prefixGet/>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -226,11 +232,11 @@
   </cppsupportpart>
   <kdevdebugger>
     <general>
-      <gdbpath></gdbpath>
-      <dbgshell></dbgshell>
-      <configGdbScript></configGdbScript>
-      <runShellScript></runShellScript>
-      <runGdbScript></runGdbScript>
+      <gdbpath/>
+      <dbgshell/>
+      <configGdbScript/>
+      <runShellScript/>
+      <runGdbScript/>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>

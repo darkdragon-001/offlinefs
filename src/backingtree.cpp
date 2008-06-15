@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include "backingtree.h"
 
-Backingtree::Backingtree(string rPath)
+Backingtree::Backingtree(string rPath, string cPath)
 {
-this->relative_path=rPath;
-
+	this->relative_path=rPath;
+	this->cache_path=cPath;
 }
 
 
@@ -32,25 +32,25 @@ Backingtree::~Backingtree()
 
 const bool Backingtree::operator==(Backingtree const b)
 {
-if (this->relative_path==b.relative_path){
-return true;
+	if (this->relative_path==b.relative_path)
+		return true;
+	else
+		return false;
 }
-else
-return false;
-}
 
-
-
-
-const string Backingtree::get_relative_path()
+const string Backingtree::get_cache_path()
 {
-return this->relative_path;
+	return this->cache_path;
 }
 
+const string Backingtree::get_relative_path() {
+	return relative_path;
+}
 
 bool Backingtree::is_in_backingtree(string path)
 {
-	if(path.length() >= relative_path.length() && path.substr(0,relative_path.length()) == relative_path) {
+	if(path.length() >= relative_path.length() &&
+		path.substr(0,relative_path.length()) == relative_path) {
 		return true;
 	}
 	return false;
@@ -59,5 +59,24 @@ bool Backingtree::is_in_backingtree(string path)
 
 bool Backingtree::backingtree_is_in(string path)
 {
-    /// @todo implement me
+	if(relative_path.length() >= path.length() &&
+		relative_path.substr(0,path.length()) == path) {
+		return true;
+	}
+	return false;
+}
+
+string Backingtree::get_cache_path(string path)
+{
+	string abspath;
+	if(!is_in_backingtree(path)) {
+		return NULL;
+	}
+	if(path.length() == get_relative_path().length())
+		abspath =  get_cache_path();
+	else 
+		abspath = get_cache_path()+"/"
+			+path.substr(relative_path.length(),
+				path.length()-relative_path.length());
+	return abspath;
 }

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "backingtreemanager.h"
-
+#include "ofsenvironment.h"
 
 std::auto_ptr<BackingtreeManager> BackingtreeManager::theBackingtreeManagerInstance;
 Mutex BackingtreeManager::m;
@@ -36,7 +36,8 @@ void BackingtreeManager::register_Backingtree(string relative_Path){
 	if(!Is_in_Backingtree(relative_Path)) {
 		// if there are backingtrees below this one, remove them,
 		// because the new one is the new root
-		list<Backingtree> subtrees = getBackingtreesBelow(relative_Path);
+		list<Backingtree> subtrees =
+			getBackingtreesBelow(relative_Path);
 		for (list<Backingtree>::iterator it = subtrees.begin();
         		it != subtrees.end(); ++it) {
 			// I do not call the remove_Backingtree method here
@@ -44,31 +45,30 @@ void BackingtreeManager::register_Backingtree(string relative_Path){
 			backinglist.remove(*it);
 		}
 		// add the new backingtree and make list persistent
-		backinglist.push_back(Backingtree(relative_Path));
+		backinglist.push_back(Backingtree(
+			relative_Path,get_Cache_Path()+relative_Path));
 		persist();
  	}
 }
 
 void BackingtreeManager::remove_Backingtree(string Relative_Path) {
-	backinglist.remove(Relative_Path);
+	for (list<Backingtree>::iterator it = backinglist.begin();
+        		it != backinglist.end(); ++it) {
+		if(it->get_relative_path() == Relative_Path)
+		{
+			backinglist.erase(it);
+			break;
+		}
+	}
 	persist();
 }
 
-string BackingtreeManager::get_Remote_Path()
-{
-return Remote_Path;
-}
 bool BackingtreeManager::Is_in_Backingtree(string path){
- for (list<Backingtree>::iterator it = backinglist.begin();
-        it != backinglist.end(); ++it) {
-	if(it->is_in_backingtree(path))
-		return true;
-   }
-   return false;
+	return Search_Backingtree_via_Path(path) != NULL;
 }
 string BackingtreeManager::get_Cache_Path()
 {
-return Cache_path;
+	return OFSEnvironment::Instance().getCachePath();
 }
 
 void BackingtreeManager::persist() const
@@ -93,4 +93,14 @@ list<Backingtree> BackingtreeManager::getBackingtreesBelow(string path)
 			trees.push_back(*it);
 	}
 	return trees;
+}
+
+Backingtree *BackingtreeManager::Search_Backingtree_via_Path(string path)
+{
+	for (list<Backingtree>::iterator it = backinglist.begin();
+		it != backinglist.end(); ++it) {
+		if(it->is_in_backingtree(path))
+			return &(*it); // pull out pointer to element
+	}
+	return NULL;
 }
