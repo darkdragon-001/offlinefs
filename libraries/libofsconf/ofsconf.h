@@ -21,8 +21,9 @@
 #define OFSCONF_H
 
 #include <string>
-#include <confuse.h>
-#include <mutexlocker.h>
+
+class Mutex;
+struct cfg_t;
 
 using namespace std;
 
@@ -32,30 +33,66 @@ using namespace std;
 class OFSConf
 {
 protected:
+    /**
+     * Protected default constructor of OFSConf only for serialization
+     * @remark Use Instance() for instantiating an object.
+     */
     OFSConf();
 
 public:
+    /**
+     * Destructor of OFSConf, frees the Confuse objects.
+     */
     ~OFSConf();
 
 public:
+    /**
+     * Returns an automatic pointer to the one and only OFSConf object.<br>
+     * Creates an instance of the objects at the first call (singleton pattern)
+     * @return Pointer to the instance of the OFSConf object
+     */
     static OFSConf& Instance();
 
+    /**
+     * Initializes the Confuse parser and invokes it.
+     * @return true if the file was parsed successfully<br>
+     *         false if errors occured whilst parsing
+     */
     bool ParseFile();
 
-    string GetRemoteShareName(const int nIndex);
+//    string GetRemoteShareName(const int nIndex);
+    /**
+     * Returns the remote path that has been found in the configuration file.
+     * @return Path of the Remote
+     */
     string GetRemotePath();
+    /**
+     * Returns the backing tree path that has been found in the configuration file.
+     * @return Path of the backing tree
+     */
     string GetBackingTreePath();
 
 protected:
 
+    /**
+     * Returns true if the file has already been parsed successfully and false otherwise.
+     */
     bool m_bFileParsed;
+    /**
+     * Pointer to data structure, Confuse uses for parsing.
+     */
     cfg_t* m_pCFG;
 
-    //! Automatischer Zeiger auf das einzige OFSConf-Objekt.<br>
-    //! (Wird nach dem Singleton-Pattern verwendet.)
+    /**
+     * Automatic pointer to to the one and only OFSConf object
+     * (Used according to singleton pattern.)
+     */
     static std::auto_ptr<OFSConf> theOFSConfInstance;
 
 private:
+    /**
+     * Static mutex object that guarantees that there is only one instance.
+     */
     static Mutex m_mutex;
     string remotePath;
     string backingPath;

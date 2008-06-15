@@ -29,7 +29,7 @@
 #define BACKING_TREE_PATH_DEFAULT "/var/ofs/backing"
 #define MOUNT_REMOTE_PATHS_TO_DEFAULT "/var/ofs/remote"
 
-// Initialisiert die Klassenattribute.
+// Initializes the class attributes.
 std::auto_ptr<OFSConf> OFSConf::theOFSConfInstance;
 Mutex OFSConf::m_mutex;
 
@@ -44,7 +44,7 @@ OFSConf::OFSConf()
     // set default config values
     remotePath = MOUNT_REMOTE_PATHS_TO_DEFAULT;
     backingPath = BACKING_TREE_PATH_DEFAULT;
-    
+
     ParseFile();
 }
 
@@ -54,16 +54,6 @@ OFSConf::~OFSConf()
         cfg_free(m_pCFG);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//
-//! Gibt einen autom. Zeiger auf das einzige OFSConf-Objekt zur�ck.<p>
-//! Beim ersten Aufruf wird eine Instanz des Objekts erzeugt.<p>
-//! Es wird nur ein Objekt erzeugt, d.h. bei einem erneuten Aufruf,
-//! wird ein Zeiger auf die vorhandene Instanz zur�ckgegeben.
-//!
-//! \result Zeiger auf die vorhandene Instanz
-//
-//////////////////////////////////////////////////////////////////////////////
 OFSConf& OFSConf::Instance()
 {
     MutexLocker obtainLock(m_mutex);
@@ -76,29 +66,29 @@ OFSConf& OFSConf::Instance()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// OEFFENTLICHE METHODEN
+// PUBLIC METHODS
 //////////////////////////////////////////////////////////////////////////////
 
 bool OFSConf::ParseFile()
 {
     if (m_bFileParsed)
     {
-        // Datei ist bereits geparst.
+        // File is already parsed.
         return true;
     }
 
     cfg_opt_t shareOpts[] =
     {
-        // Parst innerhalb der Gruppe.
+        // Parses within the group.
         CFG_STR(BACKING_TREE_PATH_VARNAME, BACKING_TREE_PATH_DEFAULT, CFGF_NONE),
         CFG_STR(MOUNT_REMOTE_PATHS_TO_VARNAME, MOUNT_REMOTE_PATHS_TO_DEFAULT, CFGF_NONE),
         CFG_END()
     };
 
-    // Initialisiert den Parser.
+    // Initializes the parser.
     m_pCFG = cfg_init(shareOpts, CFGF_NONE);
 
-    // Parst die Datei.
+    // Parses the file.
     if (cfg_parse(m_pCFG, "/etc/ofs.conf") == CFG_PARSE_ERROR)
         return false;
 
