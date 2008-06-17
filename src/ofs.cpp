@@ -35,10 +35,6 @@ int main(int argc, char *argv[])
 {
 	ofs_fuse my_ofs;
 	cout << "Starting" << endl;
-	char *args[3];
-	args[0] = argv[0];
-	args[1] = argv[1];
-	args[2] = NULL;
 	OFSEnvironment::init();
 //
 return my_ofs.main(2, argv, NULL, &my_ofs);
