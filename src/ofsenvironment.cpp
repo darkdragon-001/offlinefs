@@ -54,6 +54,7 @@ void OFSEnvironment::init()
 	OFSConf &ofsconf = OFSConf::Instance();
 	env.remotePath = ofsconf.GetRemotePath();
 	env.cachePath = ofsconf.GetBackingTreePath();
+	env.listendevices = ofsconf.GetListenDevices();
 	// TODO: command line (via parameter)
 	// TODO: cache-and remote path have to be custom for each share
 }
@@ -66,4 +67,9 @@ string OFSEnvironment::getRemotePath()
 string OFSEnvironment::getCachePath()
 {
 	return cachePath;
+}
+
+list<string> OFSEnvironment::getListenDevices()
+{
+	return listendevices;
 }

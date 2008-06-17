@@ -25,9 +25,11 @@
 #define BACKING_TREE_PATH_VARNAME "backingTreePath"
 #define MOUNT_REMOTE_PATHS_TO_VARNAME "mountRemotePathsTo"
 #define REMOTE_SHARE_VARNAME "remoteShare"
+#define LISTEN_DEVICES_VARNAME "listen"
 
 #define BACKING_TREE_PATH_DEFAULT "/var/ofs/backing"
 #define MOUNT_REMOTE_PATHS_TO_DEFAULT "/var/ofs/remote"
+#define LISTEN_DEVICES_DEFAULT "{eth0}"
 
 // Initializes the class attributes.
 std::auto_ptr<OFSConf> OFSConf::theOFSConfInstance;
@@ -44,7 +46,7 @@ OFSConf::OFSConf()
     // set default config values
     remotePath = MOUNT_REMOTE_PATHS_TO_DEFAULT;
     backingPath = BACKING_TREE_PATH_DEFAULT;
-
+    listendevices.push_back("eth0"); // TODO: do not hardcode
     ParseFile();
 }
 
@@ -80,8 +82,12 @@ bool OFSConf::ParseFile()
     cfg_opt_t shareOpts[] =
     {
         // Parses within the group.
-        CFG_STR(BACKING_TREE_PATH_VARNAME, BACKING_TREE_PATH_DEFAULT, CFGF_NONE),
-        CFG_STR(MOUNT_REMOTE_PATHS_TO_VARNAME, MOUNT_REMOTE_PATHS_TO_DEFAULT, CFGF_NONE),
+        CFG_STR(BACKING_TREE_PATH_VARNAME,
+		BACKING_TREE_PATH_DEFAULT, CFGF_NONE),
+        CFG_STR(MOUNT_REMOTE_PATHS_TO_VARNAME,
+		MOUNT_REMOTE_PATHS_TO_DEFAULT, CFGF_NONE),
+	CFG_STR(LISTEN_DEVICES_VARNAME,
+		LISTEN_DEVICES_DEFAULT, CFGF_NONE),
         CFG_END()
     };
 
@@ -93,8 +99,16 @@ bool OFSConf::ParseFile()
         return false;
 
     m_bFileParsed = true;
+    // remote path
     remotePath = cfg_getstr(m_pCFG, MOUNT_REMOTE_PATHS_TO_VARNAME);
+    // backing path
     backingPath = cfg_getstr(m_pCFG, BACKING_TREE_PATH_VARNAME);
+    // listening devices
+    listendevices.clear();
+    for(int i=0; i < cfg_size(m_pCFG, LISTEN_DEVICES_VARNAME); i++) {
+        listendevices.push_back(
+            cfg_getnstr(m_pCFG, LISTEN_DEVICES_VARNAME, i));
+    }
 
     return true;
 }
@@ -107,4 +121,9 @@ string OFSConf::GetRemotePath()
 string OFSConf::GetBackingTreePath()
 {
 	return backingPath;
+}
+
+list<string> OFSConf::GetListenDevices()
+{
+	return listendevices;
 }

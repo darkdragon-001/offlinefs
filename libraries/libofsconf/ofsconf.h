@@ -21,6 +21,7 @@
 #define OFSCONF_H
 
 #include <string>
+#include <list>
 
 class Mutex;
 struct cfg_t;
@@ -67,15 +68,22 @@ public:
      */
     string GetRemotePath();
     /**
-     * Returns the backing tree path that has been found in the configuration file.
+     * Returns the backing tree path that has been found in the
+     * configuration file.
      * @return Path of the backing tree
      */
     string GetBackingTreePath();
+    /**
+     * Return the list of devices the system should listen for plug/unplug
+     * @return list of devices as strings
+     */
+    list<string> GetListenDevices();
 
 protected:
 
     /**
-     * Returns true if the file has already been parsed successfully and false otherwise.
+     * Returns true if the file has already been parsed
+     * successfully and false otherwise.
      */
     bool m_bFileParsed;
     /**
@@ -96,6 +104,7 @@ private:
     static Mutex m_mutex;
     string remotePath;
     string backingPath;
+    list<string> listendevices;
 };
 
 #endif

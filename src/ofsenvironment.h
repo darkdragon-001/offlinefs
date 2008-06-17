@@ -57,6 +57,11 @@ public:
      * @return backingtree path
      */
     string getCachePath();
+    /**
+     * Return the list of devices the system should listen for plug/unplug
+     * @return list of devices as strings
+     */
+    list<string> getListenDevices();
 protected:
     OFSEnvironment();
 private:
@@ -65,6 +70,8 @@ private:
     static Mutex initm;
     string remotePath;
     string cachePath;
+protected:
+    list<string> listendevices;
     static bool initialized;
 };
 
