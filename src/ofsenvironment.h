@@ -20,6 +20,7 @@
 #ifndef OFSENVIRONMENT_H
 #define OFSENVIRONMENT_H
 #include "mutexlocker.h"
+#include "ofsexception.h"
 #include <string>
 #include <list>
 using namespace std;
@@ -40,28 +41,58 @@ public:
     static OFSEnvironment& Instance();
 
     ~OFSEnvironment();
+
     /**
      * Initialize the Environment
      * load data from config file
      * and parse commandline
-     * @param args Commandline parameters
+     * @param argc 
+     * @param argv[] 
+     * @return true of command line is OK, false other
      */
-    static void init();
+    static void init(int argc, char *argv[]) throw(OFSException);
     /**
      * Get the path, the remote share is mounted to
      * @return remote share path
      */
-    string getRemotePath();
+    inline string getRemotePath() { return remotePath; };
     /**
      * Get the root of the backingtree path
      * @return backingtree path
      */
-    string getCachePath();
+    inline string getCachePath() { return cachePath; };
+    /**
+     * Get the path this filesystem is mounted to
+     * @return mountpoint
+     */
+    inline string getMountPoint() { return mountPoint; };
+    /**
+     * Get the hashed URL of the remote share as unique identifier
+     * used in mountpoint and backing path for example
+     * @return share ID
+     */
+    inline string getShareID() { return shareID; };
+    /**
+     * Get the URL of the share
+     * @return share URL
+     */
+    inline string getShareURL() { return shareURL; };
+    /**
+     * Get the complete path of the called ofs binary
+     * @return path of binary
+     */
+    inline string getBinaryPath() { return binarypath; };
     /**
      * Return the list of devices the system should listen for plug/unplug
      * @return list of devices as strings
      */
     list<string> getListenDevices();
+    /**
+     * Create the usage string
+     * @param executable the called executable
+     * @return the usage string
+     */
+    static string getUsageString(string executable="ofs");
 protected:
     OFSEnvironment();
 private:
@@ -70,6 +101,10 @@ private:
     static Mutex initm;
     string remotePath;
     string cachePath;
+    string mountPoint;
+    string shareID;
+    string shareURL;
+    string binarypath;
 protected:
     list<string> listendevices;
     static bool initialized;

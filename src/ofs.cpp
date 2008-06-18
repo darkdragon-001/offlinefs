@@ -28,6 +28,7 @@
 #include "backingtreepersistence.h"
 #include "filesystemstatusmanager.h"
 #include "ofsenvironment.h"
+#include <string>
 
 using namespace std;
 
@@ -35,9 +36,22 @@ int main(int argc, char *argv[])
 {
 	ofs_fuse my_ofs;
 	cout << "Starting" << endl;
-	OFSEnvironment::init();
+	try {
+		OFSEnvironment::init(argc, argv);
+	} catch (OFSException e) {
+		cout << OFSEnvironment::getUsageString();
+		return 0;
+	}
+	OFSEnvironment &env = OFSEnvironment::Instance();
+	char *args[2];
+	args[0] = new char[env.getBinaryPath().length()+1];
+	strncpy(args[0], env.getBinaryPath().c_str(),
+		env.getBinaryPath().length()+1);
+	args[1] = new char[env.getMountPoint().length()+1];
+	strncpy(args[1], env.getMountPoint().c_str(),
+		env.getMountPoint().length()+1);
 //
-return my_ofs.main(2, argv, NULL, &my_ofs);
+return my_ofs.main(2, args, NULL, &my_ofs);
 
   //return EXIT_SUCCESS;
 }

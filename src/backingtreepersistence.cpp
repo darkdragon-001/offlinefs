@@ -44,7 +44,8 @@ BackingtreePersistence& BackingtreePersistence::Instance()
 cfg_opt_t *BackingtreePersistence::init_parser()
 {
 	cfg_opt_t *opts = new cfg_opt_t[2];
-	opts[0] = (cfg_opt_t)CFG_STR_LIST(CONFIGKEY_BACKINGTREES, "{}", CFGF_NONE);
+	opts[0] = (cfg_opt_t)CFG_STR_LIST(
+		CONFIGKEY_BACKINGTREES, "{}", CFGF_NONE);
 	opts[1] = (cfg_opt_t)CFG_END();
 	return opts;
 }
