@@ -30,6 +30,8 @@
 #include <time.h>
 #include <errno.h>
 #include <iostream>
+#include <string>
+#include <list>
 using namespace std;
 
 #include "filesystemstatusmanager.h"
@@ -84,9 +86,12 @@ void *FilesystemStatusManager::DbusListenerRun(void *)
 {
 	DBusConnection *bus;
 	DBusError error;
-	DBusMessage *message;
+	DBusMessage *msg;
 	string filter_string;
-
+        list<string> interfacelist;
+        const char* device_obj;
+        OFSEnvironment &ofeitp = OFSEnvironment::Instance();
+	interfacelist=ofeitp.getListenDevices();
 	dbus_error_init (&error);
 	bus = dbus_bus_get (DBUS_BUS_SYSTEM, &error);
 	if (!bus) {
@@ -98,34 +103,32 @@ void *FilesystemStatusManager::DbusListenerRun(void *)
 	filter_string=string("type='signal',path=/org/freedesktop/NetworkManager,interface=org.freedesktop.NetworkManager,member=DeviceNoLongerActive");
 	
 	dbus_bus_add_match (bus, filter_string.c_str(), NULL);
-/////////////////////////////////////////////////////
-	dbus_connection_read_write(bus, -1);      
-	message = dbus_connection_pop_message(bus);
-	dbus_message_unref(message);
-   	while (1) {
+	while (1) {
+		dbus_error_init (&error);
+        	dbus_connection_read_write(bus, -1);
+        	msg = dbus_connection_pop_message(bus);
 
-      		// non blocking read of the next available message
-	      	dbus_connection_read_write(bus, -1);
-	      	message = dbus_connection_pop_message(bus);
-
-	      	// loop again if we haven't read a message
-	      	if (NULL == message) { 
-        		sleep(1);
+      
+      		if (NULL == msg) { 
+         		sleep(1);
          		continue;
-	      	} else {
-			const char*  Msg_Path;
-			char* senderid;
-			Msg_Path=dbus_message_get_path(message);
-			dbus_message_get_args (message, &error, DBUS_TYPE_STRING, &senderid,DBUS_TYPE_INVALID);
-			FilesystemStatusManager::Instance().available=false;
+      		}
+		else{
+			if(dbus_message_is_signal(msg,"org.freedesktop.NetworkManager","DeviceNoLongerActive")){
+				dbus_message_get_args (msg, &error,DBUS_TYPE_OBJECT_PATH, &device_obj,DBUS_TYPE_INVALID);
+                                for (list<string>::iterator it=interfacelist.begin();it!=interfacelist.end();++it){
+				string Netpath= "/org/freedesktop/NetworkManager/Devices/"+ (*it);
+                                if(Netpath==device_obj){
+					FilesystemStatusManager::Instance().available=false;
+				}
+}
+     
+				
+			
 		}
-
-	    	DBusError error;
-
-    		dbus_error_init (&error);
-
-	      	dbus_message_unref(message);
-	}
+}
+    dbus_message_unref(msg);
+   }
 	pthread_exit(NULL);
 	return NULL;
 }
