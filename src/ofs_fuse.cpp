@@ -642,7 +642,7 @@ int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
 int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
                      struct fuse_file_info *fi)
 {
-	int res;
+	int res=0;
 	(void) path;
 	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)

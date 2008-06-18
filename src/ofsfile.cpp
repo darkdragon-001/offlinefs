@@ -282,7 +282,7 @@ int OFSFile::op_flush()
  */
 int OFSFile::op_fsync(int isdatasync)
 {
-	int res;
+/*	int res;
 #ifndef HAVE_FDATASYNC
 	(void) isdatasync;
 #else
@@ -293,6 +293,7 @@ int OFSFile::op_fsync(int isdatasync)
 		res = fsync(fd_cache);
 	if (res == -1)
 		return -errno;
+	return 0;*/
 	return 0;
 }
 
@@ -461,7 +462,7 @@ int OFSFile::op_opendir()
  */
 int OFSFile::op_read(char *buf, size_t size, off_t offset)
 {
-	int res;
+	int res=0;
 	if(fd_remote)
 		res = pread(fd_remote, buf, size, offset);
 	else
@@ -551,8 +552,6 @@ int OFSFile::op_readdir(void *buf, fuse_fill_dir_t filler, off_t offset)
 
 int OFSFile::op_release()
 {
-	int res;
-	
 	if(!fd_remote && !fd_cache) {
 		errno = EBADF;
 		return -errno;
@@ -561,7 +560,7 @@ int OFSFile::op_release()
 		if(close(fd_remote) < 0)
 			return -errno;
 	if(fd_cache)
-		if(close(fd_remote) < 0)
+		if(close(fd_cache) < 0)
 			return -errno;
 
 	fd_remote = 0;
