@@ -30,79 +30,114 @@
 #include <assert.h>
 #include <ofshash.h>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <errno.h>
 using namespace std;
 
 #define MAX_PATH 1024
 
 int main(int argc, char *argv[])
 {
+    assert(argc > 2);
     // Ermittelt die Optionen aus der Kommandozeile.
     char szOptions[10];
     char* pszOptions = szOptions;
-//    my_options(argc - 2, &argv[2], &pszOptions);
-    my_options(argc, argv, &pszOptions);
-
-    // Oeffnet die Konfigurationsdatei.
-    OFSConf& conf = OFSConf::Instance();
-    conf.ParseFile();
-
+    string shareurl = argv[1];
+    string remotefstype;
+    string shareremote;
+    string remotemountpoint;
+    string ofsmountpoint = argv[2];
     //////////////////////////////////////////////////////////////////////////
     // MOUNT
     //////////////////////////////////////////////////////////////////////////
 
-    char* pMountArgumente[4];
-    char szDateisystem[] = "-t";
-    pMountArgumente[0] = szDateisystem;
-    pMountArgumente[1] = new char[MAX_PATH + 1];
-    pMountArgumente[2] = new char[MAX_PATH + 1];
-    pMountArgumente[3] = new char[MAX_PATH + 1];
+    char* pMountArgumente[8];
+    pMountArgumente[0] - NULL;
+    pMountArgumente[1] = "-t";
+    pMountArgumente[2] = NULL;
+    pMountArgumente[3] = NULL;
+    pMountArgumente[4] = NULL;
+    pMountArgumente[5] = "-o";
+    pMountArgumente[6] = NULL;
+    pMountArgumente[7] = NULL; // terminator
 
-    // Ermittelt die Backing-Tree- und Remote-Pfade.
-    // ZU ERLEDIGEN: Muß noch verhasht werden.
-    cout << argv[0] << endl;
-    char* pchDoppelPunktPos = strchr(argv[0], ':');
+    // Ermittelt die Remote-Pfade.
+    //cout << argv[0] << endl;
+    char* pchDoppelPunktPos = strchr(argv[1], ':');
     assert(pchDoppelPunktPos != NULL);
-    int nDoppelPunktIndex = int (pchDoppelPunktPos - argv[0]);
+    int nDoppelPunktIndex = int (pchDoppelPunktPos - argv[1]);
+
+    remotefstype = shareurl.substr(0,nDoppelPunktIndex);
+    if(remotefstype == "smb")
+        shareremote = shareurl.substr(nDoppelPunktIndex+1);
+    else
+        shareremote = shareurl.substr(nDoppelPunktIndex+3);
 
     // Legt das Dateisystem fest.
-    strncpy(pMountArgumente[1], argv[0], nDoppelPunktIndex);
+    pMountArgumente[2] = (char*)remotefstype.c_str();
+
+    // Oeffnet die Konfigurationsdatei.
+    OFSConf& conf = OFSConf::Instance();
+    //conf.ParseFile(); //obsolete
 
     // Legt die Server-Share fest.
-    strncpy(pMountArgumente[2], &((argv[0])[nDoppelPunktIndex + 3]), MAX_PATH);
-    strncpy(pMountArgumente[3], conf.GetRemotePath().c_str(), MAX_PATH);
+    pMountArgumente[3] = (char*)shareremote.c_str();
+    remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
+    pMountArgumente[4] = (char*)remotemountpoint.c_str();
 
+    //    my_options(argc - 2, &argv[2], &pszOptions);
+    my_options(argc, argv, &pszOptions);
+    pMountArgumente[6] = pszOptions;
 //    pArgumente[2] = szOptions;
 
-    string strHash = ofs_hash(pMountArgumente[2]);
-    strcat(pMountArgumente[3], "/");
-    strcat(pMountArgumente[3], strHash.c_str());
-
-    cout << pMountArgumente[0] << endl;
-    cout << pMountArgumente[1] << endl;
-    cout << pMountArgumente[2] << endl;
-    cout << pMountArgumente[3] << endl;
-
     // Mountet die Share, die vom Benutzer übergeben wurde.
-    return execv("mount", pMountArgumente);
+    int childpid = fork();
+    int status;
+    if(childpid == 0) {
+/*    cout << endl << "mount" << " ";
+    cout << pMountArgumente[1] << " ";
+    cout << pMountArgumente[2] << " ";
+    cout << pMountArgumente[3] << " ";
+    cout << pMountArgumente[4] << " ";
+    cout << pMountArgumente[5] << " ";
+    cout << pMountArgumente[6] << " ";
+    cout << endl;*/
+       mkdir(pMountArgumente[4], 0777);
+       execvp("mount", pMountArgumente);
+       return errno;
+    }
+    if(childpid < 0) {
+        perror(strerror(errno));
+        return -errno;
+    }
+    //waitpid(childpid, &status, 0);
+    int childpid2 = wait(&status);
+//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
+    int exitstatus = WEXITSTATUS(status);
+    if(WIFEXITED(status) && exitstatus) {
+       errno = exitstatus;
+       perror(strerror(errno));
+       exit(exitstatus);
+    }
 
     //////////////////////////////////////////////////////////////////////////
     // OFS
     //////////////////////////////////////////////////////////////////////////
 
-    char* pArgumente[3];
-    pArgumente[0] = new char[MAX_PATH + 1];
-    pArgumente[1] = new char[MAX_PATH + 1];
+    char* pArgumente[4];
+    pArgumente[0] = "ofs";
+    pArgumente[1] = (char *)ofsmountpoint.c_str();
+    pArgumente[2] = (char *)shareurl.c_str();
+    pArgumente[3] = NULL; // terminator
 
-    // Ermittelt die Backing-Tree- und Remote-Pfade.
-    // ZU ERLEDIGEN: Muß noch verhasht werden.
-    strncpy(pArgumente[0], conf.GetBackingTreePath().c_str(), MAX_PATH);
-    strncpy(pArgumente[1], conf.GetRemotePath().c_str(), MAX_PATH);
-
-    pArgumente[2] = szOptions;
-
-    cout << pArgumente[0] << endl;
     cout << pArgumente[1] << endl;
+    cout << pArgumente[2] << endl;
 
     // Ruft das Offline-Dateisystem auf.
-    return execv("ofs", pArgumente);
+    execvp("ofs", pArgumente);
+    perror(strerror(errno));
+    return -errno;
+    //return 0;
 }

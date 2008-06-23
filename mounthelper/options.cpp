@@ -44,7 +44,8 @@ int my_options(int argc, char* argv[], char** ppszOptions)
             print_usage (stdout, 0);
         case 'o': /* -o or --options */
             optarg;
-            strncpy(*ppszOptions, optarg, strlen(optarg));
+            *ppszOptions = new char[strlen(optarg)+1];
+            strncpy(*ppszOptions, optarg, strlen(optarg)+1);
             break;
         case 'V': /* -V or --version */
             /* User has requested version information. Print it to standard

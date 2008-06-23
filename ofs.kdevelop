@@ -20,20 +20,26 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>src/ofs</activetarget>
+      <activetarget>mounthelper/ofsmount</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
-      <mainprogram/>
+      <mainprogram>/home/tobias/ofsproject/ofs/debug</mainprogram>
       <terminal>true</terminal>
       <runarguments>
-        <ofs>~/ofs_mountpoint ~/ofsproject ~/ofs_cache</ofs>
+        <ofs>~/ofs_mountpoint smb://somewhere --shareid=someshare</ofs>
+        <mounthelper/>
+        <ofsmount>smb://foo.bar/bla</ofsmount>
       </runarguments>
       <debugarguments>
-        <ofs>~/ofs_mountpoint ~/ofsproject ~/ofs_cache</ofs>
+        <ofs>~/ofs_mountpoint smb://somewhere --shareid=someshare</ofs>
+        <mounthelper/>
+        <ofsmount>smb://foo.bar/bla</ofsmount>
       </debugarguments>
       <cwd>
         <ofs>.</ofs>
+        <mounthelper>/home/tobias/ofsproject/ofs/debug/./src</mounthelper>
+        <ofsmount>/home/frank/IT-Projekt/debug/./</ofsmount>
       </cwd>
       <programargs/>
       <globaldebugarguments/>
@@ -54,7 +60,7 @@
       </optimized>
       <debug>
         <configargs>--enable-debug=full</configargs>
-        <builddir/>
+        <builddir>debug</builddir>
         <ccompiler>kdevgccoptions</ccompiler>
         <cxxcompiler>kdevgppoptions</cxxcompiler>
         <f77compiler>kdevg77options</f77compiler>
@@ -63,8 +69,8 @@
         <topsourcedir/>
         <cppflags/>
         <ldflags/>
-        <ccompilerbinary/>
-        <cxxcompilerbinary/>
+        <ccompilerbinary>gcc</ccompilerbinary>
+        <cxxcompilerbinary>g++</cxxcompilerbinary>
         <f77compilerbinary/>
         <cflags/>
         <f77flags/>
