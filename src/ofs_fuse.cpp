@@ -29,6 +29,8 @@
 #include <sys/file.h>
 #include <ulockmgr.h>
 #include <sys/time.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "filestatusmanager.h"
 #include "ofsfile.h"
@@ -804,4 +806,41 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 //	btm.set_Cache_Path("/tmp/ofscache/");
 	btm.reinstate();
 	return NULL;
+}
+
+
+/**
+ * Exit the filesystem - unmount the remote share
+ * @param  
+ */
+void ofs_fuse::fuse_destroy(void *)
+{
+	if(!OFSEnvironment::Instance().isUnmount())
+		return;
+	
+	int childpid = fork();
+	int status;
+	if(childpid == 0) {
+		char *arguments[4];
+		arguments[0] = "umount";
+		arguments[1] = "-f";
+		arguments[2] = (char *)OFSEnvironment::Instance().getRemotePath().c_str();
+		arguments[3] = NULL;
+		execvp(arguments[0], arguments);
+		errno = 0;
+		return;
+	}
+	if(childpid < 0) {
+		perror(strerror(errno));
+		errno = 0;
+		return;
+	}
+	int childpid2 = wait(&status);
+	int exitstatus = WEXITSTATUS(status);
+	if(WIFEXITED(status) && exitstatus) {
+		cout << "Unable to unmount the remote filesystem!" << endl;
+		perror(strerror(exitstatus));
+		errno = 0;
+		return;
+	}
 }

@@ -126,14 +126,15 @@ int main(int argc, char *argv[])
     // OFS
     //////////////////////////////////////////////////////////////////////////
 
-    char* pArgumente[4];
+    char* pArgumente[5];
     pArgumente[0] = "ofs";
     pArgumente[1] = (char *)ofsmountpoint.c_str();
     pArgumente[2] = (char *)shareurl.c_str();
-    pArgumente[3] = NULL; // terminator
+    pArgumente[3] = "-o"; // allow all user access to filesystem
+    pArgumente[4] = NULL; // terminator
 
-    cout << pArgumente[1] << endl;
-    cout << pArgumente[2] << endl;
+//    cout << pArgumente[1] << endl;
+//    cout << pArgumente[2] << endl;
 
     // Ruft das Offline-Dateisystem auf.
     execvp("ofs", pArgumente);

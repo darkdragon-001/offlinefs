@@ -89,6 +89,7 @@ public:
 /*	static int fuse_lock(const char *path, struct fuse_file_info *fi, int cmd,
                     struct flock *lock);*/
 	static void *fuse_init (struct fuse_conn_info *conn);
+    static void fuse_destroy(void *);
 
 private:
 	// Private variables

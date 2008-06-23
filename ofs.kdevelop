@@ -39,7 +39,7 @@
       <cwd>
         <ofs>.</ofs>
         <mounthelper>/home/tobias/ofsproject/ofs/debug/./src</mounthelper>
-        <ofsmount>/home/frank/IT-Projekt/debug/./</ofsmount>
+        <ofsmount>.</ofsmount>
       </cwd>
       <programargs/>
       <globaldebugarguments/>

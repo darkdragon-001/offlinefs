@@ -43,15 +43,25 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	OFSEnvironment &env = OFSEnvironment::Instance();
-	char *args[2];
+	char *args[5];
+	int numargs;
 	args[0] = new char[env.getBinaryPath().length()+1];
 	strncpy(args[0], env.getBinaryPath().c_str(),
 		env.getBinaryPath().length()+1);
 	args[1] = new char[env.getMountPoint().length()+1];
 	strncpy(args[1], env.getMountPoint().c_str(),
 		env.getMountPoint().length()+1);
+	if(env.isAllowOther()) {
+		args[2] = "-o";
+		args[3] = "allow_other";
+		args[4] = NULL;
+		numargs = 4;
+	} else {
+		args[2] = NULL;
+		numargs = 2;
+	}
 //
-return my_ofs.main(2, args, NULL, &my_ofs);
+return my_ofs.main(numargs, args, NULL, &my_ofs);
 
   //return EXIT_SUCCESS;
 }

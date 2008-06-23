@@ -53,6 +53,8 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	string lRemotePath = "";
 	string lCachePath = "";
 	string lShareID = "";
+	bool lAllowOther = false;
+	bool lUnmount = true;
 	list<string> lListenDevices;
 	
 	MutexLocker obtain_lock(initm);
@@ -62,12 +64,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	// TODO: cache-and remote path have to be custom for each share
 	int nextopt;
 	// define allowed options
-	const char* const short_options = ":r:b:l:i:h";
+	const char* const short_options = ":r:b:l:i:onh";
 	const struct option long_options[] = {
 		{"remote", required_argument, NULL, 'r'},
 		{"backing", required_argument, NULL, 'b'},
 		{"listen", required_argument, NULL, 'l'},
 		{"shareid", required_argument, NULL, 'i'},
+		{"allowother", required_argument, NULL, 'o'},
+		{"nounmount", required_argument, NULL, 'n'},
 		{"help", no_argument, NULL, 'h'}
 	};
 	
@@ -98,6 +102,12 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			break;
 		   case 'i': // custom share identifier
 			lShareID = optarg;
+			break;
+		   case 'o': // allow other users access to the filesystem
+			lAllowOther = true;
+			break;
+		   case 'n': // do not unmount remote share after ext
+			lUnmount = false;
 			break;
 		   case 'h': // display help
 			throw OFSException("User wants help",1);
@@ -136,6 +146,10 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		env.listendevices = ofsconf.GetListenDevices();
 	else
 		env.listendevices = lListenDevices;
+	// unmount flag
+	env.unmount = lUnmount;
+	// allow other flag
+	env.allowother = lAllowOther;
 }
 
 list<string> OFSEnvironment::getListenDevices()
@@ -149,14 +163,16 @@ string OFSEnvironment::getUsageString(string executable)
 	usage << "Usage: "+executable+" <mountpoint> <url> [<options>]"
 		<< endl;
 	usage << "Options are:" << endl;
-	usage << "-r --remote  Absolute path to the remote mountpoint"
+	usage << "-r --remote     Absolute path to the remote mountpoint"
 		<< endl;
-	usage << "-b --backing Absolute path to the backing (cache) root"
+	usage << "-b --backing    Absolute path to the backing (cache) root"
 		<< endl;
-	usage << "-l --listen  Comma separated list of network interfaces to "
+	usage << "-l --listen     Comma separated list of network interfaces to "
 		<< " listen for plug/unplug events" << endl;
-	usage << "-i --shareid Internal unique share identifier" << endl;
-	usage << "-h --help    Print this screen and exit" << endl;
+	usage << "-i --shareid    Internal unique share identifier" << endl;
+	usage << "-o --allowother Allow all users access to the filesystem" << endl;
+	usage << "-n --nounmount  Do not unmount the remote share on exit" << endl;
+	usage << "-h --help       Print this screen and exit" << endl;
 	return usage.str();
 }
 

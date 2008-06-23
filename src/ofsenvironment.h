@@ -83,6 +83,16 @@ public:
      */
     inline string getBinaryPath() { return binarypath; };
     /**
+     * Should the remote share be unmounted when this fs is unmounted
+     * @return unmount flag
+     */
+    inline bool isUnmount() { return unmount; };
+    /**
+     * Should the filesystem be accessable by all users
+     * @return allowother flag
+     */
+    inline bool isAllowOther() { return allowother; };
+    /**
      * Return the list of devices the system should listen for plug/unplug
      * @return list of devices as strings
      */
@@ -105,6 +115,8 @@ private:
     string shareID;
     string shareURL;
     string binarypath;
+    bool unmount;
+    bool allowother;
 protected:
     list<string> listendevices;
     static bool initialized;
