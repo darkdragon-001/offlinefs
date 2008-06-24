@@ -38,6 +38,12 @@ using namespace std;
 
 #define MAX_PATH 1024
 
+/**
+ * TODO: This is very very unclean
+ * @param argc 
+ * @param argv[] 
+ * @return 
+ */
 int main(int argc, char *argv[])
 {
     assert(argc > 2);
@@ -45,6 +51,7 @@ int main(int argc, char *argv[])
     char szOptions[10];
     char* pszOptions = szOptions;
     string shareurl = argv[1];
+    string sharepath;
     string remotefstype;
     string shareremote;
     string remotemountpoint;
@@ -70,11 +77,20 @@ int main(int argc, char *argv[])
     int nDoppelPunktIndex = int (pchDoppelPunktPos - argv[1]);
 
     remotefstype = shareurl.substr(0,nDoppelPunktIndex);
+    sharepath = shareurl.substr(nDoppelPunktIndex+3);
+    // handle special protocols
     if(remotefstype == "smb")
-        shareremote = shareurl.substr(nDoppelPunktIndex+1);
-    else
-        shareremote = shareurl.substr(nDoppelPunktIndex+3);
+        shareremote = string("//") + sharepath;
+    else if(remotefstype == "file") {
+	shareremote = string("/") + sharepath;
+	remotemountpoint = shareremote;
+    } else
+        shareremote = sharepath;
 
+
+    char* pArgumente[8];
+
+    if(remotefstype != "file") {
     // Legt das Dateisystem fest.
     pMountArgumente[2] = (char*)remotefstype.c_str();
 
@@ -92,6 +108,7 @@ int main(int argc, char *argv[])
     pMountArgumente[6] = pszOptions;
 //    pArgumente[2] = szOptions;
 
+    
     // Mountet die Share, die vom Benutzer übergeben wurde.
     int childpid = fork();
     int status;
@@ -106,7 +123,8 @@ int main(int argc, char *argv[])
     cout << endl;*/
        mkdir(pMountArgumente[4], 0777);
        execvp("mount", pMountArgumente);
-       return errno;
+       perror(strerror(errno));
+       return -errno;
     }
     if(childpid < 0) {
         perror(strerror(errno));
@@ -121,18 +139,30 @@ int main(int argc, char *argv[])
        perror(strerror(errno));
        exit(exitstatus);
     }
-
+    
     //////////////////////////////////////////////////////////////////////////
     // OFS
     //////////////////////////////////////////////////////////////////////////
 
-    char* pArgumente[5];
+
     pArgumente[0] = "ofs";
     pArgumente[1] = (char *)ofsmountpoint.c_str();
     pArgumente[2] = (char *)shareurl.c_str();
     pArgumente[3] = "-o"; // allow all user access to filesystem
     pArgumente[4] = NULL; // terminator
-
+    } else {
+        pArgumente[0] = "ofs";
+        pArgumente[1] = (char *)ofsmountpoint.c_str();
+        pArgumente[2] = (char *)shareurl.c_str();
+        pArgumente[3] = "-r";
+        pArgumente[4] = (char *)sharepath.c_str();
+        pArgumente[5] = "-n";
+        if(geteuid() == 0) {
+            pArgumente[6] = "-o";
+            pArgumente[7] = NULL;
+        } else
+            pArgumente[6] = NULL;
+    }
 //    cout << pArgumente[1] << endl;
 //    cout << pArgumente[2] << endl;
 
