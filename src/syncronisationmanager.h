@@ -30,6 +30,7 @@
 using namespace std;
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
+        @TODO Every work on the Syncronisation manager has been stopped because it will be part of Frank Gsellmann's Master Thesis
 */
 class SyncronisationManager:public persistable{
 public:

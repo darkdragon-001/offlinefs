@@ -27,7 +27,8 @@
 #define PERSISTENCE_MODULE_NAME "backingtrees"
 
 /**
- * @author Tobias Jaehnel <tjaehnel@gmail.com>
+ * @author Tobias Jaehnel <tjaehnel@gmail.com>,
+           
  * Defines a interface for the Backingtreemanager to make
  * the list of backingtrees persistent and reload them
  */
