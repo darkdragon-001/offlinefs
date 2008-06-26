@@ -12,4 +12,6 @@ noinst_HEADERS = options.h printusage.h
 mount_ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
 	$(top_builddir)/libraries/libofs/libofs.la $(top_builddir)/libraries/libofsconf/libofsconf.a -lconfuse
 
-
+install-exec-hook:
+	mkdir -p $(DESTDIR)/var/ofs/remote
+	mkdir -p $(DESTDIR)/var/ofs/backing
