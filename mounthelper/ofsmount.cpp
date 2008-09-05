@@ -46,30 +46,46 @@ int main(int argc, char *argv[])
     OFSConf& conf = OFSConf::Instance();
     conf.ParseFile();
 
+    cout << szOptions << endl;
+
     //////////////////////////////////////////////////////////////////////////
     // MOUNT
     //////////////////////////////////////////////////////////////////////////
 
-    char* pMountArgumente[4];
+    char* pMountArgumente[5];
     char szDateisystem[] = "-t";
-    pMountArgumente[0] = szDateisystem;
-    pMountArgumente[1] = new char[MAX_PATH + 1];
+    char szMount[] = "mount";
+    pMountArgumente[0] = szMount;
+    pMountArgumente[1] = szDateisystem;
     pMountArgumente[2] = new char[MAX_PATH + 1];
     pMountArgumente[3] = new char[MAX_PATH + 1];
+    pMountArgumente[4] = new char[MAX_PATH + 1];
+
+    cout << "Achtung!!!" << endl;
+    cout << "0.) " << argv[0] << endl;
+    cout << "1.) " << argv[1] << endl;
+//    cout << "2.) " << argv[2] << endl;
+//    cout << "3.) " << argv[3] << endl;
+//    cout << "4.) " << argv[4] << endl;
+    char ch708;
+//    cin >> ch708;
 
     // Ermittelt die Backing-Tree- und Remote-Pfade.
     // ZU ERLEDIGEN: Muß noch verhasht werden.
     cout << argv[0] << endl;
-    char* pchDoppelPunktPos = strchr(argv[0], ':');
-    assert(pchDoppelPunktPos != NULL);
-    int nDoppelPunktIndex = int (pchDoppelPunktPos - argv[0]);
+    char* pchDoppelPunktPos = strchr(argv[1], ':');
+//    assert(pchDoppelPunktPos != NULL);
+    int nDoppelPunktIndex = int (pchDoppelPunktPos - argv[1]);
+
+    cout << nDoppelPunktIndex << endl;
+//    cin >> ch708;
 
     // Legt das Dateisystem fest.
-    strncpy(pMountArgumente[1], argv[0], nDoppelPunktIndex);
+    strncpy(pMountArgumente[2], argv[1], nDoppelPunktIndex);
 
     // Legt die Server-Share fest.
-    strncpy(pMountArgumente[2], &((argv[0])[nDoppelPunktIndex + 3]), MAX_PATH);
-    strncpy(pMountArgumente[3], conf.GetRemotePath().c_str(), MAX_PATH);
+    strncpy(pMountArgumente[3], &((argv[1])[nDoppelPunktIndex + 3]), MAX_PATH);
+    strncpy(pMountArgumente[4], conf.GetRemotePath().c_str(), MAX_PATH);
 
 //    pArgumente[2] = szOptions;
 
@@ -81,9 +97,15 @@ int main(int argc, char *argv[])
     cout << pMountArgumente[1] << endl;
     cout << pMountArgumente[2] << endl;
     cout << pMountArgumente[3] << endl;
+    cout << pMountArgumente[4] << endl;
 
     // Mountet die Share, die vom Benutzer übergeben wurde.
-    return execv("mount", pMountArgumente);
+//    return execv("mount", pMountArgumente);
+    int nErg = execv("s", pMountArgumente);
+    cout << nErg << endl;
+    cin >> ch708;
+
+    return nErg;
 
     //////////////////////////////////////////////////////////////////////////
     // OFS
@@ -106,3 +128,5 @@ int main(int argc, char *argv[])
     // Ruft das Offline-Dateisystem auf.
     return execv("ofs", pArgumente);
 }
+
+// "ext3://ServerVerz /LokalVerz -o rw"
