@@ -17,57 +17,48 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCRONISATIONMANAGER_H
-#define SYNCRONISATIONMANAGER_H
+#ifndef SYNCLOGGER_H
+#define SYNCLOGGER_H
+
+/*
 #include "file_sync.h"
 #include "file.h"
 #include "syncstatetype.h"
 #include "persistable.h"
-#include "mutexlocker.h"
 #include <iostream>
 #include <map>
 #include <string>
+
 using namespace std;
-/**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-        @TODO Every work on the Syncronisation manager has been stopped because it will be part of Frank Gsellmann's Master Thesis
 */
-class SyncronisationManager:public persistable{
+#include "mutexlocker.h"
+
+/**
+	@author Frank Gsellmann <frank.gsellmann@gmx.de>
+*/
+class SyncLogger
+{
 public:
-static SyncronisationManager& Instance();
-/**
- * Determines if the file has been modified on the server
- * @param path 
- * @return 
- */
-syncstate has_been_modified(string path);
-/**
- * Determines if the file has been deleted on the server
- * @param path 
- * @return 
- */
-syncstate has_been_deleted(string path);
-/**
- * Determines the local modification state
- * @param path 
- * @return 
- */
-syncstate store_state(string path);
-~SyncronisationManager();
-/**
- * Writes the local states to the disk
- */
-virtual void persist() const;
-/**
- * Reads the local states from the disk
- */
-virtual void reinstate() const;
+    static SyncLogger& Instance();
+    ~SyncLogger();
+    bool AddEntry(const char* pszHash, const char* pszFilePath, const char chType);
+	bool ParseFile(const char* pszHash);
+    SyncLogEntry ReadFirstEntry(const char* pszHash);
+	void CalcSyncLogName(const char* pszHash, char* pszLogName);
+	FILE* OpenSyncLog(const char* pszHash, const char* szMode);
+	list<SyncLogEntry> GetEntries(const char* pszHash, const string strFilePath);
+	void ReintegrateFile(const char* pszHash, const string strFilePath);
 protected:
-SyncronisationManager();
+    SyncLogger();
+	SyncLogEntry ReadEntry(cfg_t* pEntryCFG);
+protected:
+//    FILE* m_pFile;
+    int m_nNewIndex;
+	char m_szCurShare[1024];
+    cfg_t* m_pCFG;
 private:
-static map<string,file_sync> filesmod;
-static std::auto_ptr<SyncronisationManager> theSyncronisationManagerInstance;
-static Mutex m; 
+    static std::auto_ptr<SyncLogger> theSyncLoggerInstance;
+    static Mutex m_mutex;
 };
 
-#endif
+#endif	// !SYNCLOGGER_H
