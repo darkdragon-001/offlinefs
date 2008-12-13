@@ -3,3 +3,4 @@
 AUTOMAKE_OPTIONS = foreign 1.4
 
 SUBDIRS = libraries mounthelper ofs-gui src
+MYEXECPDIR =/sbin

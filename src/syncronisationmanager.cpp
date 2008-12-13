@@ -17,37 +17,23 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "syncronisationmanager.h"
 
-//////////////////////////////////////////////////////
-/// do the registry of the test_fixture
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_SyncLogger);
-//////////////////////////////////////////////////////
-
-void Test_SyncLogger::TestInstance()
+SyncronisationManager::SyncronisationManager()
 {
-    // Sets the objects up and processes.
-    SyncLogger logger1 = SyncLogger::Instance();
-    SyncLogger logger2 = SyncLogger::Instance();
-
-    // Checks the result.
-    CPPUNIT_ASSERT(&logger1 == &logger2);
-/*
-	// Set up
-	const double dReal1 = 13.07;
-	const double dReal2 = 7.08;
-	const double dImaginaer2 = 1234.5678;
-
-	// Process
-	CKomplex komplex;
-	CKomplex komplex1(dReal1);
-	CKomplex komplex2(dReal2, dImaginaer2);
-
-	// Check
-	CPPUNIT_ASSERT_EQUAL(0.0, komplex.GetRealTeil());
-	CPPUNIT_ASSERT_EQUAL(0.0, komplex.GetImaginaerTeil());
-	CPPUNIT_ASSERT_EQUAL(dReal1, komplex1.GetRealTeil());
-	CPPUNIT_ASSERT_EQUAL(0.0, komplex1.GetImaginaerTeil());
-	CPPUNIT_ASSERT_EQUAL(dReal2, komplex2.GetRealTeil());
-	CPPUNIT_ASSERT_EQUAL(dImaginaer2, komplex2.GetImaginaerTeil());
-*/
 }
+
+
+SyncronisationManager::~SyncronisationManager()
+{
+}
+
+void SyncronisationManager::persist() const
+{
+}
+
+void SyncronisationManager::reinstate() const
+{
+}
+
+

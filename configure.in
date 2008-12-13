@@ -13,4 +13,4 @@ AC_SUBST(OFS_SBIN)
 
 AC_OUTPUT(Makefile libraries/Makefile libraries/libofs/Makefile \
 	libraries/libofsconf/Makefile libraries/libofshash/Makefile mounthelper/Makefile ofs-gui/Makefile \
-	src/Makefile src/test-ofs/Makefile)
+	src/Makefile)
