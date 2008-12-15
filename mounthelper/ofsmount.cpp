@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     //////////////////////////////////////////////////////////////////////////
 
     char* pMountArgumente[8];
-    pMountArgumente[0] - NULL;
+    pMountArgumente[0] = "mount";
     pMountArgumente[1] = "-t";
     pMountArgumente[2] = NULL;
     pMountArgumente[3] = NULL;
@@ -91,65 +91,65 @@ int main(int argc, char *argv[])
     char* pArgumente[8];
 
     if(remotefstype != "file") {
-    // Legt das Dateisystem fest.
-    pMountArgumente[2] = (char*)remotefstype.c_str();
+    	// Legt das Dateisystem fest.
+    	pMountArgumente[2] = (char*)remotefstype.c_str();
 
-    // Oeffnet die Konfigurationsdatei.
-    OFSConf& conf = OFSConf::Instance();
-    //conf.ParseFile(); //obsolete
+    	// Oeffnet die Konfigurationsdatei.
+    	OFSConf& conf = OFSConf::Instance();
+    	//conf.ParseFile(); //obsolete
 
-    // Legt die Server-Share fest.
-    pMountArgumente[3] = (char*)shareremote.c_str();
-    remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
-    pMountArgumente[4] = (char*)remotemountpoint.c_str();
+    	// Legt die Server-Share fest.
+    	pMountArgumente[3] = (char*)shareremote.c_str();
+    	remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
+    	pMountArgumente[4] = (char*)remotemountpoint.c_str();
 
-    //    my_options(argc - 2, &argv[2], &pszOptions);
-    my_options(argc, argv, &pszOptions);
-    pMountArgumente[6] = pszOptions;
-//    pArgumente[2] = szOptions;
+    	//    my_options(argc - 2, &argv[2], &pszOptions);
+    	my_options(argc, argv, &pszOptions);
+    	pMountArgumente[6] = pszOptions;
+	//    pArgumente[2] = szOptions;
 
     
-    // Mountet die Share, die vom Benutzer übergeben wurde.
-    int childpid = fork();
-    int status;
-    if(childpid == 0) {
-/*    cout << endl << "mount" << " ";
-    cout << pMountArgumente[1] << " ";
-    cout << pMountArgumente[2] << " ";
-    cout << pMountArgumente[3] << " ";
-    cout << pMountArgumente[4] << " ";
-    cout << pMountArgumente[5] << " ";
-    cout << pMountArgumente[6] << " ";
-    cout << endl;*/
-       mkdir(pMountArgumente[4], 0777);
-       execvp("mount", pMountArgumente);
-       perror(strerror(errno));
-       return -errno;
-    }
-    if(childpid < 0) {
-        perror(strerror(errno));
-        return -errno;
-    }
-    //waitpid(childpid, &status, 0);
-    int childpid2 = wait(&status);
-//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
-    int exitstatus = WEXITSTATUS(status);
-    if(WIFEXITED(status) && exitstatus) {
-       errno = exitstatus;
-       perror(strerror(errno));
-       exit(exitstatus);
-    }
+    	// Mountet die Share, die vom Benutzer übergeben wurde.
+    	int childpid = fork();
+    	int status;
+    	if(childpid == 0) {
+    		/*cout << endl << "mount" << " ";
+		cout << pMountArgumente[1] << " ";
+    		cout << pMountArgumente[2] << " ";
+    		cout << pMountArgumente[3] << " ";
+    		cout << pMountArgumente[4] << " ";
+    		cout << pMountArgumente[5] << " ";
+    		cout << pMountArgumente[6] << " ";
+    		cout << endl;*/
+       		mkdir(pMountArgumente[4], 0777);
+       		execvp("mount", pMountArgumente);
+       		perror(strerror(errno));
+       		return -errno;
+    	}
+    	if(childpid < 0) {
+        	perror(strerror(errno));
+        	return -errno;
+    	}
+    	//waitpid(childpid, &status, 0);
+    	int childpid2 = wait(&status);
+	//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
+    	int exitstatus = WEXITSTATUS(status);
+    	if(WIFEXITED(status) && exitstatus) {
+       		errno = exitstatus;
+       		perror(strerror(errno));
+       		exit(exitstatus);
+    	}
     
-    //////////////////////////////////////////////////////////////////////////
-    // OFS
-    //////////////////////////////////////////////////////////////////////////
+    	//////////////////////////////////////////////////////////////////////////
+    	// OFS
+    	//////////////////////////////////////////////////////////////////////////
 
 
-    pArgumente[0] = "ofs";
-    pArgumente[1] = (char *)ofsmountpoint.c_str();
-    pArgumente[2] = (char *)shareurl.c_str();
-    pArgumente[3] = "-o"; // allow all user access to filesystem
-    pArgumente[4] = NULL; // terminator
+    	pArgumente[0] = "ofs";
+    	pArgumente[1] = (char *)ofsmountpoint.c_str();
+    	pArgumente[2] = (char *)shareurl.c_str();
+    	pArgumente[3] = "-o"; // allow all user access to filesystem
+    	pArgumente[4] = NULL; // terminator
     } else {
         pArgumente[0] = "ofs";
         pArgumente[1] = (char *)ofsmountpoint.c_str();
