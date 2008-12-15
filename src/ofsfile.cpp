@@ -27,6 +27,7 @@
 #include <iostream>
 #include <sstream>
 #include <utime.h>
+#include <cstring>
 #include <attr/xattr.h>
 
 OFSFile::OFSFile(const string path) : dh_cache(NULL), dh_remote(NULL),

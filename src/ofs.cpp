@@ -29,6 +29,7 @@
 #include "filesystemstatusmanager.h"
 #include "ofsenvironment.h"
 #include <string>
+#include <cstring>
 
 using namespace std;
 

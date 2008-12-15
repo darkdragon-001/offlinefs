@@ -34,6 +34,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <cstring>
 using namespace std;
 
 #define MAX_PATH 1024

@@ -23,6 +23,7 @@
 #include "ofshash.h"
 #include <getopt.h>
 #include <sstream>
+#include <cstring>
 
 std::auto_ptr<OFSEnvironment> OFSEnvironment::theOFSEnvironmentInstance;
 Mutex OFSEnvironment::m;
