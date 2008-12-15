@@ -23,6 +23,7 @@
 #include "mutexlocker.h"
 #include "backingtree.h"
 #include <list>
+#include <memory>
 #define CONFIGKEY_BACKINGTREES "backingtrees"
 #define PERSISTENCE_MODULE_NAME "backingtrees"
 

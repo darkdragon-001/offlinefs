@@ -15,6 +15,6 @@ ofs_LDFLAGS = $(all_libraries) `pkg-config fuse --libs` `pkg-config dbus-1 --lib
 noinst_HEADERS = backingtreepersistence.h file.h file_sync.h fileref.h \
 	filestatusmanager.h ofs_fuse.h ofsenvironment.h ofsexception.h ofsfile.h persistable.h \
 	persistencemanager.h syncronisationmanager.h syncstatetype.h
-AM_CXXFLAGS = `pkg-config fuse --cflags-only-other` `pkg-config dbus-1 --cflags-only-other`
+AM_CXXFLAGS = `pkg-config fuse --cflags-only-other` `pkg-config dbus-1 --cflags-only-other` -ansi
 ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
 	$(top_builddir)/libraries/libofsconf/libofsconf.a $(top_builddir)/libraries/libofs/libofs.la

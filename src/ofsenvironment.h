@@ -23,6 +23,7 @@
 #include "ofsexception.h"
 #include <string>
 #include <list>
+#include <memory>
 using namespace std;
 
 /**

@@ -27,6 +27,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <memory>
 using namespace std;
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>

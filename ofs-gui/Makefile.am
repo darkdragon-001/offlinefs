@@ -1,1 +1,2 @@
 METASOURCES = AUTO
+AM_CFLAGS = -ansi

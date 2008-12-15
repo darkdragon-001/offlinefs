@@ -23,6 +23,7 @@
 #include "mutexlocker.h"
 //#include "filesystem.h"
 #include <string>
+#include <memory>
 
 #define TESTING_REMOTE_PATH "/usr/bin"
 #define TESTING_BACKING_PATH "/tmp/ofsbacking"

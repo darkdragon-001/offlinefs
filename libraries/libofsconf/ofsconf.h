@@ -22,6 +22,7 @@
 
 #include <string>
 #include <list>
+#include <memory>
 
 class Mutex;
 struct cfg_t;

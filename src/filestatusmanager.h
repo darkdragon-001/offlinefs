@@ -22,6 +22,7 @@
 #include "file.h"
 #include <string>
 #include <map>
+#include <memory>
 #include "mutex.h"
 #include "mutexlocker.h"
 

@@ -1,4 +1,4 @@
-myexecpdir= $(DESTDIR)@OFS_SBIN@
+myexecpdir = $(DESTDIR)@OFS_SBIN@
 myexecp_PROGRAMS = mount.ofs 
 mount_ofs_SOURCES = ofsmount.cpp options.cpp usage.cpp
 
@@ -15,3 +15,4 @@ mount_ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
 install-exec-hook:
 	mkdir -p $(DESTDIR)/var/ofs/remote
 	mkdir -p $(DESTDIR)/var/ofs/backing
+AM_CFLAGS = -ansi

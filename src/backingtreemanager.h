@@ -25,6 +25,7 @@
 #include "backingtreepersistence.h"
 #include <string>
 #include <list>
+#include <memory>
 /**
  *	@author Carsten Kolassa <Carsten@Kolassa.de>,
  *		Tobias Jaehnel <tjaehnel@gmail.com>
