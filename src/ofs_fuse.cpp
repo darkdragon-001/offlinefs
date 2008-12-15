@@ -20,6 +20,7 @@
 #include "ofs_fuse.h"
 
 #include <string>
+#include <cstring>
 #include <pthread.h>
 #include <errno.h>
 #include <stdio.h>
