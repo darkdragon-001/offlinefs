@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007 by                                                 *
+ *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,66 +17,43 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "backingtree.h"
+#ifndef CONFLICTLOGGER_H
+#define CONFLICTLOGGER_H
 
-Backingtree::Backingtree(string rPath, string cPath)
+#include "logger.h"
+
+#include "mutexlocker.h"
+
+#include "synclogentry.h"
+
+#include <string>
+#include <list>
+using namespace std;
+
+struct cfg_t;
+
+/**
+    @author Frank Gsellmann <frank.gsellmann@gmx.de>
+*/
+class ConflictLogger : public Logger
 {
-	this->relative_path=rPath;
-	this->cache_path=cPath;
-}
+public:
+    static ConflictLogger& Instance();
+    ~ConflictLogger();
+    virtual bool AddEntry(const char* pszHash, const char* pszFilePath, const char chType);
+    virtual bool ParseFile(const char* pszHash);
+    virtual SyncLogEntry ReadFirstEntry(const char* pszHash);
+    virtual void CalcLogFileName(const char* pszHash, char* pszLogName);
+    virtual list<SyncLogEntry> GetEntries(const char* pszHash, const string strFilePath);
+    virtual bool RemoveEntry(const char* pszHash, SyncLogEntry& sle);
+protected:
+    ConflictLogger();
+    SyncLogEntry ReadEntry(cfg_t* pEntryCFG);
+protected:
+//    FILE* m_pFile;
+private:
+    static std::auto_ptr<ConflictLogger> theConflictLoggerInstance;
+    static Mutex m_mutex;
+};
 
-
-Backingtree::~Backingtree()
-{
-}
-
-const bool Backingtree::operator==(Backingtree b) const
-{
-	if (this->relative_path==b.relative_path)
-		return true;
-	else
-		return false;
-}
-
-const string Backingtree::get_cache_path()
-{
-	return this->cache_path;
-}
-
-const string Backingtree::get_relative_path() {
-	return relative_path;
-}
-
-bool Backingtree::is_in_backingtree(string path)
-{
-	if(path.length() >= relative_path.length() &&
-		path.substr(0,relative_path.length()) == relative_path) {
-		return true;
-	}
-	return false;
-}
-
-
-bool Backingtree::backingtree_is_in(string path)
-{
-	if(relative_path.length() >= path.length() &&
-		relative_path.substr(0,path.length()) == path) {
-		return true;
-	}
-	return false;
-}
-
-string Backingtree::get_cache_path(string path)
-{
-	string abspath;
-	if(!is_in_backingtree(path)) {
-		return NULL;
-	}
-	if(path.length() == get_relative_path().length())
-		abspath =  get_cache_path();
-	else 
-		abspath = get_cache_path()+"/"
-			+path.substr(relative_path.length(),
-				path.length()-relative_path.length());
-	return abspath;
-}
+#endif	// !CONFLICTLOGGER_H

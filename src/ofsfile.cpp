@@ -18,8 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ofsfile.h"
+#include "synclogger.h"
 #include "filestatusmanager.h"
 #include "backingtreemanager.h"
+#include "ofsbroadcast.h"
+#include "ofsenvironment.h"
+#include "synchronizationmanager.h"
 #include <sys/time.h>
 #include <unistd.h>
 #include <ofsexception.h>
@@ -198,21 +202,36 @@ int OFSFile::op_chown(uid_t uid, gid_t gid)
  */
 int OFSFile::op_create(mode_t mode, int flags)
 {
-	int fdr=0, fdc=0;
+	int fdr=0, fdc=0, nRet = 0;
 	try {		
 		update_cache();
 
 		if (get_offline_state()) {
 			fdc = open(get_cache_path().c_str(), flags, mode);
 			if (fdc == -1)
+			{
+				// Sends a signal: Couldn't create file on cache.
+				OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", -errno);
 				return -errno;
+			}
 		}
 		if (get_availability()) {
 			fdr = open(get_remote_path().c_str(), flags, mode);
 			if (fdr == -1) {
 				close(fdc);
-				return -errno;
+				nRet = -errno;
+				// Sends a signal: Couldn't create file on remote share.
+				OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", nRet);
 			}
+		}
+		// Inserts a sync log entry if the file couldn't be created on the remote or if the network is not connected but could be created on the cache.
+		if (fdr == -1 || fdr == 0)
+		{
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'c');
+		}
+		if (fdr == -1)
+		{
+			return nRet;
 		}
 		fd_remote = fdr;
 		fd_cache = fdc;
@@ -305,27 +324,42 @@ int OFSFile::op_fsync(int isdatasync)
  */
 int OFSFile::op_mkdir(mode_t mode)
 {
-	int res;
+	int res, nRet = 0;
 	try {
 		update_cache();
 		
+		bool bOK = true;
 		if(get_availability()) {
 			res = mkdir(get_remote_path().c_str(), mode);
 			if (res == -1)
-				return -errno;
+			{
+				bOK = false;
+				nRet = -errno;
+				// Sends a signal: Couldn't create folder on remote share.
+				OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", nRet);
+			}
 		}
-		if (get_offline_state()) {
+		if (bOK && get_offline_state()) {
 			res = mkdir(get_cache_path().c_str(), mode);
 			if (res == -1)
+			{
+				// Sends a signal: Couldn't create folder on cache.
+				OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", -errno);
 				return -errno;
+			}
 		}
-		
-		update_amtime();
+		// Inserts a sync log entry if the folder couldn't be created on the remote or if the network is not connected but could be created on the cache.
+		if (!(get_availability() && bOK))
+		{
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'c');
+		}
+		if (bOK)
+			update_amtime();
 	} catch(OFSException &e) {
 		errno = e.get_posixerrno();
 		return -errno;
 	}
-	return 0;
+	return nRet;
 }
 
 /**
@@ -342,6 +376,9 @@ int OFSFile::op_mknod(mode_t mode, dev_t rdev)
 {
 	int res;
 	try {
+		bool bOK = true;
+		bool bCacheOK = false;
+		int nErrNo = 0;
 		update_cache();
 		string remotepath = get_remote_path();
 		string cachepath = get_cache_path();
@@ -349,12 +386,21 @@ int OFSFile::op_mknod(mode_t mode, dev_t rdev)
 			if(get_availability()) {
 				res = mkfifo(remotepath.c_str(), mode);
 				if (res == -1)
-					return -errno;
+				{
+					nErrNo = -errno;
+					bOK = false;
+//					return -errno;
+				}
 			}
-			if(get_offline_state()) {
+			if(bOK && get_offline_state()) {
+				bCacheOK = true;
 				res = mkfifo(cachepath.c_str(), mode);
 				if(res == -1)
-					return -errno;
+				{
+					nErrNo = -errno;
+					bCacheOK = false;
+//					return -errno;
+				}
 			}			
 		}
 		else
@@ -362,13 +408,38 @@ int OFSFile::op_mknod(mode_t mode, dev_t rdev)
 			if(get_availability()) {
 				res = mknod(remotepath.c_str(), mode, rdev);
 				if (res == -1)
-					return -errno;
+				{
+					nErrNo = -errno;
+					bOK = false;
+//					return -errno;
+				}
 			}
-			if(get_offline_state()) {
+			if(bOK && get_offline_state()) {
+				bCacheOK = true;
 				res = mknod(cachepath.c_str(), mode, rdev);
 				if(res == -1)
-					return -errno;
+				{
+					nErrNo = -errno;
+					bCacheOK = false;
+//					return -errno;
+				}
 			}
+		}
+		if (!bOK)
+		{
+			// Sends a signal: Couldn't create file on remote share.
+			OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", 0);
+		}
+		// Inserts a sync log entry if the file couldn't be created on the remote or if the network is not connected but could be created on the cache.
+		if (!(get_availability() && bOK) && bCacheOK)
+		{
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'c');
+		}
+		if (!bOK || !bCacheOK)
+		{
+			// Sends a signal: Couldn't create file on cache.
+			OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", nErrNo);
+			return nErrNo;
 		}
 		update_amtime();
 		return 0;
@@ -464,7 +535,7 @@ int OFSFile::op_opendir()
 int OFSFile::op_read(char *buf, size_t size, off_t offset)
 {
 	int res=0;
-	if(fd_remote)
+	if(fd_remote && !SynchronizationManager::Instance().has_been_modified(fileinfo))
 		res = pread(fd_remote, buf, size, offset);
 	else
 		res = pread(fd_cache, buf, size, offset);
@@ -598,21 +669,37 @@ int OFSFile::op_releasedir()
  */
 int OFSFile::op_rmdir()
 {
-	int res;
+	int res, nRet = 0;
 	try {
 		update_cache();
+		bool bOK = true;
 		if(get_availability()) {
 			res = rmdir(get_remote_path().c_str());
 			if (res == -1)
-				return -errno;
+			{
+				bOK = false;
+				nRet = -errno;
+				// Sends a signal: Couldn't delete folder from remote share.
+				OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", nRet);
+			}
 		}
 		if(get_offline_state()) {
 			res = rmdir(get_cache_path().c_str());
 			if (res == -1)
+			{
+				// Sends a signal: Couldn't delete folder from cache.
+				OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", -errno);
 				return -errno;
+			}
 		}
-		update_amtime();
-		return 0;
+		// Inserts a sync log entry if the folder couldn't be deleted on the remote or if the network is not connected but could be deleted on the cache.
+		if (!(get_availability() && bOK))
+		{
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'd');
+		}
+		if (bOK)
+			update_amtime();
+		return nRet;
 	} catch(OFSException &e) {
 		errno = e.get_posixerrno();
 		return -errno;
@@ -704,26 +791,45 @@ int OFSFile::op_ftruncate(off_t size)
  */
 int OFSFile::op_unlink()
 {
-	int res;
+	int res, nRet = 0;
 	try {
 		update_cache();
 
+		bool bOK = true;
 		if(get_availability()) {
 			res = unlink(get_remote_path().c_str());
 			if (res == -1)
-				return -errno;
+			{
+				bOK = false;
+				nRet = -errno;
+				// Sends a signal: Couldn't delete file from remote share.
+				OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", nRet);
+			}
 		}
-		if(get_offline_state()) {
+		if(bOK && get_offline_state()) {
 			res = unlink(get_cache_path().c_str());
 			if (res == -1)
+			{
+				// Sends a signal: Couldn't delete file from cache.
+				OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", -errno);
 				return -errno;
+			}
 		}
-		return 0;
+		// Inserts a sync log entry if the file couldn't be deleted on the remote or if the network is not connected but could be deleted on the cache.
+		if (!(get_availability() && bOK))
+		{
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'd');
+		}
+		return nRet;
 	} catch(OFSException &e) {
 		errno = e.get_posixerrno();
 		return -errno;
 	}
 }
+
+
+
+
 
 /**
  * Change the access and modification times of
@@ -776,19 +882,34 @@ int OFSFile::op_utimens(const struct timespec ts[2])
 int OFSFile::op_write(const char *buf, size_t size, off_t offset)
 {
 	int res;
+	int nNumberOfWrittenBytes = -1;
 	if(!fd_remote && !fd_cache) {
 		errno = EBADF;
+		// Sends a signal: Couldn't write file due to missing network connection.
+		OFSBroadcast::Instance().SendSignal("FileError", "NeitherRemoteNorCacheAvailable", -EBADF);
 		return -errno;
 	}
 	if(fd_remote) {
-		res = pwrite(fd_remote, buf, size, offset);
+		nNumberOfWrittenBytes = res = pwrite(fd_remote, buf, size, offset);
 		if (res == -1)
+		{
 			res = -errno;
+			// Sends a signal: Couldn't write file to remote share.
+			OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", res);
+		}
 	}
 	if(fd_cache) {
 		res = pwrite(fd_cache, buf, size, offset);
+		// Inserts a sync log entry if a file was successfully written to the cache but not or incompletely written to the remote.
+		if (nNumberOfWrittenBytes != size - offset &&
+			res == size - offset)
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'm');
 		if (res == -1)
+		{
 			res = -errno;
+			// Sends a signal: Couldn't write file to cache.
+			OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", res);
+		}
 	}
 	return res;
 }
@@ -826,23 +947,45 @@ int OFSFile::op_symlink(const char* from)
  */
 int OFSFile::op_rename(OFSFile *to)
 {
-	int res;
+	int res, nRet = 0;
 	try {
 		update_cache();
+		bool bOK = true;
 		if(get_availability()) {
 			res = rename(get_remote_path().c_str(), 
 				to->get_remote_path().c_str());
 			if (res == -1)
-				return -errno;
+			{
+				bOK = false;
+				nRet = -errno;
+				// Sends a signal: Couldn't rename file on remote share.
+				OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", nRet);
+			}
 		}
 		if(get_offline_state()) {
 			res = rename(get_cache_path().c_str(), 
 				to->get_cache_path().c_str());
 			if (res == -1)
-				return -errno;		
+			{
+				// Sends a signal: Couldn't rename file on cache.
+				OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", -errno);
+				return -errno;
+			}
 		}
-		update_amtime();
-		return 0;
+		// Inserts a sync log entry if the link couldn't be renamed on the remote or if the network is not connected but could be renamed on the cache.
+		if (!(get_availability() && bOK))
+		{
+			// Creates the new file.
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), to->get_relative_path().c_str(), 'c');
+			// Copies the file content.
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), to->get_relative_path().c_str(), 'm');
+			// Deletes the old file.
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'd');
+		}
+		if (bOK)
+			update_amtime();
+
+		return nRet;
 	} catch(OFSException &e) {
 		errno = e.get_posixerrno();
 		return -errno;
@@ -858,24 +1001,41 @@ int OFSFile::op_rename(OFSFile *to)
  */
 int OFSFile::op_link(OFSFile *to)
 {
-	int res;
+	int res, nRet = 0;
 	try {
 		update_cache();
 		
+		bool bOK = true;
 		if(get_availability()) {
 			res = link(get_remote_path().c_str(),
 				to->get_remote_path().c_str());
 			if(res == -1)
-				return -errno;
+			{
+				bOK = false;
+				nRet = -errno;
+				// Sends a signal: Couldn't create link on remote share.
+				OFSBroadcast::Instance().SendSignal("FileError", "RemoteNotWritable", nRet);
+			}
 		}
-		if(get_offline_state()) {
+		if(bOK && get_offline_state()) {
 			res = link(get_cache_path().c_str(),
 				to->get_cache_path().c_str());
 			if(res == -1)
-				return -errno;	
+			{
+				// Sends a signal: Couldn't create link on cache.
+				OFSBroadcast::Instance().SendSignal("FileError", "CacheNotWritable", -errno);
+				return -errno;
+			}
 		}
-		update_amtime();
-		return 0;
+		// Inserts a sync log entry if the link couldn't be created on the remote or if the network is not connected but could be created on the cache.
+		if (!(get_availability() && bOK))
+		{
+			SyncLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'c');
+		}
+		if (bOK)
+			update_amtime();
+
+		return nRet;
 	} catch(OFSException &e) {
 		errno = e.get_posixerrno();
 		return -errno;

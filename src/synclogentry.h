@@ -17,12 +17,61 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#ifndef SYNCLOGENTRY_H
+#define SYNCLOGENTRY_H
+
+#include <string>
+
+using namespace std;
 
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Frank Gsellmann <frank.gsellmann@gmx.de>
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3} syncstate;
+class SyncLogEntry
+{
+public:
+    /**
+     * Constructor of SyncLogEntry takes the relative position
+     * of the backingtree as argument
+     * @param rPath 
+     */
+    SyncLogEntry(const string strFilePath, const string strModTime,
+		const char chModType, const int nNumber);
+    ~SyncLogEntry();
 
-#endif
+    /**
+     * Compares the file path of the entry with the given file path.
+     * @param strFilePath (in): File path to compare with
+     * @return true if equal false otherwise
+     */
+    const bool operator==(const string strFilePath);
+
+    /**
+     * Returns the relative path of the file.
+     * @return relative path of the file
+     */
+	const string GetFilePath() const;
+
+    /**
+     * Returns the time stamp of the modification.
+     * @return time stamp of the modification
+     */
+	const string GetModTime() const;
+
+    /**
+     * Returns the type of the modification.
+     * @return type of the modification
+     */
+	const char GetModType() const;
+
+//    friend bool SyncLogger::RemoveEntry(SyncLogEntry& sle);
+//    friend bool ConflictLogger::RemoveEntry(SyncLogEntry& sle);
+
+protected:
+    string m_strFilePath;
+    string m_strModTime;
+	char m_chModType;
+    int m_nNumber;
+};
+
+#endif	// !SYNCLOGENTRY_H

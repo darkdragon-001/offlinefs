@@ -1,9 +1,10 @@
 myexecpdir= $(DESTDIR)@OFS_SBIN@
 myexecp_PROGRAMS = ofs
 ofs_SOURCES = backingtree.cpp backingtreemanager.cpp backingtreepersistence.cpp \
-	file.cpp file_sync.cpp fileref.cpp filestatusmanager.cpp \
-	filesystemstatusmanager.cpp ofs.cpp ofs_fuse.cpp ofsenvironment.cpp ofsexception.cpp ofsfile.cpp \
-	persistable.cpp persistencemanager.cpp syncronisationmanager.cpp
+	conflictlogger.cpp file.cpp file_sync.cpp fileref.cpp filestatusmanager.cpp \
+	filesystemstatusmanager.cpp logger.cpp ofs.cpp ofs_fuse.cpp ofsbroadcast.cpp ofsenvironment.cpp \
+	ofsexception.cpp ofsfile.cpp persistable.cpp persistencemanager.cpp \
+	synchronizationmanager.cpp synclogentry.cpp synclogger.cpp syncronisationmanager.cpp
 
 # set the include path found by configure
 INCLUDES = -I$(top_srcdir)/libraries/libofs \

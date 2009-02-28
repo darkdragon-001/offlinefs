@@ -17,12 +17,57 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#ifndef SYNCLOGGER_H
+#define SYNCLOGGER_H
 
-/**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
+
+/*
+#include "file_sync.h"
+#include "file.h"
+#include "syncstatetype.h"
+#include "persistable.h"
+#include <iostream>
+#include <map>
+#include <string>
+
+using namespace std;
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3} syncstate;
+#include "mutexlocker.h"
 
-#endif
+
+#include "logger.h"
+
+#include <string>
+#include <list>
+using namespace std;
+
+struct cfg_t;
+class SyncLogEntry;
+/**
+    @author Frank Gsellmann <frank.gsellmann@gmx.de>
+*/
+class SyncLogger : public Logger
+{
+public:
+    static SyncLogger& Instance();
+    ~SyncLogger();
+    virtual bool AddEntry(const char* pszHash, const char* pszFilePath, const char chType);
+    virtual bool ParseFile(const char* pszHash);
+    virtual SyncLogEntry ReadFirstEntry(const char* pszHash);
+    virtual void CalcLogFileName(const char* pszHash, char* pszLogName);
+    virtual list<SyncLogEntry> GetEntries(const char* pszHash, const string strFilePath);
+    virtual bool RemoveEntry(const char* pszHash, SyncLogEntry& sle);
+
+protected:
+    SyncLogger();
+    SyncLogEntry ReadEntry(cfg_t* pEntryCFG);
+protected:
+//    FILE* m_pFile;
+private:
+    static std::auto_ptr<SyncLogger> theSyncLoggerInstance;
+    static Mutex m_mutex;
+};
+
+#include "synclogentry.h"
+
+#endif	// !SYNCLOGGER_H

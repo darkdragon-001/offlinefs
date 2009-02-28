@@ -51,7 +51,7 @@ public:
      * @param b The Backingtree to compare to
      * @return true if equal false otherwise
      */
-    const bool operator== (Backingtree const b);
+    const bool operator== (Backingtree b) const;
     /**
      * Getter for the relative path of the backing Tree
      * @return path relative to the mounted share
