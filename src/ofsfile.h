@@ -29,9 +29,14 @@
 // when starting with 'user.' - this might be a FUSE bug
 #define OFS_ATTRIBUTE_OFFLINE "ofs.offline"
 #define OFS_ATTRIBUTE_AVAILABLE "ofs.available"
+#define OFS_ATTRIBUTE_STATE "ofs.offlinestate"
 #define OFS_ATTRIBUTE_VALUE_YES "yes"
 #define OFS_ATTRIBUTE_VALUE_NO "no"
-
+#define OFS_ATTRIBUTE_VALUE_CURRENT "current"
+#define OFS_ATTRIBUTE_VALUE_OUTDATED "outdated"
+#define OFS_ATTRIBUTE_VALUE_CONFLICT "conflict"
+#define OFS_ATTRIBUTE_VALUE_UPDATING "updating"
+#define OFS_ATTRIBUTE_VALUE_REINTEGRATING "reintegrating"
 /**
 	@author Tobias Jaehnel <tjaehnel@gmail.com>
 	The Object represents one open file. It holds file/directory

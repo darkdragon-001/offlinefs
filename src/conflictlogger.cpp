@@ -26,6 +26,7 @@
 #include <confuse.h>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <assert.h>
 #include <time.h>
 #include <sys/types.h>

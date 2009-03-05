@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ofsbroadcast.h"
+#include <cstdlib>
 
 // Initializes the class attributes.
 std::auto_ptr<OFSBroadcast> OFSBroadcast::theOFSBroadcastInstance;
@@ -52,6 +53,7 @@ OFSBroadcast& OFSBroadcast::Instance()
  */
 void OFSBroadcast::SendSignal(char* pszSignal, char* pszValue, int nValue)
 {
+    return; ///\todo skipping DBUS stuff by now
    DBusMessage* msg;
    DBusMessageIter args;
    DBusConnection* conn;
@@ -124,6 +126,7 @@ void OFSBroadcast::SendSignal(char* pszSignal, char* pszValue, int nValue)
  */
 void OFSBroadcast::Listen() 
 {
+   return; ///\todo skipping DBUS stuff by now
    DBusMessage* msg;
    DBusMessage* reply;
    DBusMessageIter args;

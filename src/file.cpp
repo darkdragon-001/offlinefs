@@ -72,4 +72,3 @@ File & File::operator =(const File &copy)
 
 	return *this;
 }
-

@@ -45,9 +45,12 @@ void BackingtreeManager::register_Backingtree(string relative_Path){
 			backinglist.remove(*it);
 		}
 		// add the new backingtree and make list persistent
-		backinglist.push_back(Backingtree(
-			relative_Path,get_Cache_Path()+relative_Path));
+		Backingtree back = Backingtree(
+			relative_Path,get_Cache_Path()+relative_Path);
+		backinglist.push_back(back);
 		persist();
+		// start updating 
+		back.updateCache();
  	}
 }
 

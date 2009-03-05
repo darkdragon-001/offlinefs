@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <string>
+#include <cstring>
 
 // Initializes the class attributes.
 std::auto_ptr<SynchronizationManager> SynchronizationManager::theSynchronizationManagerInstance;

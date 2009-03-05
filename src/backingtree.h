@@ -36,6 +36,9 @@ using namespace std;
  */
 class Backingtree{
 public:
+    enum estatus { online, offline, updating, reintegrating };
+    estatus status;
+    inline estatus getStatus();
     /**
      * Constructor of Backingtree takes the relative position
      * of the backingtree as argument
@@ -80,6 +83,12 @@ public:
      * @return the absolute path in the cache or NULL if not in this backingtree
      */
     string get_cache_path(string path);
+    /**
+     * Start a thread updating the cache for this backing tree
+     */
+    void updateCache();
+    void updateCacheRunner(string str);
+    static void *updateCacheThread(void *);
 protected:
     string relative_path;
     string cache_path;
