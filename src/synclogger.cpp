@@ -230,9 +230,9 @@ bool SyncLogger::ParseFile(const char* pszHash)
 
 void SyncLogger::CalcLogFileName(const char* pszHash, char* pszLogName)
 {
-	strcpy(pszLogName, "Sync_");
-	strcat(pszLogName, pszHash);
-	strcat(pszLogName, ".log");
+    strcpy(pszLogName, "Sync_");
+    strcat(pszLogName, pszHash);
+    strcat(pszLogName, ".log");
 }
 
 list<SyncLogEntry> SyncLogger::GetEntries(const char* pszHash, const string strFilePath)

@@ -20,19 +20,19 @@
   </general>
   <kdevautoproject>
     <general>
-      <activetarget>mounthelper/ofsmount</activetarget>
+      <activetarget>src/ofs</activetarget>
       <useconfiguration>debug</useconfiguration>
     </general>
     <run>
       <mainprogram>/home/tobias/ofsproject/ofs/debug</mainprogram>
       <terminal>true</terminal>
       <runarguments>
-        <ofs>~/ofs_mountpoint smb://somewhere --shareid=someshare</ofs>
+        <ofs>/home/tobias/ofsproject/test/mount -r /home/tobias/ofsproject/test/remote -b /home/tobias/ofsproject/test/local</ofs>
         <mounthelper/>
         <ofsmount>smb://foo.bar/bla</ofsmount>
       </runarguments>
       <debugarguments>
-        <ofs>~/ofs_mountpoint smb://somewhere --shareid=someshare</ofs>
+        <ofs>/home/tobias/ofsproject/test/mount -r /home/tobias/ofsproject/test/remote -b /home/tobias/ofsproject/test/local</ofs>
         <mounthelper/>
         <ofsmount>smb://foo.bar/bla</ofsmount>
       </debugarguments>
@@ -188,7 +188,7 @@
     </qt>
     <references/>
     <codecompletion>
-      <automaticCodeCompletion>false</automaticCodeCompletion>
+      <automaticCodeCompletion>true</automaticCodeCompletion>
       <automaticArgumentsHint>true</automaticArgumentsHint>
       <automaticHeaderCompletion>true</automaticHeaderCompletion>
       <codeCompletionDelay>250</codeCompletionDelay>
@@ -201,13 +201,13 @@
       <statusBarTypeEvaluation>false</statusBarTypeEvaluation>
       <namespaceAliases>std=_GLIBCXX_STD;__gnu_cxx=std</namespaceAliases>
       <processPrimaryTypes>true</processPrimaryTypes>
-      <processFunctionArguments>false</processFunctionArguments>
-      <preProcessAllHeaders>false</preProcessAllHeaders>
+      <processFunctionArguments>true</processFunctionArguments>
+      <preProcessAllHeaders>true</preProcessAllHeaders>
       <parseMissingHeadersExperimental>false</parseMissingHeadersExperimental>
       <resolveIncludePathsUsingMakeExperimental>false</resolveIncludePathsUsingMakeExperimental>
       <alwaysParseInBackground>true</alwaysParseInBackground>
       <usePermanentCaching>true</usePermanentCaching>
-      <alwaysIncludeNamespaces>false</alwaysIncludeNamespaces>
+      <alwaysIncludeNamespaces>true</alwaysIncludeNamespaces>
       <includePaths>.;</includePaths>
     </codecompletion>
     <creategettersetter>

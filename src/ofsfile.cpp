@@ -20,6 +20,7 @@
 #include "ofsfile.h"
 #include "synclogger.h"
 #include "filestatusmanager.h"
+#include "filesystemstatusmanager.h" 
 #include "backingtreemanager.h"
 #include "ofsbroadcast.h"
 #include "ofsenvironment.h"
@@ -116,7 +117,7 @@ int OFSFile::op_chmod ( mode_t mode )
 int OFSFile::op_getattr ( struct stat *stbuf )
 {
 	int res;
-	if ( get_availability() )
+	if ( get_availability() == true )
 	{
 		res = lstat ( get_remote_path().c_str(), stbuf );
 	}
@@ -242,7 +243,9 @@ int OFSFile::op_create ( mode_t mode, int flags )
                 return -errno;
             }
         }
-        // Inserts a sync log entry if the file couldn't be created on the remote or if the network is not connected but could be created on the cache.
+        // DON'T UNDERSTAND THIS COMMENT: Inserts a sync log entry if the file couldn't be created on the remote or if the network is not connected but could be created on the cache.
+        
+        // If the remote file is not available, create a log entry
         if ( get_offline_state() && !get_availability() )
         {
             SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(),
@@ -540,7 +543,7 @@ int OFSFile::op_opendir()
 			if ( dh_remote == NULL )
 				return -errno;
 		}
-		if ( get_offline_state() )
+		if ( get_offline_state() || !get_availability())
 		{
 			dh_cache = opendir ( get_cache_path().c_str() );
 			if ( dh_cache == NULL )
@@ -1257,28 +1260,25 @@ OFSFile * OFSFile::get_parent_directory()
  */
 void OFSFile::update_amtime()
 {
-	if ( get_offline_state() && get_availability() )
-	{
-		struct stat fileinfo_remote;
-		struct utimbuf times;
+    if ( get_offline_state() && get_availability() )
+    {
+        struct stat fileinfo_remote;
+        struct utimbuf times;
 
-		if ( lstat ( get_remote_path().c_str(), &fileinfo_remote ) < 0 )
-			throw OFSException ( strerror ( errno ), errno );
+        if ( lstat ( get_remote_path().c_str(), &fileinfo_remote ) < 0 )
+            throw OFSException ( strerror ( errno ), errno );
 
-		// utime can not be used with symbolic links because there
-		// is no possibility to prevent it from following the link
-		if ( !S_ISLNK ( fileinfo_remote.st_mode ) )
-		{
-			times.actime = fileinfo_remote.st_atime;
-			times.modtime = fileinfo_remote.st_mtime;
-			if ( utime ( get_cache_path().c_str(), &times ) < 0 )
-				throw OFSException ( strerror ( errno ), errno );
-		}
-	}
+        // utime can not be used with symbolic links because there
+        // is no possibility to prevent it from following the link
+        if ( !S_ISLNK ( fileinfo_remote.st_mode ) )
+        {
+            times.actime = fileinfo_remote.st_atime;
+            times.modtime = fileinfo_remote.st_mtime;
+            if ( utime ( get_cache_path().c_str(), &times ) < 0 )
+                throw OFSException ( strerror ( errno ), errno );
+        }
+    }
 }
-
-
-
 
 /*!
     \fn OFSFile::op_getxattr(const char *name, char *value,
@@ -1370,9 +1370,16 @@ int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int
 	else if ( strncmp ( name, OFS_ATTRIBUTE_AVAILABLE,
 	                    strlen ( OFS_ATTRIBUTE_AVAILABLE + 1 ) ) == 0 )
 	{
-		// readonly -> error
-		res = -1;
-		errno = EACCES;
+            // if this is set on root, simulate if possible, otherwise deny access
+            if(get_relative_path() == "/")
+            {
+                FilesystemStatusManager::Instance().setAvailability(true);
+            }
+            else
+            {
+                res = -1;
+                errno = EACCES;
+            }
 	}
 	else if ( strncmp ( name, OFS_ATTRIBUTE_STATE,
 	                    strlen ( OFS_ATTRIBUTE_STATE + 1 ) ) == 0 )
@@ -1403,7 +1410,7 @@ int OFSFile::op_listxattr ( char *list, size_t size )
 
 	res += strlen ( OFS_ATTRIBUTE_OFFLINE ) + 1;
 	res += strlen ( OFS_ATTRIBUTE_AVAILABLE ) + 1;
-	res += strlen ( OFS_ATTRIBUTE_AVAILABLE ) + 1;
+	res += strlen ( OFS_ATTRIBUTE_STATE ) + 1;
 	if ( size > 0 ) // copy available attributes into the buffer
 	{
 		strncpy ( list, OFS_ATTRIBUTE_OFFLINE,
@@ -1449,9 +1456,16 @@ int OFSFile::op_removexattr ( const char *name )
 	else if ( strncmp ( name, OFS_ATTRIBUTE_AVAILABLE,
 	                    strlen ( OFS_ATTRIBUTE_AVAILABLE + 1 ) ) == 0 )
 	{
-		// readonly -> error
-		res = -1;
-		errno = EACCES;
+            // if this is set on root, simulate if possible, otherwise deny access
+            if(get_relative_path() == "/")
+            {
+                FilesystemStatusManager::Instance().setAvailability(false);
+            }
+            else
+            {
+                res = -1;
+                errno = EACCES;
+            }
 	}
 	else if ( strncmp (name, OFS_ATTRIBUTE_STATE,
 	               strlen (OFS_ATTRIBUTE_OFFLINE) + 1 ) == 0 )

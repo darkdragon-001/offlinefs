@@ -77,6 +77,8 @@ public:
      * @return the absolute path to the file below the mountpoint
      */
     string getRemote(string path);
+    
+    inline void setAvailability(bool value) { available = value; };
 protected:
     FilesystemStatusManager();
   private:

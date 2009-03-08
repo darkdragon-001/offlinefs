@@ -43,8 +43,6 @@ bool File::get_offline_state() const
 
 bool File::get_availability() const
 {
-	if(!offline_state)
-		return true;
 	return availability;
 }
 
