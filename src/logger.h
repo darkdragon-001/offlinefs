@@ -32,7 +32,7 @@ using namespace std;
  * This method is not available on linux
  * taken from http://www.jb.man.ac.uk/~slowe/cpp/itoa.html
  */
-char* itoa(int val, char *ret, int base);
+char* itoa(int val, int base);
 
 struct cfg_t;
 

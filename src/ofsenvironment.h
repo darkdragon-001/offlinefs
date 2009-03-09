@@ -93,6 +93,13 @@ public:
      * @return allowother flag
      */
     inline bool isAllowOther() { return allowother; };
+    
+    /**
+     * Get the global OFS directory where all persistence files,
+     * cache and remote mountpoints are in
+     * @return path to the ofs directory
+     */
+    inline string getOfsDir() { return ofsdir; };
     /**
      * Return the list of devices the system should listen for plug/unplug
      * @return list of devices as strings
@@ -118,6 +125,7 @@ private:
     string binarypath;
     bool unmount;
     bool allowother;
+    string ofsdir;
 protected:
     list<string> listendevices;
     static bool initialized;

@@ -23,6 +23,8 @@
 #include "synclogentry.h"
 #include "confuse.h"
 #include "ofsexception.h"
+#include "ofsenvironment.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -86,37 +88,29 @@ bool SyncLogger::AddEntry(const char* pszHash,
 
 	// Creates the new entry.
     char szEntry[MAX_PATH + 1024];
-	char szIndex[15];
-	char szDate[9];
-	char szTime[9];
+    char *szIndex = itoa(m_nNewIndex, 10);
+    char strtype[2];
+    strtype[0] = chType;
+    strtype[1] = '\0';
 
-	itoa(m_nNewIndex, szIndex, 10);
-
-	szDate[0] = 0;
-	szTime[0] = 0;
-	//strdate(szDate);
-	//strtime(szTime);
-
-	// Writes the new entry.
+    // Writes the new entry.
     strcpy(szEntry, MOD_NUMBER_VARNAME);
     strcat(szEntry, " ");
     strcat(szEntry, szIndex);
-    strcat(szEntry, "\n{\n\t");
+    strcat(szEntry, "\n\{\n\t");
     strcat(szEntry, FILE_PATH_VARNAME);
     strcat(szEntry, " = ");
     strcat(szEntry, pszFilePath);
     strcat(szEntry, "\n\t");
     strcat(szEntry, MOD_TIME_VARNAME);
     strcat(szEntry, " = ");
-    strcat(szEntry, szDate);
-    strcat(szEntry, " ");
-    strcat(szEntry, szTime);
+    strcat(szEntry, itoa(time(NULL),10));
     strcat(szEntry, "\n\t");
     strcat(szEntry, MOD_TYPE_VARNAME);
     strcat(szEntry, " = ");
-    strcat(szEntry, &chType);
+    strcat(szEntry, strtype);
     strcat(szEntry, "\n}\n\n");
-    strncpy(&szEntry[8], (char*)&szTime, sizeof(time_t)); // sizeof(FILETIME));
+//    strncpy(&szEntry[8], (char*)&szTime, sizeof(time_t)); // sizeof(FILETIME));
 /*
 	// Creates the file name of the sync log.
 	char szLogName[MAX_PATH];
@@ -135,8 +129,9 @@ bool SyncLogger::AddEntry(const char* pszHash,
 		return false;
 
 	// Writes the new entry into the sync log.
-    fwrite(szEntry, sizeof(char), 32 + strlen(szEntry), pFile);
-	fclose(pFile);
+//    fwrite(szEntry, sizeof(char), 32 + strlen(szEntry), pFile);
+    fwrite(szEntry, sizeof(char), strlen(szEntry), pFile);
+    fclose(pFile);
 
     m_nNewIndex++;
 
@@ -230,7 +225,8 @@ bool SyncLogger::ParseFile(const char* pszHash)
 
 void SyncLogger::CalcLogFileName(const char* pszHash, char* pszLogName)
 {
-    strcpy(pszLogName, "Sync_");
+    strcpy(pszLogName, OFSEnvironment::Instance().getOfsDir().c_str());
+    strcat(pszLogName, "/Sync_");
     strcat(pszLogName, pszHash);
     strcat(pszLogName, ".log");
 }
@@ -278,8 +274,7 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	fclose(pFile);
 
 	// Looks for the begin of the entry.
-	char szIndex[10];
-	itoa(m_nNewIndex, szIndex, 10);
+	char *szIndex = itoa(m_nNewIndex, 10);
 	strcpy(szSubstring, MOD_NUMBER_VARNAME);
 	strcat(szSubstring, " ");
 	strcat(szSubstring, szIndex);

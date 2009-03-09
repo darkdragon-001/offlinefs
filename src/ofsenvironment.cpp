@@ -57,10 +57,13 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	bool lAllowOther = false;
 	bool lUnmount = true;
 	list<string> lListenDevices;
-	
+		
 	MutexLocker obtain_lock(initm);
 	initialized = true;
 	OFSEnvironment &env = Instance();
+	
+	env.ofsdir = "/var/ofs";
+	
 	// parse command line
 	// TODO: cache-and remote path have to be custom for each share
 	int nextopt;

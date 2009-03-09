@@ -23,7 +23,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION/ DESTRUCTION
 //////////////////////////////////////////////////////////////////////////////
-char* itoa(int val, char *ret, int base) {
+char* itoa(int val, int base) {
 	
 	static char buf[32] = {0};
 	
@@ -32,10 +32,8 @@ char* itoa(int val, char *ret, int base) {
 	for(; val && i ; --i, val /= base)
 	
 		buf[i] = "0123456789abcdef"[val % base];
-	
-	
-	ret = &buf[i+1];
-	return ret;
+		
+	return &buf[i+1];
 }
 
 Logger::Logger()

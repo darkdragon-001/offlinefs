@@ -20,8 +20,9 @@
 
 #include "conflictlogger.h"
 #include "ofsexception.h"
-
+#include "ofsenvironment.h"
 #include "synclogentry.h"
+
 #include <assert.h>
 #include <confuse.h>
 #include <cstdlib>
@@ -84,11 +85,10 @@ bool ConflictLogger::AddEntry(const char* pszHash,
 
 	// Creates the new entry.
     char szEntry[MAX_PATH + 1024];
-	char szIndex[15];
 	char szDate[9];
 	char szTime[9];
 
-	itoa(m_nNewIndex, szIndex, 10);
+	char *szIndex = itoa(m_nNewIndex, 10);
 
 	szDate[0] = 0;
 	szTime[0] = 0;
@@ -225,9 +225,10 @@ bool ConflictLogger::ParseFile(const char* pszHash)
 
 void ConflictLogger::CalcLogFileName(const char* pszHash, char* pszLogName)
 {
-	strcpy(pszLogName, "Conflict_");
-	strcat(pszLogName, pszHash);
-	strcat(pszLogName, ".log");
+    strcpy(pszLogName, OFSEnvironment::Instance().getOfsDir().c_str());
+    strcat(pszLogName, "/Conflict_");
+    strcat(pszLogName, pszHash);
+    strcat(pszLogName, ".log");
 }
 
 list<SyncLogEntry> ConflictLogger::GetEntries(const char* pszHash, const string strFilePath)
@@ -273,8 +274,7 @@ bool ConflictLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	fclose(pFile);
 
 	// Looks for the begin of the entry.
-	char szIndex[10];
-	itoa(m_nNewIndex, szIndex, 10);
+	char *szIndex = itoa(m_nNewIndex, 10);
 	strcpy(szSubstring, MOD_NUMBER_VARNAME);
 	strcat(szSubstring, " ");
 	strcat(szSubstring, szIndex);
