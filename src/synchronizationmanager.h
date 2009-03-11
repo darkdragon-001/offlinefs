@@ -80,6 +80,26 @@ public:
      * @return 
      */
     void ReintegrateAll(const char* pszHash);
+    /**
+     * Add a new modification time entry
+     * @param path 
+     * @param mtime 
+     */
+    void addmtime(string path, time_t mtime);
+    /**
+     * Fetch a modification time entry
+     * @param path 
+     * @return Modification time of given file or 0 if not available
+     */
+    time_t getmtime(string path);
+    
+    /**
+     * Remove a time entry and make list persistent
+     * @param pszHash 
+     * @param listOfEntries 
+     */
+    void removemtime(string path);
+
 protected:
     SynchronizationManager();
     void ReintegrateFiles(const char* pszHash, list<SyncLogEntry> listOfEntries);
@@ -87,7 +107,7 @@ protected:
     int ModifyFile(const File& fileInfo);
     int DeleteFile(const File& fileInfo);
 private:
-    static map<string,file_sync> filesmod;
+    map<string,time_t> mtimes;
     static std::auto_ptr<SynchronizationManager> theSynchronizationManagerInstance;
     static Mutex m_mutex;
 };

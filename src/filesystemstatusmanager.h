@@ -21,6 +21,8 @@
 #define FILESYSTEMSTATUSMANAGER_H
 #include "mutex.h"
 #include "mutexlocker.h"
+#include "synchronizationmanager.h"
+#include "ofsenvironment.h"
 //#include "filesystem.h"
 #include <string>
 #include <memory>
@@ -78,7 +80,9 @@ public:
      */
     string getRemote(string path);
     
-    inline void setAvailability(bool value) { available = value; };
+    inline void setAvailability(bool value) { available = value; 
+        if(available) SynchronizationManager::Instance().ReintegrateAll(
+            OFSEnvironment::Instance().getShareID().c_str()); };
 protected:
     FilesystemStatusManager();
   private:

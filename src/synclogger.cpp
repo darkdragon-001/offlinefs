@@ -180,7 +180,7 @@ SyncLogEntry SyncLogger::ReadEntry(cfg_t* pEntryCFG)
 		// The log entry does not meet the standard.
 		throw OFSException("The log entry does not meet the standard", 1);
 	}
-	int nModNumber = atoi(cfg_title(pEntryCFG)+sizeof(MOD_NUMBER_VARNAME));
+	int nModNumber = atoi(cfg_title(pEntryCFG));
 	SyncLogEntry sle(cfg_getstr(pEntryCFG, FILE_PATH_VARNAME),
 		cfg_getstr(pEntryCFG, MOD_TIME_VARNAME), strModType.c_str()[0],
 		nModNumber);
@@ -221,6 +221,7 @@ bool SyncLogger::ParseFile(const char* pszHash)
 //    if (cfg_parse(pCFG, szLogName) == CFG_PARSE_ERROR)
     if (cfg_parse(m_pCFG, szLogName) == CFG_PARSE_ERROR)
         return false;
+    return true;
 }
 
 void SyncLogger::CalcLogFileName(const char* pszHash, char* pszLogName)
@@ -233,7 +234,8 @@ void SyncLogger::CalcLogFileName(const char* pszHash, char* pszLogName)
 
 list<SyncLogEntry> SyncLogger::GetEntries(const char* pszHash, const string strFilePath)
 {
-	ParseFile(pszHash);
+	if(!ParseFile(pszHash))
+	   throw OFSException("Parse error", 0);
 
 	// Assures the correct parsing of the file.
 	assert(m_pCFG != NULL);
@@ -243,7 +245,7 @@ list<SyncLogEntry> SyncLogger::GetEntries(const char* pszHash, const string strF
 	for (int i = 0; i < nCount; i++)
 	{
 		SyncLogEntry sle = ReadEntry(cfg_getnsec(m_pCFG, MOD_NUMBER_VARNAME, i));
-		if (sle == strFilePath)
+		if (strFilePath == "" || sle == strFilePath)
 			listOfEntries.push_back(sle);
 	}
 	return listOfEntries;
@@ -267,14 +269,15 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 		return false;
 
 	ssize_t nBytesRead;
-	if ((nBytesRead = fread(pszBuffer, sizeof(char), fileinfo.st_size, pFile)) < 0)
+	if ((nBytesRead = fread(pszBuffer, sizeof(char), fileinfo.st_size, pFile)) 
+	   < 0)
 	{
 		throw new OFSException(strerror(errno), errno);
 	}
 	fclose(pFile);
 
 	// Looks for the begin of the entry.
-	char *szIndex = itoa(m_nNewIndex, 10);
+	char *szIndex = itoa(sle.GetNumber(), 10);
 	strcpy(szSubstring, MOD_NUMBER_VARNAME);
 	strcat(szSubstring, " ");
 	strcat(szSubstring, szIndex);
@@ -288,11 +291,11 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	int nEntryBegin = pszEntry - pszBuffer;
 
 	// Looks for the end of the entry.
-	strcpy(szSubstring, "\n}\n\n");
-	strcat(szSubstring, MOD_NUMBER_VARNAME);
-	pszEntry = strstr(pszEntry, szSubstring);
+	//strcpy(szSubstring, "\n}\n\n");
+	//strcat(szSubstring, MOD_NUMBER_VARNAME);
+	pszEntry = strstr(pszEntry, "}");
 
-	// Opens the sync log file for reading.
+	// Opens the sync log file for writing.
 	pFile = OpenLogFile(pszHash, "w");
 	if (pFile == NULL)
 		return false;
@@ -302,8 +305,8 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	if (pszEntry != NULL)
 	{
 		// Entry already removed, nothing to do
-		int nEntryEnd = pszEntry - pszBuffer + 4;
-		fwrite(pszBuffer, sizeof(char), fileinfo.st_size - nEntryEnd, pFile);
+		int nEntryEnd = pszEntry - pszBuffer;
+		fwrite(pszEntry+1, sizeof(char), fileinfo.st_size - nEntryEnd-1, pFile);
 	}
 
 	fclose(pFile);

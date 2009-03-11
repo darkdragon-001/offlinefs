@@ -90,6 +90,7 @@ public:
     inline string get_relative_path() { return fileinfo.get_relative_path(); }
     int op_removexattr(const char *name);
     int op_listxattr(char *list, size_t size);
+    void savemtime();
 private:
     File fileinfo;
     DIR *dh_cache;

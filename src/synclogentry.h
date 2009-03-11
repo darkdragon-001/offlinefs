@@ -64,6 +64,7 @@ public:
      */
 	const char GetModType() const;
 
+    inline int GetNumber() { return m_nNumber; };
 //    friend bool SyncLogger::RemoveEntry(SyncLogEntry& sle);
 //    friend bool ConflictLogger::RemoveEntry(SyncLogEntry& sle);
 

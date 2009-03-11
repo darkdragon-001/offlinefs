@@ -23,6 +23,6 @@
 /**
 	@author Carsten Kolassa <Carsten@Kolassa.de>
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3} syncstate;
+typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
 
 #endif

@@ -219,7 +219,7 @@ int OFSFile::op_create ( mode_t mode, int flags )
     {
         // make sure the cache is sync regarding this file
 	update_cache();
-
+                
 	if ( get_offline_state() )
 	{
             fdc = open ( get_cache_path().c_str(), flags, mode );
@@ -499,7 +499,7 @@ int OFSFile::op_open ( int flags )
 	try
 	{
 		update_cache();
-
+                
 		if ( get_offline_state() )
 		{
 			fdc = open ( get_cache_path().c_str(), flags );
@@ -723,6 +723,9 @@ int OFSFile::op_rmdir()
 	try
 	{
 		update_cache();
+	        if ( get_offline_state() && !get_availability() )
+                    savemtime();
+
 		bool bOK = true;
 		if ( get_availability() )
 		{
@@ -857,6 +860,9 @@ int OFSFile::op_unlink()
 	try
 	{
 		update_cache();
+		
+                if ( get_offline_state() && !get_availability() )
+                    savemtime();
 
 		bool bOK = true;
 		if ( get_availability() )
@@ -955,11 +961,16 @@ int OFSFile::op_write ( const char *buf, size_t size, off_t offset )
 {
 	int res;
 	int nNumberOfWrittenBytes = -1;
+        
+        if ( get_offline_state() && !get_availability() )
+            savemtime();
+
 	if ( !fd_remote && !fd_cache )
 	{
 		errno = EBADF;
 		// Sends a signal: Couldn't write file due to missing network connection.
-		OFSBroadcast::Instance().SendSignal ( "FileError", "NeitherRemoteNorCacheAvailable", -EBADF );
+		OFSBroadcast::Instance().SendSignal ( "FileError", 
+		  "NeitherRemoteNorCacheAvailable", -EBADF );
 		return -errno;
 	}
 	if ( fd_remote )
@@ -1029,6 +1040,10 @@ int OFSFile::op_rename ( OFSFile *to )
 	{
 		update_cache();
 		bool bOK = true;
+		
+                if ( get_offline_state() && !get_availability() )
+                    savemtime();
+
 		if ( get_availability() )
 		{
 			res = rename ( get_remote_path().c_str(),
@@ -1481,4 +1496,17 @@ int OFSFile::op_removexattr ( const char *name )
 	if ( res == -1 )
 		return -errno;
 	return 0;
+}
+
+
+/**
+ * \brief Save the modification time of the local file via Synchronization manager
+ */
+void OFSFile::savemtime()
+{
+    struct stat finfo;
+    if( lstat(get_cache_path().c_str(), &finfo) == 0)
+    {
+        SynchronizationManager::Instance().addmtime(get_relative_path(), finfo.st_mtime);
+    }
 }

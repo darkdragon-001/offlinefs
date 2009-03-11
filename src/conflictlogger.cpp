@@ -105,16 +105,13 @@ bool ConflictLogger::AddEntry(const char* pszHash,
     strcat(szEntry, pszFilePath);
     strcat(szEntry, "\n\t");
     strcat(szEntry, MOD_TIME_VARNAME);
-    strcat(szEntry, " = ");
-    strcat(szEntry, szDate);
-    strcat(szEntry, " ");
-    strcat(szEntry, szTime);
+    strcat(szEntry, " = 0");
     strcat(szEntry, "\n\t");
     strcat(szEntry, MOD_TYPE_VARNAME);
     strcat(szEntry, " = ");
     strcat(szEntry, &chType);
     strcat(szEntry, "\n}\n\n");
-    strncpy(&szEntry[8], (char*)&szTime, sizeof(time_t)); // sizeof(FILETIME));
+//    strncpy(&szEntry[8], (char*)&szTime, sizeof(time_t)); // sizeof(FILETIME));
 /*
 	// Creates the file name of the sync log.
 	char szLogName[MAX_PATH];
