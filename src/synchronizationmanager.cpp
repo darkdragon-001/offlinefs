@@ -23,7 +23,7 @@
 #include "filestatusmanager.h"
 #include "synclogentry.h"
 #include "ofsbroadcast.h"
-#include "conflictlogger.h"
+#include "conflictmanager.h"
 #include "ofsenvironment.h"
 #include "synchronizationpersistence.h"
 #include "ofsfile.h"
@@ -244,8 +244,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
 		// Sends a signal: File type mismatch.
 		OFSBroadcast::Instance().SendSignal("Conflict",
 		  "RemoteAndCacheTypeMismatch", 0);
-		ConflictLogger::Instance().AddEntry(OFSEnvironment::Instance()
-		  .getShareID().c_str(), fileInfo.get_relative_path().c_str(), 't');
+		ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 		return 1;
 	} // else both have created directories -> we can merge
 }
@@ -279,8 +278,7 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 		// Sends a signal: Modified file has been deleted on remote.
 		OFSBroadcast::Instance().SendSignal("Conflict",
 		  "ModifiedFileHasBeenDeleted", 0);
-		ConflictLogger::Instance().AddEntry(OFSEnvironment::Instance()
-		  .getShareID().c_str(), fileInfo.get_relative_path().c_str(), 'd');
+		ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 		return 1;
 	}
 	else
@@ -291,9 +289,7 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 			// Sends a signal: Modified file has been modified on remote.
 			OFSBroadcast::Instance().SendSignal("Conflict",
 			 "ModifiedFileHasBeenModified", 0);
-			ConflictLogger::Instance().AddEntry(OFSEnvironment::Instance()
-			 .getShareID().c_str(), fileInfo.get_relative_path().c_str(),
-			 'c');
+			ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 			return 2;
 		}
 		else
@@ -370,7 +366,7 @@ int SynchronizationManager::DeleteFile(const File& fileInfo)
 			// Conflict!!!
 			// Sends a signal: Couldn't delete a file that has been modified on the remote.
 			OFSBroadcast::Instance().SendSignal("Conflict", "FileToDeleteHasBeenModified", 0);
-			ConflictLogger::Instance().AddEntry(OFSEnvironment::Instance().getShareID().c_str(), fileInfo.get_relative_path().c_str(), 'm');
+			ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 			return 1;
 		}
 		else

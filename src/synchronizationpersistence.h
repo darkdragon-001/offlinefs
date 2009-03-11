@@ -17,43 +17,52 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef CONFLICTLOGGER_H
-#define CONFLICTLOGGER_H
-
-#include "logger.h"
-
+#ifndef SYNCHRONIZATIONPERSISTENCE_H
+#define SYNCHRONIZATIONPERSISTENCE_H
+#include "persistencemanager.h"
 #include "mutexlocker.h"
-
-#include "synclogentry.h"
-
-#include <string>
-#include <list>
+#include <map>
+#include <memory>
 using namespace std;
 
-struct cfg_t;
+#define CONFIGKEY_MTIMES "mtimes"
+#define PERSISTENCE_MODULE_NAME "synchronization"
 
 /**
-    @author Frank Gsellmann <frank.gsellmann@gmx.de>
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
 */
-class ConflictLogger : public Logger
-{
+class SynchronizationPersistence : public PersistenceManager {
 public:
-    static ConflictLogger& Instance();
-    ~ConflictLogger();
-    virtual bool AddEntry(const char* pszHash, const char* pszFilePath, const char chType);
-    virtual bool ParseFile(const char* pszHash);
-    virtual SyncLogEntry ReadFirstEntry(const char* pszHash);
-    virtual void CalcLogFileName(const char* pszHash, char* pszLogName);
-    virtual list<SyncLogEntry> GetEntries(const char* pszHash, const string strFilePath);
-    virtual bool RemoveEntry(const char* pszHash, SyncLogEntry& sle);
+    /**
+     * Get singleton instance
+     * @return singleton instance
+     */
+    static SynchronizationPersistence& Instance();
+    ~SynchronizationPersistence();
+    /**
+     * make modification times persistent
+     * @param trees list of modification times
+     */
+    void mtimes(const map<string, time_t> modtimes);
+    /**
+     * load modification times
+     * @return list of modification times per file
+     */
+    map<string,time_t> mtimes();
 protected:
-    ConflictLogger();
-    SyncLogEntry ReadEntry(cfg_t* pEntryCFG);
-protected:
-//    FILE* m_pFile;
+    SynchronizationPersistence();
+    virtual cfg_opt_t * init_parser();
+    virtual string get_persistence();
+    virtual void read_values();
+
 private:
-    static std::auto_ptr<ConflictLogger> theConflictLoggerInstance;
-    static Mutex m_mutex;
+    map<string,time_t> mtimemap;
+
+    static std::auto_ptr<SynchronizationPersistence> 
+        theSynchronizationPersistenceInstance;
+    static Mutex m;
+
+
 };
 
-#endif	// !CONFLICTLOGGER_H
+#endif

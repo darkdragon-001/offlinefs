@@ -25,6 +25,8 @@
 #include "ofsbroadcast.h"
 #include "ofsenvironment.h"
 #include "synchronizationmanager.h"
+#include "conflictmanager.h"
+
 #include <sys/time.h>
 #include <unistd.h>
 #include <ofsexception.h>
@@ -73,7 +75,6 @@ int OFSFile::op_access ( int mask )
 
 	return 0;
 }
-
 
 /**
  * Change the permission bits of a file
@@ -1325,8 +1326,7 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 				          strlen ( OFS_ATTRIBUTE_VALUE_NO ) );
 			}
 		}
-		// availability attribute
-	}
+	} // availability attribute
 	else if ( strncmp ( name, OFS_ATTRIBUTE_AVAILABLE,
 	                    strlen ( OFS_ATTRIBUTE_AVAILABLE + 1 ) ) == 0 )
 	{
@@ -1355,6 +1355,28 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 	{
             ///\todo fetch information from somewhere
 	}
+	else if ( strncmp (name, OFS_ATTRIBUTE_CONFLICT,
+                            strlen ( OFS_ATTRIBUTE_CONFLICT + 1 ) ) == 0 )
+        {
+		if ( ConflictManager::Instance().isConflicted(get_relative_path()) )
+		{
+			res = strlen ( OFS_ATTRIBUTE_VALUE_YES );
+			if ( size >= res )
+			{
+				strncpy ( value, OFS_ATTRIBUTE_VALUE_YES,
+				          strlen ( OFS_ATTRIBUTE_VALUE_YES ) );
+			}
+		}
+		else
+		{
+			res = strlen ( OFS_ATTRIBUTE_VALUE_NO );
+			if ( size >= res )
+			{
+				strncpy ( value, OFS_ATTRIBUTE_VALUE_NO,
+				          strlen ( OFS_ATTRIBUTE_VALUE_NO ) );
+			}
+		}
+        }
 	else   // TODO: By now this is only for remote files
 	{
 		res = lgetxattr ( get_remote_path().c_str(),

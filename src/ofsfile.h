@@ -30,6 +30,7 @@
 #define OFS_ATTRIBUTE_OFFLINE "ofs.offline"
 #define OFS_ATTRIBUTE_AVAILABLE "ofs.available"
 #define OFS_ATTRIBUTE_STATE "ofs.offlinestate"
+#define OFS_ATTRIBUTE_CONFLICT "ofs.conflict"
 #define OFS_ATTRIBUTE_VALUE_YES "yes"
 #define OFS_ATTRIBUTE_VALUE_NO "no"
 #define OFS_ATTRIBUTE_VALUE_CURRENT "current"
