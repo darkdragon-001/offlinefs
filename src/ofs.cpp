@@ -61,8 +61,11 @@ int main(int argc, char *argv[])
 		args[2] = NULL;
 		numargs = 2;
 	}
+	
+	// create cache path - ignore errors if it not exists
+	mkdir(env.getCachePath().c_str(), 0777);
 //
-return my_ofs.main(numargs, args, NULL, &my_ofs);
+        return my_ofs.main(numargs, args, NULL, &my_ofs);
 
   //return EXIT_SUCCESS;
 }

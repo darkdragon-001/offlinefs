@@ -80,9 +80,9 @@ public:
      */
     string getRemote(string path);
     
-    inline void setAvailability(bool value) { available = value; 
-        if(available) SynchronizationManager::Instance().ReintegrateAll(
-            OFSEnvironment::Instance().getShareID().c_str()); };
+    void setAvailability(bool value);
+    void unmountfs();
+    void mountfs();
 protected:
     FilesystemStatusManager();
   private:

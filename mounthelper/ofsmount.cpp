@@ -80,14 +80,13 @@ int main(int argc, char *argv[])
     remotefstype = shareurl.substr(0,nDoppelPunktIndex);
     sharepath = shareurl.substr(nDoppelPunktIndex+3);
     // handle special protocols
-    if(remotefstype == "smb")
+    if(remotefstype == "smb" || remotefstype == "smbfs")
         shareremote = string("//") + sharepath;
     else if(remotefstype == "file") {
 	shareremote = string("/") + sharepath;
 	remotemountpoint = shareremote;
     } else
         shareremote = sharepath;
-
 
     char* pArgumente[8];
 
@@ -122,6 +121,7 @@ int main(int argc, char *argv[])
     		cout << pMountArgumente[5] << " ";
     		cout << pMountArgumente[6] << " ";
     		cout << endl;*/
+    		// make the mount point and ignore errors of it does exits
        		mkdir(pMountArgumente[4], 0777);
        		execvp("mount", pMountArgumente);
        		perror(strerror(errno));
@@ -168,8 +168,9 @@ int main(int argc, char *argv[])
 //    cout << pArgumente[2] << endl;
 
     // Ruft das Offline-Dateisystem auf.
-    execvp("ofs", pArgumente);
+    execvp("/sbin/ofs", pArgumente);    
     perror(strerror(errno));
+
     return -errno;
     //return 0;
 }
