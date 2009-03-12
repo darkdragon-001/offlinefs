@@ -1158,11 +1158,19 @@ void OFSFile::update_cache()
 	struct stat fileinfo_cache;
 	struct stat fileinfo_remote;
 	bool file_exists = true;
+	bool isdir = false;
 	int ret;
 
-	// only if the file is marked as offline and the remote
-	// file is available we do something
-	if ( get_offline_state() && get_availability() )
+	ret = lstat ( get_remote_path().c_str(), &fileinfo_remote );
+	if(ret >= 0 && S_ISDIR(fileinfo_remote.st_mode))
+	   isdir = true;
+        // only update if:
+	// - the file is marked as offline
+	// - the remote file is available
+	// - the file is not in conflict state
+	if ( get_offline_state() && get_availability() 
+	       && (!isConflictPath() || isdir)
+	   )
 	{
 		// get info of remote file
 		ret = lstat ( get_remote_path().c_str(), &fileinfo_remote );
@@ -1358,7 +1366,7 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 	else if ( strncmp (name, OFS_ATTRIBUTE_CONFLICT,
                             strlen ( OFS_ATTRIBUTE_CONFLICT + 1 ) ) == 0 )
         {
-		if ( ConflictManager::Instance().isConflicted(get_relative_path()) )
+		if ( isConflictPath() )
 		{
 			res = strlen ( OFS_ATTRIBUTE_VALUE_YES );
 			if ( size >= res )
@@ -1389,7 +1397,6 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 		return -errno;
 	return res;
 }
-
 
 /*!
     \fn OFSFile::op_setxattr(const char *value, size_t size, int flags)
@@ -1424,6 +1431,33 @@ int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int
 		// readonly -> error
 		res = -1;
 		errno = EACCES;
+	}
+	else if ( strncmp ( name, OFS_ATTRIBUTE_CONFLICT,
+	                    strlen ( OFS_ATTRIBUTE_CONFLICT + 1 ) ) == 0 )
+	{
+            if(get_offline_state() && get_availability())
+            {
+                if(strcmp(value, "local") == 0)
+                {
+                    ConflictManager::Instance().resolve(get_relative_path(), "local");
+                }
+                else if(strcmp(value, "remote") == 0)
+                {
+                    ConflictManager::Instance().resolve(get_relative_path(), "remote");
+                }
+                else
+                {
+                    // readonly -> error
+                    res = -1;
+                    errno = EACCES;
+                }
+            }
+            else
+            {
+                // readonly -> error
+                res = -1;
+                errno = EACCES;
+            }
 	}
 	else   // other attribute - delegate to underlying filesystem
 	{

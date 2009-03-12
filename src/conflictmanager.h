@@ -45,6 +45,8 @@ public:
     
     bool isConflicted(string relativePath);
     
+    bool resolve(string relativePath, string direction);
+
     /**
      * Writes the local states to the disk
      */

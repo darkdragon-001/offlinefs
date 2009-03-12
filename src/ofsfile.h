@@ -21,6 +21,7 @@
 #define OFSFILE_H
 
 #include "file.h"
+#include "conflictmanager.h"
 #include <string>
 #include <fusexx.hpp>
 #include <dirent.h>
@@ -89,6 +90,8 @@ public:
     inline bool get_availability() { return fileinfo.get_availability(); }
     inline bool get_offline_state() { return fileinfo.get_offline_state(); }
     inline string get_relative_path() { return fileinfo.get_relative_path(); }
+    inline bool isConflictPath() { return
+         ConflictManager::Instance().isConflicted(get_relative_path()); };
     int op_removexattr(const char *name);
     int op_listxattr(char *list, size_t size);
     void savemtime();
