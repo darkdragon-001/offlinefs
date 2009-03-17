@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <cstring>
 #include <pthread.h>
 #define DBUS_API_SUBJECT_TO_CHANGE
 #include <dbus/dbus.h>
@@ -32,10 +33,16 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <assert.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 using namespace std;
 
 #include "filesystemstatusmanager.h"
 #include "ofsenvironment.h"
+#include "ofsconf.h"
+#include "ofshash.h"
 
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
@@ -141,4 +148,154 @@ string FilesystemStatusManager::getRemoteMountpoint()
 string FilesystemStatusManager::getRemote(string path)
 {
 	return OFSEnvironment::Instance().getRemotePath()+path;
+}
+
+
+/*!
+    \fn FilesystemStatusManager::mountfs()
+ */
+void FilesystemStatusManager::mountfs()
+{
+    string shareurl = OFSEnvironment::Instance().getShareURL();
+    string sharepath;
+    string remotefstype;
+    string shareremote;
+    string remotemountpoint;
+    
+    //////////////////////////////////////////////////////////////////////////
+    // MOUNT
+    //////////////////////////////////////////////////////////////////////////
+
+    char* pMountArgumente[8];
+    pMountArgumente[0] = "mount";
+    pMountArgumente[1] = "-t";
+    pMountArgumente[2] = NULL;
+    pMountArgumente[3] = NULL;
+    pMountArgumente[4] = NULL;
+    pMountArgumente[5] = "-o";
+    pMountArgumente[6] = NULL;
+    pMountArgumente[7] = NULL; // terminator
+
+    // Ermittelt die Remote-Pfade.
+    //cout << argv[0] << endl;
+    const char* cshareurl = shareurl.c_str();
+    char* pchDoppelPunktPos = strchr(cshareurl, ':');
+    assert(pchDoppelPunktPos != NULL);
+    int nDoppelPunktIndex = int (pchDoppelPunktPos - cshareurl);
+
+    remotefstype = shareurl.substr(0,nDoppelPunktIndex);
+    sharepath = shareurl.substr(nDoppelPunktIndex+3);
+    // handle special protocols
+    if(remotefstype == "smb" || remotefstype == "smbfs")
+        shareremote = string("//") + sharepath;
+    else if(remotefstype == "file") {
+	shareremote = string("/") + sharepath;
+	remotemountpoint = shareremote;
+    } else
+        shareremote = sharepath;
+
+    char* pArgumente[8];
+
+    if(remotefstype != "file") {
+    	// Legt das Dateisystem fest.
+    	pMountArgumente[2] = (char*)remotefstype.c_str();
+
+    	// Oeffnet die Konfigurationsdatei.
+    	OFSConf& conf = OFSConf::Instance();
+    	//conf.ParseFile(); //obsolete
+
+    	// Legt die Server-Share fest.
+    	pMountArgumente[3] = (char*)shareremote.c_str();
+    	remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
+    	pMountArgumente[4] = (char*)remotemountpoint.c_str();
+
+    	//    my_options(argc - 2, &argv[2], &pszOptions);
+    	pMountArgumente[6] = (char *)OFSEnvironment::Instance().getMountOptions().c_str();
+    	// filesystem options
+	//    pArgumente[2] = szOptions;
+    
+    	// Mountet die Share, die vom Benutzer übergeben wurde.
+    	int childpid = fork();
+    	int status;
+    	if(childpid == 0) {
+    		/*cout << endl << "mount" << " ";
+		cout << pMountArgumente[1] << " ";
+    		cout << pMountArgumente[2] << " ";
+    		cout << pMountArgumente[3] << " ";
+    		cout << pMountArgumente[4] << " ";
+    		cout << pMountArgumente[5] << " ";
+    		cout << pMountArgumente[6] << " ";
+    		cout << endl;*/
+    		// make the mount point and ignore errors of it does exits
+       		mkdir(pMountArgumente[4], 0777);
+       		execvp("mount", pMountArgumente);
+       		perror(strerror(errno));
+       		return;
+    	}
+    	if(childpid < 0) {
+        	perror(strerror(errno));
+        	return;
+    	}
+    	//waitpid(childpid, &status, 0);
+    	int childpid2 = wait(&status);
+	//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
+    	int exitstatus = WEXITSTATUS(status);
+    	if(WIFEXITED(status) && exitstatus) {
+       		errno = exitstatus;
+       		perror(strerror(errno));
+       		return;
+    	}
+    
+    }
+}
+
+
+/*!
+    \fn FilesystemStatusManager::unmountfs()
+ */
+void FilesystemStatusManager::unmountfs()
+{	
+	int childpid = fork();
+	int status;
+	if(childpid == 0) {
+		char *arguments[4];
+		arguments[0] = "umount";
+		arguments[1] = "-f";
+		arguments[2] = (char *)OFSEnvironment::Instance().getRemotePath().c_str();
+		arguments[3] = NULL;
+		execvp(arguments[0], arguments);
+		errno = 0;
+		return;
+	}
+	if(childpid < 0) {
+		perror(strerror(errno));
+		errno = 0;
+		return;
+	}
+	int childpid2 = wait(&status);
+	int exitstatus = WEXITSTATUS(status);
+	if(WIFEXITED(status) && exitstatus) {
+		cout << "Unable to unmount the remote filesystem!" << endl;
+		perror(strerror(exitstatus));
+		errno = 0;
+		return;
+	}
+}
+
+void FilesystemStatusManager::setAvailability(bool value)
+{
+    if(available != value)
+    {
+        available = value;
+        if(available)
+        { // mount share and reintegrate
+            mountfs();
+            SynchronizationManager::Instance().ReintegrateAll(
+                OFSEnvironment::Instance().getShareID().c_str());
+        }
+        else
+        { // unmount fs
+            unmountfs();
+        }
+    }
 }

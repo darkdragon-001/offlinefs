@@ -56,10 +56,11 @@ File Filestatusmanager::give_me_file(string Path)
 	
 	offline = (back != NULL);
 	available = fssm.isAvailable();
+	
 	if(offline) {
-		Cache_Path = back->get_cache_path(Path);
+            Cache_Path = back->get_cache_path(Path);
 	} else {
-		Cache_Path = "";
+            Cache_Path = btm.get_Cache_Path()+Path; // actually same as above
 	}
 	if(available) {
 		Remote_Path = fssm.getRemote(Path);
@@ -67,5 +68,6 @@ File Filestatusmanager::give_me_file(string Path)
 		Remote_Path = "";
 	}
 	
-	return File(offline, available, Path, Remote_Path, Cache_Path);
+	//
+        return File(offline, available, Path, Remote_Path, Cache_Path);
 }

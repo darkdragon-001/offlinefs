@@ -21,6 +21,7 @@
 #define OFSFILE_H
 
 #include "file.h"
+#include "conflictmanager.h"
 #include <string>
 #include <fusexx.hpp>
 #include <dirent.h>
@@ -29,9 +30,15 @@
 // when starting with 'user.' - this might be a FUSE bug
 #define OFS_ATTRIBUTE_OFFLINE "ofs.offline"
 #define OFS_ATTRIBUTE_AVAILABLE "ofs.available"
+#define OFS_ATTRIBUTE_STATE "ofs.offlinestate"
+#define OFS_ATTRIBUTE_CONFLICT "ofs.conflict"
 #define OFS_ATTRIBUTE_VALUE_YES "yes"
 #define OFS_ATTRIBUTE_VALUE_NO "no"
-
+#define OFS_ATTRIBUTE_VALUE_CURRENT "current"
+#define OFS_ATTRIBUTE_VALUE_OUTDATED "outdated"
+#define OFS_ATTRIBUTE_VALUE_CONFLICT "conflict"
+#define OFS_ATTRIBUTE_VALUE_UPDATING "updating"
+#define OFS_ATTRIBUTE_VALUE_REINTEGRATING "reintegrating"
 /**
 	@author Tobias Jaehnel <tjaehnel@gmail.com>
 	The Object represents one open file. It holds file/directory
@@ -83,8 +90,11 @@ public:
     inline bool get_availability() { return fileinfo.get_availability(); }
     inline bool get_offline_state() { return fileinfo.get_offline_state(); }
     inline string get_relative_path() { return fileinfo.get_relative_path(); }
+    inline bool isConflictPath() { return
+         ConflictManager::Instance().isConflicted(get_relative_path()); };
     int op_removexattr(const char *name);
     int op_listxattr(char *list, size_t size);
+    void savemtime();
 private:
     File fileinfo;
     DIR *dh_cache;

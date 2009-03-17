@@ -17,12 +17,55 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#ifndef CONFLICTMANAGER_H
+#define CONFLICTMANAGER_H
+
+#include "persistable.h"
+#include "mutexlocker.h"
+#include <string>
+#include <list>
+using namespace std;
 
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
+class ConflictManager : public persistable {
+public:
+    /**
+     * Get singleton instance
+     * @return singleton instance
+     */
+    static ConflictManager& Instance();    
+
+    ~ConflictManager();
+
+    void addConflictFile(string relativePath);
+    
+    void removeConflictFile(string relativePath);
+    
+    bool isConflicted(string relativePath);
+    
+    bool resolve(string relativePath, string direction);
+
+    /**
+     * Writes the local states to the disk
+     */
+    virtual void persist() const;
+    /**
+     * Reads the local states from the disk
+     */
+    virtual void reinstate();
+
+protected:
+    ConflictManager();
+    
+private:
+    list<string> conflictfiles;
+    
+    static std::auto_ptr<ConflictManager> 
+        theConflictManagerInstance;
+    static Mutex m;
+
+};
 
 #endif

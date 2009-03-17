@@ -36,6 +36,9 @@ using namespace std;
  */
 class Backingtree{
 public:
+    enum estatus { online, offline, updating, reintegrating };
+    estatus status;
+    inline estatus getStatus();
     /**
      * Constructor of Backingtree takes the relative position
      * of the backingtree as argument
@@ -51,7 +54,7 @@ public:
      * @param b The Backingtree to compare to
      * @return true if equal false otherwise
      */
-    const bool operator== (Backingtree const b);
+    const bool operator== (Backingtree b) const;
     /**
      * Getter for the relative path of the backing Tree
      * @return path relative to the mounted share
@@ -80,6 +83,12 @@ public:
      * @return the absolute path in the cache or NULL if not in this backingtree
      */
     string get_cache_path(string path);
+    /**
+     * Start a thread updating the cache for this backing tree
+     */
+    void updateCache();
+    void updateCacheRunner(string str);
+    static void *updateCacheThread(void *);
 protected:
     string relative_path;
     string cache_path;

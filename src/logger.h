@@ -17,12 +17,47 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#ifndef LOGGER_H
+#define LOGGER_H
 
+#include "synclogentry.h"
+
+#include <string>
+#include <list>
+using namespace std;
+
+#define MAX_PATH 512
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-*/
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
+ * This method converts from integer to char array
+ * This method is not available on linux
+ * taken from http://www.jb.man.ac.uk/~slowe/cpp/itoa.html
+ */
+char* itoa(int val, int base);
 
-#endif
+struct cfg_t;
+
+class SyncLogEntry;
+/**
+    @author Frank Gsellmann <frank.gsellmann@gmx.de>
+*/
+class Logger
+{
+public:
+    Logger();
+
+    virtual bool AddEntry(const char* pszHash, const char* pszFilePath, const char chType) = 0;
+    virtual bool ParseFile(const char* pszHash) = 0;
+    virtual SyncLogEntry ReadFirstEntry(const char* pszHash) = 0;
+    virtual void CalcLogFileName(const char* pszHash, char* pszLogName) = 0;
+    virtual list<SyncLogEntry> GetEntries(const char* pszHash, const string strFilePath) = 0;
+    virtual bool RemoveEntry(const char* pszHash, SyncLogEntry& sle) = 0;
+
+    FILE* OpenLogFile(const char* pszHash, const char* szMode);
+
+protected:
+    int m_nNewIndex;
+    char m_szCurShare[1024];
+    cfg_t* m_pCFG;
+};
+
+#endif	// !LOGGER_H

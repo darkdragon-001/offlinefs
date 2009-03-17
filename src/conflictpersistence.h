@@ -17,12 +17,56 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#ifndef CONFLICTPERSISTENCE_H
+#define CONFLICTPERSISTENCE_H
+
+#include "persistencemanager.h"
+#include <list>
+#include "mutexlocker.h"
+#include <memory>
+using namespace std;
+
+#define CONFIGKEY_CFILES "cfiles"
+#define PERSISTENCE_MODULE_NAME "conflicts"
 
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
+class ConflictPersistence : public PersistenceManager
+{
+public:
+    ~ConflictPersistence();
+    
+    /**
+     * Get singleton instance
+     * @return singleton instance
+     */
+    static ConflictPersistence& Instance();
+    /**
+     * make conflicted files persistent
+     * @param cfiles Conflicted files
+     */
+    void files(const list<string> cfiles);
+    /**
+     * load conflicted files
+     * @return Conflicted files
+     */
+    list<string> files();
+
+protected:
+    ConflictPersistence();
+    
+    virtual cfg_opt_t *init_parser();
+    virtual string get_persistence();
+    virtual void read_values();
+
+private:
+    list<string> conflictfiles;
+    
+    static std::auto_ptr<ConflictPersistence> 
+        theConflictPersistenceInstance;
+    static Mutex m;
+
+};
 
 #endif

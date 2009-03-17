@@ -54,25 +54,30 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	string lRemotePath = "";
 	string lCachePath = "";
 	string lShareID = "";
+	string lMountOptions = "";
 	bool lAllowOther = false;
 	bool lUnmount = true;
 	list<string> lListenDevices;
-	
+		
 	MutexLocker obtain_lock(initm);
 	initialized = true;
 	OFSEnvironment &env = Instance();
+	
+	env.ofsdir = "/var/ofs";
+	
 	// parse command line
 	// TODO: cache-and remote path have to be custom for each share
 	int nextopt;
 	// define allowed options
-	const char* const short_options = ":r:b:l:i:onh";
+	const char* const short_options = ":r:b:l:i:p:onh";
 	const struct option long_options[] = {
 		{"remote", required_argument, NULL, 'r'},
 		{"backing", required_argument, NULL, 'b'},
 		{"listen", required_argument, NULL, 'l'},
 		{"shareid", required_argument, NULL, 'i'},
-		{"allowother", required_argument, NULL, 'o'},
+		{"allowother", no_argument, NULL, 'o'},
 		{"nounmount", required_argument, NULL, 'n'},
+		{"options", required_argument, NULL, 'p'},
 		{"help", no_argument, NULL, 'h'}
 	};
 	
@@ -103,6 +108,9 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			break;
 		   case 'i': // custom share identifier
 			lShareID = optarg;
+			break;
+		   case 'p': // mount options
+			lMountOptions = optarg;
 			break;
 		   case 'o': // allow other users access to the filesystem
 			lAllowOther = true;
@@ -147,6 +155,8 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		env.listendevices = ofsconf.GetListenDevices();
 	else
 		env.listendevices = lListenDevices;
+        // mount options
+        env.mountoptions = lMountOptions;
 	// unmount flag
 	env.unmount = lUnmount;
 	// allow other flag
@@ -172,6 +182,7 @@ string OFSEnvironment::getUsageString(string executable)
 		<< " listen for plug/unplug events" << endl;
 	usage << "-i --shareid    Internal unique share identifier" << endl;
 	usage << "-o --allowother Allow all users access to the filesystem" << endl;
+	usage << "-p --options    Mount options as given to the mount command via -o" << endl;
 	usage << "-n --nounmount  Do not unmount the remote share on exit" << endl;
 	usage << "-h --help       Print this screen and exit" << endl;
 	return usage.str();

@@ -33,6 +33,9 @@ BackingtreeManager& BackingtreeManager::Instance()
 }
 void BackingtreeManager::register_Backingtree(string relative_Path){
 	MutexLocker obtain_lock(m);
+	Backingtree back = Backingtree(
+            relative_Path,get_Cache_Path()+relative_Path);
+
 	if(!Is_in_Backingtree(relative_Path)) {
 		// if there are backingtrees below this one, remove them,
 		// because the new one is the new root
@@ -45,10 +48,11 @@ void BackingtreeManager::register_Backingtree(string relative_Path){
 			backinglist.remove(*it);
 		}
 		// add the new backingtree and make list persistent
-		backinglist.push_back(Backingtree(
-			relative_Path,get_Cache_Path()+relative_Path));
+		backinglist.push_back(back);
 		persist();
  	}
+	// start updating 
+	back.updateCache();
 }
 
 void BackingtreeManager::remove_Backingtree(string Relative_Path) {

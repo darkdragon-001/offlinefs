@@ -17,12 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#include "synclogentry.h"
 
-/**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
-*/
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
+SyncLogEntry::SyncLogEntry(const string strFilePath,
+						   const string strModTime,
+						   const char chModType,
+						   const int nNumber)
+{
+	m_strFilePath = strFilePath;
+	m_strModTime = strModTime;
+	m_chModType = chModType;
+	m_nNumber = nNumber;
+}
 
-#endif
+
+SyncLogEntry::~SyncLogEntry()
+{
+}
+
+const bool SyncLogEntry::operator==(const string strFilePath)
+{
+	return (strFilePath.compare(m_strFilePath) == 0);
+}
+
+const string SyncLogEntry::GetFilePath() const
+{
+	return m_strFilePath;
+}
+
+const string SyncLogEntry::GetModTime() const
+{
+	return m_strModTime;
+}
+
+const char SyncLogEntry::GetModType() const
+{
+	return m_chModType;
+}

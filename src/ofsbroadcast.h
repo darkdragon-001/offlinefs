@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by                                                 *
+ *   Copyright (C) 2008 by                                                 *
  *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,12 +17,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#ifndef OFSBROADCAST_H
+#define OFSBROADCAST_H
+
+#include "mutexlocker.h"
+#include <dbus/dbus.h>
+
+class DBusMessage;
+class DBusConnection;
 
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Frank Gsellmann <frank.gsellmann@gmx.de>
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
+class OFSBroadcast
+{
+public:
+    static OFSBroadcast& Instance();
+    /**
+     * Connects to the DBUS bus and sends a broadcast signal.
+     * @param pszSignal (in): string that should be sent
+     * @return 
+     */
+    void SendSignal(char* pszSignal, char* pszValue, int nValue);
+    /**
+     * Listens for method calls.
+     */
+    void Listen();
+    /**
+     * Determines the local modification state
+     * @param path 
+     * @return 
+     */
+    void ReplyToMethodCall(DBusMessage* msg, DBusConnection* conn);
+//    syncstate store_state(string path);
+    ~OFSBroadcast();
+protected:
+    OFSBroadcast();
+private:
+    static std::auto_ptr<OFSBroadcast> theOFSBroadcastInstance;
+    static Mutex m_mutex;
+};
 
-#endif
+#endif  // !OFSBROADCAST_H

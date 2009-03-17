@@ -17,12 +17,52 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
+#ifndef SYNCHRONIZATIONPERSISTENCE_H
+#define SYNCHRONIZATIONPERSISTENCE_H
+#include "persistencemanager.h"
+#include "mutexlocker.h"
+#include <map>
+#include <memory>
+using namespace std;
+
+#define CONFIGKEY_MTIMES "mtimes"
+#define PERSISTENCE_MODULE_NAME "synchronization"
 
 /**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
+	@author Tobias Jaehnel <tjaehnel@gmail.com>
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
+class SynchronizationPersistence : public PersistenceManager {
+public:
+    /**
+     * Get singleton instance
+     * @return singleton instance
+     */
+    static SynchronizationPersistence& Instance();
+    ~SynchronizationPersistence();
+    /**
+     * make modification times persistent
+     * @param trees list of modification times
+     */
+    void mtimes(const map<string, time_t> modtimes);
+    /**
+     * load modification times
+     * @return list of modification times per file
+     */
+    map<string,time_t> mtimes();
+protected:
+    SynchronizationPersistence();
+    virtual cfg_opt_t * init_parser();
+    virtual string get_persistence();
+    virtual void read_values();
+
+private:
+    map<string,time_t> mtimemap;
+
+    static std::auto_ptr<SynchronizationPersistence> 
+        theSynchronizationPersistenceInstance;
+    static Mutex m;
+
+
+};
 
 #endif

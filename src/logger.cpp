@@ -17,12 +17,48 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef SYNCSTATETYPE_H
-#define SYNCSTATETYPE_H
 
-/**
-	@author Carsten Kolassa <Carsten@Kolassa.de>
+#include "logger.h"
+
+//////////////////////////////////////////////////////////////////////////////
+// CONSTRUCTION/ DESTRUCTION
+//////////////////////////////////////////////////////////////////////////////
+char* itoa(int val, int base) {
+	
+    static char buf[32] = {0};
+    
+    int i = 30;
+    
+    if(val == 0)
+    {
+        buf[i] = '0';
+        return &buf[i];
+    }    
+    
+    for(; val && i ; --i, val /= base)
+
+        buf[i] = "0123456789abcdef"[val % base];
+        
+    return &buf[i+1];
+}
+
+Logger::Logger()
+{
+	m_pCFG = NULL;
+	m_nNewIndex = 0;
+	m_szCurShare[0] = '\0';
+}
+
+FILE* Logger::OpenLogFile(const char* pszHash, const char* szMode)
+{
+	// Creates the file name of the sync log.
+	char szLogName[MAX_PATH];
+	CalcLogFileName(pszHash, szLogName);
+/*
+	strcpy(szLogName, "Sync_");
+	strcat(szLogName, pszHash);
+	strcat(szLogName, ".log");
 */
-typedef enum syncsateenum {no_state_avail=0,filesystem_not_available=1,changed_on_server=2,deleted_on_server=3, not_changed=4} syncstate;
-
-#endif
+	// Opens the sync log file.
+	return fopen(szLogName, szMode);
+}

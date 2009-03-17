@@ -21,6 +21,8 @@
 #define FILESYSTEMSTATUSMANAGER_H
 #include "mutex.h"
 #include "mutexlocker.h"
+#include "synchronizationmanager.h"
+#include "ofsenvironment.h"
 //#include "filesystem.h"
 #include <string>
 #include <memory>
@@ -77,6 +79,10 @@ public:
      * @return the absolute path to the file below the mountpoint
      */
     string getRemote(string path);
+    
+    void setAvailability(bool value);
+    void unmountfs();
+    void mountfs();
 protected:
     FilesystemStatusManager();
   private:
