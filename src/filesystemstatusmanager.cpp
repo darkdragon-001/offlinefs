@@ -210,7 +210,8 @@ void FilesystemStatusManager::mountfs()
     	pMountArgumente[4] = (char*)remotemountpoint.c_str();
 
     	//    my_options(argc - 2, &argv[2], &pszOptions);
-    	pMountArgumente[6] = "rw"; // filesystem options
+    	pMountArgumente[6] = (char *)OFSEnvironment::Instance().getMountOptions().c_str();
+    	// filesystem options
 	//    pArgumente[2] = szOptions;
     
     	// Mountet die Share, die vom Benutzer übergeben wurde.

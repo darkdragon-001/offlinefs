@@ -150,7 +150,10 @@ int main(int argc, char *argv[])
     	pArgumente[1] = (char *)ofsmountpoint.c_str();
     	pArgumente[2] = (char *)shareurl.c_str();
     	pArgumente[3] = "-o"; // allow all user access to filesystem
-    	pArgumente[4] = NULL; // terminator
+
+	pArgumente[4] = "-p"; // mount options
+	pArgumente[5] = pszOptions;
+	pArgumente[6] = NULL; // terminator
     } else {
         pArgumente[0] = "ofs";
         pArgumente[1] = (char *)ofsmountpoint.c_str();

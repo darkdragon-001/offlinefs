@@ -101,6 +101,12 @@ public:
      */
     inline string getOfsDir() { return ofsdir; };
     /**
+     * Get the mount options that should be passed to the mount command
+     * via the -o parameter when mounting the remote share
+     * @return mount parameters
+     */
+    inline string getMountOptions() { return mountoptions; };
+    /**
      * Return the list of devices the system should listen for plug/unplug
      * @return list of devices as strings
      */
@@ -123,6 +129,7 @@ private:
     string shareID;
     string shareURL;
     string binarypath;
+    string mountoptions;
     bool unmount;
     bool allowother;
     string ofsdir;
