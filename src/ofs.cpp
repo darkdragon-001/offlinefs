@@ -28,6 +28,7 @@
 #include "backingtreepersistence.h"
 #include "filesystemstatusmanager.h"
 #include "ofsenvironment.h"
+#include "ofslog.h"
 #include <string>
 #include <cstring>
 
@@ -35,7 +36,13 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+	if(! ofslog::init() ){
+		fprintf(stderr,"failed to init log system\n");
+		return 1;
+	}
+
 	ofs_fuse my_ofs;
+	ofslog::info("Starting ofs daemon");
 	cout << "Starting" << endl;
 	try {
 		OFSEnvironment::init(argc, argv);
