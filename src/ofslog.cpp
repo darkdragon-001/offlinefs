@@ -37,7 +37,7 @@ ofslog::init()
 
     OFSConf &ofsconf = OFSConf::Instance();
     int loglvl = ofsconf.GetLogLevel();
-    int mask = LOG_MASK(loglvl);
+    int mask = LOG_UPTO(loglvl);
     setlogmask(mask);
     
     return initok;

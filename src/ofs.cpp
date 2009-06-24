@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
 
 	ofs_fuse my_ofs;
 	ofslog::info("Starting ofs daemon");
-	cout << "Starting" << endl;
 	try {
 		OFSEnvironment::init(argc, argv);
 	} catch (OFSException e) {

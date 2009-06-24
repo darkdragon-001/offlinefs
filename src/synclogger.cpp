@@ -234,8 +234,8 @@ void SyncLogger::CalcLogFileName(const char* pszHash, char* pszLogName)
 
 list<SyncLogEntry> SyncLogger::GetEntries(const char* pszHash, const string strFilePath)
 {
-	if(!ParseFile(pszHash))
-	   throw OFSException("Parse error", 0);
+	if(!ParseFile(pszHash)) 
+	   throw OFSException("Synclogger parse error", 0,true);
 
 	// Assures the correct parsing of the file.
 	assert(m_pCFG != NULL);

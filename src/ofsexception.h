@@ -29,7 +29,7 @@ using namespace std;
  */
 class OFSException : public exception {
 public:
-    OFSException(string message, int posixerrno);
+    OFSException(string message, int posixerrno,bool s = false);
 
     OFSException(const OFSException &e);
     ~OFSException() throw();

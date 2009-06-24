@@ -21,6 +21,7 @@
 #include "ofsexception.h"
 #include "ofsconf.h"
 #include "ofshash.h"
+#include "ofslog.h"
 #include <getopt.h>
 #include <sstream>
 #include <cstring>
@@ -32,8 +33,9 @@ bool OFSEnvironment::initialized = false;
 
 OFSEnvironment& OFSEnvironment::Instance()
 {
-    if(!initialized)
-        throw new OFSException("OFS Environment not initialized", 1);
+    if(!initialized) {
+        throw new OFSException("OFS Environment not initialized", 1,true);
+    }
     MutexLocker obtain_lock(m);
     if (theOFSEnvironmentInstance.get() == 0)
       theOFSEnvironmentInstance.reset(new OFSEnvironment());
@@ -82,7 +84,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	};
 	
 	if (argc < 3)
-		throw OFSException("Not enough parameters", 1);
+		throw OFSException("Not enough parameters", 1,true);
 	// binary name, mountpoint and remote path
 	env.binarypath = argv[0];
 	env.mountPoint = argv[1];
@@ -128,7 +130,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		   default: // unknown behaviour
 			throw OFSException(
 			"Undefined parameter or error while parsing commandline"
-			,1);
+			,1,true);
 		}
 		
 	}

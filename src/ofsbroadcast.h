@@ -38,7 +38,9 @@ public:
      * @param pszSignal (in): string that should be sent
      * @return 
      */
-    void SendSignal(char* pszSignal, char* pszValue, int nValue);
+    void SendSignal(const char* pszSignal,const char* pszValue,int nValue);
+    void SendError(const char* pszSignal,const char* pszValue,const char* pszDesc,int nValue);
+    void SendInfo(const char* pszSignal,const char* pszValue,const char* pszDesc,int nValue);
     /**
      * Listens for method calls.
      */

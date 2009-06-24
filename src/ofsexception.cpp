@@ -18,9 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ofsexception.h"
+#include "ofslog.h"
 
-OFSException::OFSException(string message, int posixerrno)
+OFSException::OFSException(string message, int posixerrno,bool syslogentry)
 {
+	if(syslogentry) ofslog::error(message.c_str());
 	this->message = message;
 	this->posixerrno = posixerrno;
 }
