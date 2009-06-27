@@ -99,9 +99,9 @@ bool SyncLogger::AddEntry(const char* pszHash,
     strcat(szEntry, szIndex);
     strcat(szEntry, "\n\{\n\t");
     strcat(szEntry, FILE_PATH_VARNAME);
-    strcat(szEntry, " = ");
+    strcat(szEntry, " = \"");
     strcat(szEntry, pszFilePath);
-    strcat(szEntry, "\n\t");
+    strcat(szEntry, "\"\n\t");
     strcat(szEntry, MOD_TIME_VARNAME);
     strcat(szEntry, " = ");
     strcat(szEntry, itoa(time(NULL),10));
