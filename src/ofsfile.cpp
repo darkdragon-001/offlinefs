@@ -586,7 +586,7 @@ int OFSFile::op_opendir()
 int OFSFile::op_read ( char *buf, size_t size, off_t offset )
 {
 	int res=0;
-	if ( fd_remote && !SynchronizationManager::Instance().has_been_modified ( fileinfo ) )
+	if ( fd_remote && SynchronizationManager::Instance().has_been_modified ( fileinfo ) == not_changed )
 		res = pread ( fd_remote, buf, size, offset );
 	else
 		res = pread ( fd_cache, buf, size, offset );
@@ -762,8 +762,6 @@ int OFSFile::op_rmdir()
 		{
 			SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'd' );
 		}
-		if ( bOK )
-			update_amtime();
 		return nRet;
 	}
 	catch ( OFSException &e )
@@ -1092,8 +1090,6 @@ int OFSFile::op_rename ( OFSFile *to )
 			// Deletes the old file.
 			SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'd' );
 		}
-		if ( bOK )
-			update_amtime();
 
 		return nRet;
 	}
@@ -1234,6 +1230,7 @@ void OFSFile::update_cache()
 			}
 			else if ( S_ISREG ( fileinfo_remote.st_mode ) )
 			{
+				unlink(get_cache_path().c_str());
 				int fdl = open ( get_cache_path().c_str(),
 				                 O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU );
 				if ( fdl < 0 )

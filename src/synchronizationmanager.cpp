@@ -95,8 +95,8 @@ syncstate SynchronizationManager::has_been_modified(const File& fileInfo)
             if (timesRemote > timesCache)
                 return changed_on_server;
         }
-        return not_changed;
     }
+    return not_changed;
 }
 
 //syncstate SynchronizationManager::has_been_deleted(string path)
