@@ -695,6 +695,7 @@ int OFSFile::op_release()
 	fd_remote = 0;
 	fd_cache = 0;
 	update_amtime();
+
 	return 0;
 }
 
@@ -1303,7 +1304,13 @@ void OFSFile::update_amtime()
         struct utimbuf times;
 
         if ( lstat ( get_remote_path().c_str(), &fileinfo_remote ) < 0 )
-            throw OFSException ( strerror ( errno ), errno ,true );
+	{
+	    // it may happen that a file disappears before updating the times.
+            // e.g. this happens while a file is closed which has been deleted prior to closing
+	    // for this reason we do not throw an exception here but just return
+	    return;
+            //throw OFSException ( strerror ( errno ), errno ,true );
+	}
 
         // utime can not be used with symbolic links because there
         // is no possibility to prevent it from following the link
@@ -1488,37 +1495,46 @@ int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int
  */
 int OFSFile::op_listxattr ( char *list, size_t size )
 {
-	int res = 0;
+	// we must not expose our own attribute because there are programs (gedit is one)
+	// which try to copy all extended attributes from one file to another
+	// This of course failes for most ofs attributes
+	// not listing them makes them invisible for the application
+ 	return llistxattr ( get_remote_path().c_str(), list, 0 ); // works
+	
+/*	int res = 0;
 	int fsres = 0;
-	char *fslist = NULL;
+	char *fslist = list;
 
 	res += strlen ( OFS_ATTRIBUTE_OFFLINE ) + 1;
 	res += strlen ( OFS_ATTRIBUTE_AVAILABLE ) + 1;
 	res += strlen ( OFS_ATTRIBUTE_STATE ) + 1;
 	if ( size > 0 ) // copy available attributes into the buffer
 	{
-		strncpy ( list, OFS_ATTRIBUTE_OFFLINE,
+		strncpy ( fslist, OFS_ATTRIBUTE_OFFLINE,
 		          strlen ( OFS_ATTRIBUTE_OFFLINE ) +1 );
-		strncpy ( list+strlen ( OFS_ATTRIBUTE_OFFLINE ) +1,
-		          OFS_ATTRIBUTE_AVAILABLE,
+		fslist += strlen ( OFS_ATTRIBUTE_OFFLINE ) +1;
+
+		strncpy ( fslist, OFS_ATTRIBUTE_AVAILABLE,
 		          strlen ( OFS_ATTRIBUTE_AVAILABLE ) +1 );
-		strncpy ( list+strlen ( OFS_ATTRIBUTE_OFFLINE ) +1
-		          +strlen ( OFS_ATTRIBUTE_STATE ) +1,
-		          OFS_ATTRIBUTE_STATE,
+		fslist += strlen ( OFS_ATTRIBUTE_AVAILABLE ) +1;		
+
+		strncpy ( fslist, OFS_ATTRIBUTE_STATE,
 		          strlen ( OFS_ATTRIBUTE_STATE ) +1 );
-		fslist = new char[size-res];
-		fsres = llistxattr ( get_remote_path().c_str(),
-		                     fslist, size-res );
-		if ( fsres > 0 )
-			res += fsres;
+		fslist += strlen ( OFS_ATTRIBUTE_STATE ) +1;		
+
+		//fsres = llistxattr ( get_remote_path().c_str(),
+		//                     fslist, size-res );
+		//if ( fsres > 0 )
+		//	res += fsres;
 	}
 	else   // no buffer - only calculate length
 	{
-		fsres = llistxattr ( get_remote_path().c_str(), fslist, 0 );
-		if ( fsres > 0 )
-			res += fsres;
+		//fsres = llistxattr ( get_remote_path().c_str(), fslist, 0 );
+		//if ( fsres > 0 )
+		//	res += fsres;
 	}
 	return res;
+*/
 }
 
 
