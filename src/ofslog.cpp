@@ -17,48 +17,104 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include "ofsexception.h"
+
+#include <syslog.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include "ofslog.h"
+#include "ofsconf.h"
 
-OFSException::OFSException(string message, int posixerrno,bool syslogentry)
-{
-	if(syslogentry) ofslog::error(message.c_str());
-	this->message = message;
-	this->posixerrno = posixerrno;
-}
-OFSException::OFSException(const OFSException &e)
-{
-	message = e.message;
-	posixerrno = e.posixerrno;
-}
+#define MAX_LOGENTRY_LEN        1024
 
-OFSException::~OFSException() throw()
+/*!
+    \fn ofslog::init() 
+ */
+bool
+ofslog::init()
 {
+    bool initok = true;
+    openlog("ofs", LOG_PID|LOG_CONS|LOG_NDELAY, LOG_USER);
+
+    OFSConf &ofsconf = OFSConf::Instance();
+    int loglvl = ofsconf.GetLogLevel();
+    int mask = LOG_UPTO(loglvl);
+    setlogmask(mask);
+    
+    return initok;
 }
 
 /*!
-    \fn OFSException::operator=(OFSException &)
+    \fn ofslog::log(int loglvl,const char *fmt,va_list ap)
  */
-OFSException & OFSException::operator=(OFSException &e)
+void 
+ofslog::log(int loglvl,const char *fmt,va_list ap)
 {
-	this->message = e.message;
-	this->posixerrno = e.posixerrno;
-	return *this;
+    char buf[MAX_LOGENTRY_LEN];
+    int len = vsnprintf(buf,MAX_LOGENTRY_LEN,fmt,ap);
+    
+    syslog(loglvl,"%s",buf);
+
+    //fprintf(stdout,"%s",buf); // TODO 
 }
 
 /*!
-    \fn OFSException::what() const throw()
+    \fn ofslog::info(const char* msg)
  */
-const char * OFSException::what() const throw()
+void 
+ofslog::info(const char *fmt, ...)
 {
-	return message.c_str();
+    va_list args;
+    log(LOG_INFO,fmt,args);
 }
-
 
 /*!
-    \fn OFSException::get_posixerrno()
+    \fn ofslog::debug(const char* msg)
  */
-int OFSException::get_posixerrno()
+void 
+ofslog::debug(const char *fmt, ...)
 {
-	return this->posixerrno;
+    va_list args;
+    log(LOG_DEBUG,fmt,args);
 }
+
+/*!
+    \fn ofslog::error(const char* msg)
+ */
+void 
+ofslog::error(const char *fmt, ...)
+{
+    va_list args;
+    log(LOG_ERR,fmt,args);
+}
+
+/*!
+    \fn ofslog::warning(const char* msg)
+ */
+void 
+ofslog::warning(const char *fmt, ...)
+{
+    va_list args;
+    log(LOG_WARNING,fmt,args);
+}
+
+/*!
+    \fn ofslog::notice(const char* msg)
+ */
+void 
+ofslog::notice(const char *fmt, ...)
+{
+    va_list args;
+    log(LOG_NOTICE,fmt,args);
+}
+
+/*!
+    \fn ofslog::critical(const char* msg)
+ */
+void 
+ofslog::critical(const char *fmt, ...)
+{
+    va_list args;
+    log(LOG_CRIT,fmt,args);
+}
+
+

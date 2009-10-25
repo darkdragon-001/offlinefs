@@ -26,10 +26,12 @@
 #define MOUNT_REMOTE_PATHS_TO_VARNAME "mountRemotePathsTo"
 #define REMOTE_SHARE_VARNAME "remoteShare"
 #define LISTEN_DEVICES_VARNAME "listen"
+#define LOGLEVEL_VARNAME "loglevel"
 
 #define BACKING_TREE_PATH_DEFAULT "/var/ofs/backing"
 #define MOUNT_REMOTE_PATHS_TO_DEFAULT "/var/ofs/remote"
 #define LISTEN_DEVICES_DEFAULT "{eth0}"
+#define LOGLEVEL_DEFAULT 6 // LOG INFO
 
 // Initializes the class attributes.
 std::auto_ptr<OFSConf> OFSConf::theOFSConfInstance;
@@ -43,6 +45,7 @@ OFSConf::OFSConf()
 {
     m_bFileParsed = false;
     m_pCFG = 0;
+    m_logLvl = LOGLEVEL_DEFAULT; // LOG_INFO; 
     // set default config values
     remotePath = MOUNT_REMOTE_PATHS_TO_DEFAULT;
     backingPath = BACKING_TREE_PATH_DEFAULT;
@@ -88,6 +91,7 @@ bool OFSConf::ParseFile()
 		MOUNT_REMOTE_PATHS_TO_DEFAULT, CFGF_NONE),
 	CFG_STR(LISTEN_DEVICES_VARNAME,
 		LISTEN_DEVICES_DEFAULT, CFGF_NONE),
+	CFG_INT(LOGLEVEL_VARNAME,LOGLEVEL_DEFAULT,CFGF_NONE),
         CFG_END()
     };
 
@@ -103,6 +107,8 @@ bool OFSConf::ParseFile()
     remotePath = cfg_getstr(m_pCFG, MOUNT_REMOTE_PATHS_TO_VARNAME);
     // backing path
     backingPath = cfg_getstr(m_pCFG, BACKING_TREE_PATH_VARNAME);
+    // log level
+    m_logLvl = cfg_getint(m_pCFG,LOGLEVEL_VARNAME);
     // listening devices
     listendevices.clear();
     for(int i=0; i < cfg_size(m_pCFG, LISTEN_DEVICES_VARNAME); i++) {

@@ -95,8 +95,8 @@ syncstate SynchronizationManager::has_been_modified(const File& fileInfo)
             if (timesRemote > timesCache)
                 return changed_on_server;
         }
-        return not_changed;
     }
+    return not_changed;
 }
 
 //syncstate SynchronizationManager::has_been_deleted(string path)
@@ -112,7 +112,7 @@ syncstate SynchronizationManager::has_been_deleted(const File& fileInfo)
             if (errno == ENOENT)
                 return deleted_on_server;
             else
-                throw OFSException(strerror(errno), errno);
+                throw OFSException(strerror(errno), errno,true);
         }
     }
 }
@@ -193,7 +193,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
 	}
 	else if (nRet < 0)
 	{
-	   throw OFSException(strerror(errno), errno);
+	   throw OFSException(strerror(errno), errno,true);
 	}
 
 	// get info of remote file
@@ -204,14 +204,14 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
             if (S_ISDIR(fsCache.st_mode))
             {
                 if (mkdir(fileInfo.get_remote_path().c_str(), S_IRWXU) < 0)
-                    throw OFSException(strerror(errno), errno);
+                    throw OFSException(strerror(errno), errno,true);
             }
             else if (S_ISREG(fsCache.st_mode))
             {
                 int fdr = open(fileInfo.get_remote_path().c_str(),
                     O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
                 if (fdr < 0)
-		   throw OFSException(strerror(errno), errno);
+		   throw OFSException(strerror(errno), errno,true);
                 close(fdr);
             }
             else if (S_ISLNK(fsCache.st_mode))
@@ -225,10 +225,10 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
                 // create the new link
                 len = readlink(fileInfo.get_cache_path().c_str(), buf, sizeof(buf)-1);
                 if (len < 0)
-                    throw OFSException(strerror(errno), errno);
+                    throw OFSException(strerror(errno), errno,true);
                 buf[len] = '\0';
                 if (symlink(buf, fileInfo.get_remote_path().c_str()) < 0)
-                    throw OFSException(strerror(errno), errno);
+                    throw OFSException(strerror(errno), errno,true);
             } // TODO: Other file types
             
             // set atime and mtime
@@ -242,8 +242,8 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
 	{
 		// Conflict!!!
 		// Sends a signal: File type mismatch.
-		OFSBroadcast::Instance().SendSignal("Conflict",
-		  "RemoteAndCacheTypeMismatch", 0);
+		OFSBroadcast::Instance().SendError("Conflict",
+		  "RemoteAndCacheTypeMismatch","Conflict: File type mismatch.", 0);
 		ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 		return 1;
 	} // else both have created directories -> we can merge
@@ -267,7 +267,7 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 	}
 	else if (nRet < 0)
 	{
-		throw OFSException(strerror(errno), errno);
+		throw OFSException(strerror(errno), errno,true);
 	}
 
 	// get info of remote file
@@ -276,8 +276,8 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 	{ // remote file has been deleted
 		// Conflict!!!
 		// Sends a signal: Modified file has been deleted on remote.
-		OFSBroadcast::Instance().SendSignal("Conflict",
-		  "ModifiedFileHasBeenDeleted", 0);
+		OFSBroadcast::Instance().SendError("Conflict",
+		  "ModifiedFileHasBeenDeleted","Conflict: Modified file has been deleted on remote.",0);
 		ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 		return 1;
 	}
@@ -287,8 +287,8 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 		{
 			// Conflict!!!
 			// Sends a signal: Modified file has been modified on remote.
-			OFSBroadcast::Instance().SendSignal("Conflict",
-			 "ModifiedFileHasBeenModified", 0);
+			OFSBroadcast::Instance().SendError("Conflict",
+			 "ModifiedFileHasBeenModified","Conflict: Modified file has been modified on remote.",0);
 			ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 			return 2;
 		}
@@ -303,21 +303,21 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 				int fdr = open(fileInfo.get_remote_path().c_str(),
 					O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
 				if (fdr < 0)
-					throw OFSException(strerror(errno), errno);
+					throw OFSException(strerror(errno), errno,true);
 				int fdl = open(fileInfo.get_cache_path().c_str(),
 				 O_RDONLY);
 				if (fdl < 0)
-					throw OFSException(strerror(errno), errno);
+					throw OFSException(strerror(errno), errno,true);
 				char szBuf[1024];
 				ssize_t nBytesRead;
 				while((nBytesRead = read(fdl, szBuf, sizeof(szBuf))) > 0)
 				{
 					if (write(fdr, szBuf, nBytesRead) < 0)
 						throw OFSException(strerror(errno),
-						errno);
+						errno,true);
 				}
 				if (nBytesRead < 0)
-					throw new OFSException(strerror(errno), errno);
+					throw new OFSException(strerror(errno), errno,true);
 				close(fdl);
 				close(fdr);
 			}
@@ -333,10 +333,10 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 				len = readlink(fileInfo.get_cache_path().c_str(), buf,
 				 sizeof(buf)-1);
 				if (len < 0)
-					throw OFSException(strerror(errno), errno);
+					throw OFSException(strerror(errno), errno,true);
 				buf[len] = '\0';
 				if (symlink(buf, fileInfo.get_remote_path().c_str()) < 0)
-					throw OFSException(strerror(errno), errno);
+					throw OFSException(strerror(errno), errno,true);
 			} // TODO: Other file types
 	
 			// set atime and mtime
@@ -365,7 +365,8 @@ int SynchronizationManager::DeleteFile(const File& fileInfo)
 		{
 			// Conflict!!!
 			// Sends a signal: Couldn't delete a file that has been modified on the remote.
-			OFSBroadcast::Instance().SendSignal("Conflict", "FileToDeleteHasBeenModified", 0);
+			OFSBroadcast::Instance().SendError("Conflict", "FileToDeleteHasBeenModified",
+				       "Conflict: Could not delete a file that has been modified on the remote.",0);
 			ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 			return 1;
 		}

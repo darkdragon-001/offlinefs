@@ -43,6 +43,7 @@ using namespace std;
 #include "ofsenvironment.h"
 #include "ofsconf.h"
 #include "ofshash.h"
+#include "ofslog.h"
 
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
@@ -102,7 +103,7 @@ void *FilesystemStatusManager::DbusListenerRun(void *)
 	dbus_error_init (&error);
 	bus = dbus_bus_get (DBUS_BUS_SYSTEM, &error);
 	if (!bus) {
-		printf ("Failed to connect to the D-BUS daemon: %s", error.message);
+		ofslog::error("Failed to connect to the D-BUS daemon: %s", error.message);
 		dbus_error_free (&error);
 		pthread_exit(NULL);
 		return NULL;
@@ -229,11 +230,11 @@ void FilesystemStatusManager::mountfs()
     		// make the mount point and ignore errors of it does exits
        		mkdir(pMountArgumente[4], 0777);
        		execvp("mount", pMountArgumente);
-       		perror(strerror(errno));
+		ofslog::error(strerror(errno));
        		return;
     	}
     	if(childpid < 0) {
-        	perror(strerror(errno));
+		ofslog::error(strerror(errno));
         	return;
     	}
     	//waitpid(childpid, &status, 0);
@@ -242,7 +243,7 @@ void FilesystemStatusManager::mountfs()
     	int exitstatus = WEXITSTATUS(status);
     	if(WIFEXITED(status) && exitstatus) {
        		errno = exitstatus;
-       		perror(strerror(errno));
+		ofslog::error(strerror(errno));
        		return;
     	}
     
@@ -275,7 +276,7 @@ void FilesystemStatusManager::unmountfs()
 	int childpid2 = wait(&status);
 	int exitstatus = WEXITSTATUS(status);
 	if(WIFEXITED(status) && exitstatus) {
-		cout << "Unable to unmount the remote filesystem!" << endl;
+		ofslog::error("Unable to unmount the remote filesystem!");
 		perror(strerror(exitstatus));
 		errno = 0;
 		return;

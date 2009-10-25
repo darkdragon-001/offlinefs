@@ -17,28 +17,55 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef OFSEXCEPTION_H
-#define OFSEXCEPTION_H
-#include <exception>
-#include <string>
-using namespace std;
+#ifndef OFSLOG_H
+#define OFSLOG_H
 
 /**
- * @author Tobias Jaehnel <tjaehnel@gmail.com>
- * Base class for OFS related exceptions
- */
-class OFSException : public exception {
+	@author Matthias Petri <Matthias.Petri@gmail.com>
+*/
+class ofslog {
 public:
-    OFSException(string message, int posixerrno,bool s = false);
-
-    OFSException(const OFSException &e);
-    ~OFSException() throw();
-    OFSException & operator=(OFSException &);
-    virtual const char * what() const throw();
-    int get_posixerrno();
-private:
-	string message;
-	int posixerrno;
+    /**
+     * initialise the logging infrastructure
+     * @return logging system successfully initialised?
+     */
+    static bool init();
+    /**
+     * info log msg
+     * @param log msg
+     */    
+    static void info(const char *fmt, ...);
+    /**
+     * debug log msg
+     * @param log msg
+     */    
+    static void debug(const char *fmt, ...);
+    /**
+     * error log msg
+     * @param log msg
+     */    
+    static void error(const char *fmt, ...);
+    /**
+     * warning log msg
+     * @param log msg
+     */    
+    static void warning(const char *fmt, ...);
+    /**
+     * notice log msg
+     * @param log msg
+     */    
+    static void notice(const char *fmt, ...);
+    /**
+     * critical log msg
+     * @param log msg
+     */    
+    static void critical(const char *fmt, ...);
+    /**
+     * actual log function
+     * @param log msg
+     */    
+    static void log(int loglvl,const char *fmt,va_list ap);
 };
 
 #endif
+

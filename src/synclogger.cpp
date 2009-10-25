@@ -99,9 +99,9 @@ bool SyncLogger::AddEntry(const char* pszHash,
     strcat(szEntry, szIndex);
     strcat(szEntry, "\n\{\n\t");
     strcat(szEntry, FILE_PATH_VARNAME);
-    strcat(szEntry, " = ");
+    strcat(szEntry, " = \"");
     strcat(szEntry, pszFilePath);
-    strcat(szEntry, "\n\t");
+    strcat(szEntry, "\"\n\t");
     strcat(szEntry, MOD_TIME_VARNAME);
     strcat(szEntry, " = ");
     strcat(szEntry, itoa(time(NULL),10));
@@ -234,8 +234,8 @@ void SyncLogger::CalcLogFileName(const char* pszHash, char* pszLogName)
 
 list<SyncLogEntry> SyncLogger::GetEntries(const char* pszHash, const string strFilePath)
 {
-	if(!ParseFile(pszHash))
-	   throw OFSException("Parse error", 0);
+	if(!ParseFile(pszHash)) 
+	   throw OFSException("Synclogger parse error", 0,true);
 
 	// Assures the correct parsing of the file.
 	assert(m_pCFG != NULL);

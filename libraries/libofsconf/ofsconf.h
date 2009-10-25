@@ -79,6 +79,12 @@ public:
      * @return list of devices as strings
      */
     list<string> GetListenDevices();
+    /**
+     * Return the current syslog loglevel
+     * @return current loglevel
+     */
+    int GetLogLevel() { return m_logLvl;} ;
+
 
 protected:
 
@@ -106,6 +112,7 @@ private:
     string remotePath;
     string backingPath;
     list<string> listendevices;
+    int m_logLvl;
 };
 
 #endif
