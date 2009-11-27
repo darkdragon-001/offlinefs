@@ -20,6 +20,7 @@
 #include "backingtree.h"
 #include "filesystemstatusmanager.h"
 #include "ofsfile.h"
+#include "ofslog.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -91,6 +92,7 @@ string Backingtree::get_cache_path(string path)
 
 void Backingtree::updateCache()
 {
+	ofslog::debug("updateCache");
 	pthread_t *thread = new pthread_t;
 	pthread_create(thread, NULL, Backingtree::updateCacheThread, (void *)this);
 }
@@ -150,9 +152,10 @@ void Backingtree::updateCacheRunner(string relativeDir)
     // second traverse the cache directory and remove files and directories
     // which have been removed from the remote directory
     dir = opendir(absoluteCacheDir.c_str());
-    if(dir == NULL)
+    if( dir == NULL )
+    {
         return; ///\todo do something on error
-    
+    }
     while( (entry = readdir(dir) ) != NULL)
     {
         string filename = entry->d_name;
