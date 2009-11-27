@@ -25,6 +25,7 @@
 
 //#include <iostream>
 #include <cstdlib>
+#include <stdio.h>
 #include <ofsconf.h>
 #include "options.h"
 #include <assert.h>

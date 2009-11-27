@@ -123,7 +123,7 @@ void Backingtree::updateCacheRunner(string relativeDir)
     if(dir == NULL)
         return; ///\todo do something on error
     
-    while(entry = readdir(dir))
+    while( (entry = readdir(dir)) != NULL)
     {
         string filename = entry->d_name;
         if(filename == "." || filename == "..")
@@ -153,7 +153,7 @@ void Backingtree::updateCacheRunner(string relativeDir)
     if(dir == NULL)
         return; ///\todo do something on error
     
-    while(entry = readdir(dir))
+    while( (entry = readdir(dir) ) != NULL)
     {
         string filename = entry->d_name;
         string absolutePath = absoluteCacheDir+"/"+filename;

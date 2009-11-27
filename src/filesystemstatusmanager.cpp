@@ -180,7 +180,7 @@ void FilesystemStatusManager::mountfs()
     // Ermittelt die Remote-Pfade.
     //cout << argv[0] << endl;
     const char* cshareurl = shareurl.c_str();
-    char* pchDoppelPunktPos = strchr(cshareurl, ':');
+    const char* pchDoppelPunktPos = strchr(cshareurl, ':');
     assert(pchDoppelPunktPos != NULL);
     int nDoppelPunktIndex = int (pchDoppelPunktPos - cshareurl);
 
