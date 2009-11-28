@@ -35,6 +35,7 @@
 
 #include "filestatusmanager.h"
 #include "ofsfile.h"
+#include "ofslog.h"
 #include "filesystemstatusmanager.h"
 #include "backingtreemanager.h"
 #include "ofsenvironment.h"
@@ -66,10 +67,13 @@ ofs_fuse::ofs_fuse () {
  */
 int ofs_fuse::fuse_getattr(const char *path, struct stat *stbuf)
 {
+	ofslog::debug("Enter fuse_getattr");
+	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_getattr(stbuf);
 	delete file;
+	ofslog::debug("Leave fuse_getattr");
 	return res;
 }
 
@@ -88,15 +92,18 @@ int ofs_fuse::fuse_getattr(const char *path, struct stat *stbuf)
 int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
                         struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_fgetattr");
 	int res;
 	(void) path;
 	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
+		ofslog::debug("Leave fuse_fgetattr EBADF");
 		return -errno;
 	}
 	res = file->op_fgetattr(stbuf);
+	ofslog::debug("Leave fuse_fgetattr");
 	return res;
 }
 
@@ -114,10 +121,12 @@ int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
  */
 int ofs_fuse::fuse_access(const char *path, int mask)
 {
+	ofslog::debug("Enter fuse_access");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_access(mask);
 	delete file;
+	ofslog::debug("Leave fuse_fgetattr");
 	return res;
 }
 
@@ -135,10 +144,12 @@ int ofs_fuse::fuse_access(const char *path, int mask)
  */
 int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
 {
+	ofslog::debug("Enter fuse_readlink");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_readlink(buf, size);
 	delete file;
+	ofslog::debug("Leave fuse_fgetattr");
 	return res;
 }
 
@@ -152,6 +163,7 @@ int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
  */
 int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_opendir");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_opendir();
@@ -159,6 +171,7 @@ int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
 		delete file;
 	else	
 		fi->fh = (unsigned long)file;
+	ofslog::debug("Leave fuse_opendir");
 	return res;
 }
 
@@ -189,6 +202,7 @@ int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
 int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                        off_t offset, struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_readdir");
 	(void) path;
 	int res;
 	OFSFile *file = (OFSFile *)fi->fh;
@@ -198,6 +212,7 @@ int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		return -errno;
 	}
 	res = file->op_readdir(buf, filler, offset);
+	ofslog::debug("Leave fuse_readdir");
 	return res;
 }
 
@@ -209,6 +224,7 @@ int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
  */
 int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_releasedir");
 	(void) path;
 	int res;
 	OFSFile *file = (OFSFile *)fi->fh;
@@ -220,7 +236,7 @@ int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
 	res = file->op_releasedir();
 	delete file;
 	fi->fh = 0;
-
+	ofslog::debug("Leave fuse_releasedir");
 	return res;
 }
 
@@ -237,10 +253,12 @@ int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
  */
 int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 {
+	ofslog::debug("Enter fuse_mknod");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_mknod(mode, rdev);
 	delete file;
+	ofslog::debug("Leave fuse_mknod");
 	return res;
 }
 
@@ -252,10 +270,12 @@ int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
  */
 int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 {
+	ofslog::debug("Enter fuse_mkdir");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_mkdir(mode);
 	delete file;
+	ofslog::debug("Leave fuse_mknod");
 	return res;
 }
 
@@ -266,10 +286,13 @@ int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
  */
 int ofs_fuse::fuse_unlink(const char *path)
 {
+	ofslog::debug("Enter fuse_unlink");
+	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_unlink();
 	delete file;
+	ofslog::debug("Leave fuse_unlink");
 	return res;
 }
 
@@ -280,10 +303,12 @@ int ofs_fuse::fuse_unlink(const char *path)
  */
 int ofs_fuse::fuse_rmdir(const char *path)
 {
+	ofslog::debug("Enter fuse_rmdir");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_rmdir();
 	delete file;
+	ofslog::debug("leave fuse_rmdir");
 	return res;
 }
 
@@ -298,10 +323,12 @@ int ofs_fuse::fuse_rmdir(const char *path)
  */
 int ofs_fuse::fuse_symlink(const char *from, const char *to)
 {
+	ofslog::debug("Enter fuse_symlink");
 	int res;
 	OFSFile *file_to = new OFSFile(to);
 	res = file_to->op_symlink(from);
 	delete file_to;
+	ofslog::debug("Leave fuse_symlink");
 	return res;
 }
 
@@ -313,12 +340,16 @@ int ofs_fuse::fuse_symlink(const char *from, const char *to)
  */
 int ofs_fuse::fuse_rename(const char *from, const char *to)
 {
+	ofslog::debug("Enter fuse_rename");
+	ofslog::debug((string("from: ")+string(from)).c_str());
+	ofslog::debug((string("to: ")+string(to)).c_str());
 	int res;
 	OFSFile *file_from = new OFSFile(from);
 	OFSFile *file_to = new OFSFile(to);
 	res = file_from->op_rename(file_to);
 	delete file_from;
 	delete file_to;
+	ofslog::debug("Leave fuse_rename");
 	return res;
 }
 
@@ -330,12 +361,14 @@ int ofs_fuse::fuse_rename(const char *from, const char *to)
  */
 int ofs_fuse::fuse_link(const char *from, const char *to)
 {
+	ofslog::debug("Enter fuse_link");
 	int res;
 	OFSFile *file_from = new OFSFile(from);
 	OFSFile *file_to = new OFSFile(to);
 	res = file_from->op_link(file_to);
 	delete file_from;
 	delete file_to;
+	ofslog::debug("Leave fuse_link");
 	return res;
 }
 
@@ -347,10 +380,13 @@ int ofs_fuse::fuse_link(const char *from, const char *to)
  */
 int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 {
+	ofslog::debug("Enter fuse_chmod");
+	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_chmod(mode);
 	delete file;
+	ofslog::debug("Leave fuse_chmod");
 	return res;
 }
 
@@ -363,10 +399,13 @@ int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
  */
 int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 {
+	ofslog::debug("Enter fuse_chown");
+	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_chown(uid, gid);
 	delete file;
+	ofslog::debug("Leave fuse_chown");
 	return res;
 }
 
@@ -378,10 +417,13 @@ int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
  */
 int ofs_fuse::fuse_truncate(const char *path, off_t size)
 {
+	ofslog::debug("Enter fuse_truncate");
+	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_truncate(size);
 	delete file;
+	ofslog::debug("Leave fuse_truncate");
 	return res;
 }
 
@@ -401,15 +443,18 @@ int ofs_fuse::fuse_truncate(const char *path, off_t size)
 int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
                          struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_ftruncate");
 	int res;
 
 	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
+		ofslog::debug("Leave fuse_ftruncate EBADF");
 		return -errno;
 	}
 
+	ofslog::debug("Leave fuse_ftruncate");
 	return file->op_ftruncate(size);
 }
 
@@ -422,10 +467,12 @@ int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
  */
 int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
 {
+	ofslog::debug("Enter fuse_utimens");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_utimens(ts);
 	delete file;
+	ofslog::debug("Leave fuse_utimens");
 	return res;
 }
 
@@ -445,6 +492,8 @@ int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
 int ofs_fuse::fuse_create(const char *path, mode_t mode,
 	struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_create");
+	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_create(mode, fi->flags);
@@ -452,6 +501,7 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode,
 		delete file;
 	else
 		fi->fh = (unsigned long)file;
+	ofslog::debug("Leave fuse_create");
 	return res;
 }
 
@@ -469,6 +519,8 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode,
  */
 int ofs_fuse::fuse_open(const char *path, struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_open");
+	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_open(fi->flags);
@@ -476,6 +528,7 @@ int ofs_fuse::fuse_open(const char *path, struct fuse_file_info *fi)
 		delete file;
 	else
 		fi->fh = (unsigned long)file;
+	ofslog::debug("Leave fuse_open");
 	return res;
 }
 
@@ -497,16 +550,20 @@ int ofs_fuse::fuse_open(const char *path, struct fuse_file_info *fi)
 int ofs_fuse::fuse_read(const char *path, char *buf, size_t size, off_t offset,
                     struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_read");
+	ofslog::debug(path);
 	int res;
 	(void) path;
 	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
+		ofslog::debug("Leave fuse_read (EBADF)");
 		return -errno;
 	}
 	
 	res = file->op_read(buf, size, offset);
+	ofslog::debug("Leave fuse_read");
 	return res;
 }
 
@@ -526,15 +583,18 @@ int ofs_fuse::fuse_read(const char *path, char *buf, size_t size, off_t offset,
 int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
                      off_t offset, struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_write");
 	int res;
 	(void) path;
 	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
+		ofslog::debug("Leave fuse_write EBADF");
 		return -errno;
 	}
 	res = file->op_write(buf, size, offset);
+	ofslog::debug("Leave fuse_write");
 	return res;
 }
 
@@ -548,10 +608,12 @@ int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
  */
 int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
 {
+	ofslog::debug("Enter fuse_statfs");
 	int res;
 	OFSFile *file = new OFSFile(path);
 	res = file->op_statfs(stbuf);
 	delete file;
+	ofslog::debug("Leave fuse_statfs");
 	return res;
 }
 
@@ -597,6 +659,7 @@ int ofs_fuse::fuse_flush(const char *path, struct fuse_file_info *fi)
 // 	if (res == -1)
 // 		return -errno;
 
+	ofslog::debug("fuse_flush");
 	return 0;
 }
 
@@ -617,18 +680,22 @@ int ofs_fuse::fuse_flush(const char *path, struct fuse_file_info *fi)
  */
 int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_release");
+	ofslog::debug(path);
 	int res;
 	(void) path;
 	OFSFile *file = (OFSFile *)fi->fh;
 	if (!file)
 	{
 		errno = EBADF;
+		ofslog::debug("Leave fuse_release (EBADF)");
 		return -errno;
 	}
 	res = file->op_release();
 	delete file;
 	fi->fh = 0;
 	
+	ofslog::debug("Leave fuse_release");
 	return res;
 }
 
@@ -645,6 +712,8 @@ int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
 int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
                      struct fuse_file_info *fi)
 {
+	ofslog::debug("Enter fuse_fsync");
+	ofslog::debug(path);
 	int res=0;
 	(void) path;
 	OFSFile *file = (OFSFile *)fi->fh;
@@ -654,6 +723,7 @@ int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
 		return -errno;
 	}
 	res = file->op_fsync(isdatasync);
+	ofslog::debug("Leave fuse_fsync");
 	return res;
 }
 
@@ -682,8 +752,12 @@ int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
 int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 			const char *value, size_t size, int flags)
 {
+	ofslog::debug("Enter fuse_setxattr");
+	ofslog::debug(path);
+	ofslog::debug((string("Name: ")+string(name)).c_str());
 	int res = 0;
 	OFSFile file = OFSFile(path);
+	ofslog::debug("Leave fuse_setxattr");
 	return file.op_setxattr(name, value, size, flags);
 }
 
@@ -703,8 +777,14 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
                     size_t size)
 {
-	OFSFile file = OFSFile(path);
-	return file.op_getxattr(name, value, size);
+	ofslog::debug("Enter fuse_getxattr");
+	ofslog::debug(path);
+	ofslog::debug((string("Name: ")+string(name)).c_str());
+	int ret;
+	OFSFile file = OFSFile(path);	
+	ret = file.op_getxattr(name, value, size);
+	ofslog::debug("Leave fuse_getxattr");
+	return ret;
 }
 
 /**
@@ -719,7 +799,9 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
  */
 int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 {
+	ofslog::debug("Enter fuse_listxattr");
 	OFSFile file = OFSFile(path);
+	ofslog::debug("Leave fuse_listxattr");
 	return file.op_listxattr(list, size);
 }
 
@@ -735,8 +817,10 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
  */
 int ofs_fuse::fuse_removexattr(const char *path, const char *name)
 {
+	ofslog::debug("Enter fuse_removexattr");
 	int res = 0;
 	OFSFile file = OFSFile(path);
+	ofslog::debug("Leave fuse_removexattr");
 	return file.op_removexattr(name);
 }
 #endif /* HAVE_SETXATTR */

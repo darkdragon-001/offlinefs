@@ -20,6 +20,8 @@
 #ifndef OFSLOG_H
 #define OFSLOG_H
 
+#include <cstdarg>
+
 /**
 	@author Matthias Petri <Matthias.Petri@gmail.com>
 */
