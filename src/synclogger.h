@@ -57,6 +57,8 @@ public:
     virtual void CalcLogFileName(const char* pszHash, char* pszLogName);
     virtual list<SyncLogEntry> GetEntries(const char* pszHash, const string strFilePath);
     virtual bool RemoveEntry(const char* pszHash, SyncLogEntry& sle);
+    virtual char getModDependingOnOtherEntries(const char* pszHash, const string strFilePath,const char chType); //oreiche	
+    virtual bool deleteOtherEntries(const char* pszHash);
 
 protected:
     SyncLogger();
