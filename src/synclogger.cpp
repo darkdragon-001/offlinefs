@@ -91,7 +91,7 @@ bool SyncLogger::AddEntry(const char* pszHash,
     // depending on earlier entries
     string strFilePath = pszFilePath;
     char newType = getModDependingOnOtherEntries(pszHash, strFilePath, chType);
-    if (newType == 'x') //error or nothing to do
+    if (newType == 'x') //nothing to do
 	return false;
 
     // Creates the new entry.
@@ -328,55 +328,53 @@ char SyncLogger::getModDependingOnOtherEntries(const char* pszHash, const string
 	/* get the whole list with iterator */
 	list<SyncLogEntry> entrylist = GetEntries(pszHash, strFilePath);
 	list<SyncLogEntry>::iterator iter;
-	char modType = ' ';
+	char modType = (char)0;
 
-	/* search for entries on given path an delete ALL... */
+	/* search for entries on given path and delete ALL... */
 	for (iter = entrylist.begin(); iter != entrylist.end(); iter++) {
 		SyncLogEntry sle = (SyncLogEntry)*iter;
 		if (sle == strFilePath) {
-			/* ... but store last modification type */
-			modType = sle.GetModType();
+			/* ... but store FIRST modification type */
+			if ((int)modType == 0)
+				modType = sle.GetModType();
 			RemoveEntry(pszHash, sle);
 		}
 	}
 	
 	/* determine the correct modtype of the entry */
 	switch (modType) {
-	    case ' ': //start value => no earlier entries found
-		return chType;
-
-	    case 'c': //exists
+	    case 'c': //Not Exist
 		if (chType == 'c')
 			return 'c'; //c + c => c
 		else if (chType == 'm')
-			return 'm'; //c + m => m
+			return 'c'; //c + m => c
 		else if (chType == 'd')
 			return 'x'; //c + d => none (nothing to do)
 		break;
 
-	    case 'm': //exists
+	    case 'm': //Exist
 		if (chType == 'c')
 			return 'm'; //m + c => m
 		else if (chType == 'm')
 			return 'm'; //m + m => m
 		else if (chType == 'd')
-			return 'x'; //m + d => none (nothing to do)
-		return 'x';
+			return 'd'; //m + d => d
+		break;
 
-	    case 'd': //not exists
+	    case 'd': //Exist
 		if (chType == 'c')
-			return 'c'; //d + c => c
+			return 'm'; //d + c => m
 		else if (chType == 'm')
-			return 'c'; //d + m => c
+			return 'm'; //d + m => m
 		else if (chType == 'd')
-			return 'x'; //d + d => none (nothing to do)
-		return 'x';
+			return 'd'; //d + d => d
+		break;
 
-	    default: //error or nothing to do
-		return 'x';
+	    default: //no earlier entry found
+		return chType; //return new entry type
 	}
 	
-	return 'x'; //nothing to do
+	return chType; //return unknown change type
 }
 
 bool SyncLogger::deleteOtherEntries(const char* pszHash) {
