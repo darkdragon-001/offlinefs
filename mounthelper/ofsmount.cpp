@@ -81,7 +81,9 @@ int main(int argc, char *argv[])
     remotefstype = shareurl.substr(0,nDoppelPunktIndex);
     sharepath = shareurl.substr(nDoppelPunktIndex+3);
     // handle special protocols
-    if(remotefstype == "smb" || remotefstype == "smbfs")
+    if(remotefstype == "smb" || 
+       remotefstype == "smbfs" || 
+       remotefstype == "cifs")
         shareremote = string("//") + sharepath;
     else if(remotefstype == "file") {
 	shareremote = string("/") + sharepath;
