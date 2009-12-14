@@ -59,7 +59,9 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	string lMountOptions = "";
 	bool lAllowOther = false;
 	bool lUnmount = true;
+    bool lUseFSCache = false;
 	list<string> lListenDevices;
+    list<string> lMountOptionsList;
 		
 	MutexLocker obtain_lock(initm);
 	initialized = true;
@@ -89,6 +91,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	env.binarypath = argv[0];
 	env.mountPoint = argv[1];
 	env.shareURL = argv[2];
+	// parsing paramaters ('man getopt_long' for usage)
 	while((nextopt =
 	    getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
 		switch(nextopt) {
@@ -112,8 +115,18 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			lShareID = optarg;
 			break;
 		   case 'p': // mount options
-			lMountOptions = optarg;
-			break;
+               char *mntopt;
+               mntopt = optarg;
+			   lMountOptions = mntopt;
+               char *optsaveptr;
+               char *stroption;
+               stroption = strtok_r(mntopt, ",", &optsaveptr);
+               lMountOptionsList.clear();
+               while(stroption != NULL) {
+                  lMountOptionsList.push_back(stroption);
+                  stroption = strtok_r(NULL, ",", &optsaveptr);
+               }
+			   break;
 		   case 'o': // allow other users access to the filesystem
 			lAllowOther = true;
 			break;
@@ -134,6 +147,19 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		}
 		
 	}
+
+    // parsing the mount options
+    if (!lMountOptionsList.empty())
+    {
+       list<string>::iterator i;
+       for(i=lMountOptionsList.begin(); i != lMountOptionsList.end(); ++i)
+       {
+          // option 'fsc': "Try to use FSCache"
+          if (*i == "fsc")
+             lUseFSCache = true;
+       }
+    }
+
 
 	// variable from config file
 	OFSConf &ofsconf = OFSConf::Instance();
@@ -157,12 +183,16 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		env.listendevices = ofsconf.GetListenDevices();
 	else
 		env.listendevices = lListenDevices;
-        // mount options
-        env.mountoptions = lMountOptions;
+    // mount options
+    env.mountoptions = lMountOptions;
 	// unmount flag
 	env.unmount = lUnmount;
 	// allow other flag
 	env.allowother = lAllowOther;
+    // use FSCache flag
+    env.usefscache = lUseFSCache;
+    //TODO: remove the following debug-output
+    cout << "fsc:" << lUseFSCache << endl;
 }
 
 list<string> OFSEnvironment::getListenDevices()

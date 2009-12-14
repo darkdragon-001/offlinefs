@@ -28,6 +28,7 @@ using namespace std;
 
 /**
  * @author Tobias Jaehnel <tjaehnel@gmail.com>
+ * @author Samuel Walz <samuel.walz@gmail.com>
  *
  * Manages configuration values for the current process. Those are determined
  * - from configuration file via OFSConf
@@ -93,7 +94,12 @@ public:
      * @return allowother flag
      */
     inline bool isAllowOther() { return allowother; };
-    
+    /**
+     * Should be tried to use FSCache?
+     * @return usefscache flag
+     */
+    inline bool isFSCacheUser() { return usefscache; };
+
     /**
      * Get the global OFS directory where all persistence files,
      * cache and remote mountpoints are in
@@ -132,6 +138,7 @@ private:
     string mountoptions;
     bool unmount;
     bool allowother;
+    bool usefscache;
     string ofsdir;
 protected:
     list<string> listendevices;
