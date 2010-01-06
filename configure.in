@@ -7,19 +7,8 @@ AC_LANG_CPLUSPLUS
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 OFS_SBIN=/sbin
-
-
-default_moduledir=/lib/modules/`uname -r`/build/include
-AC_ARG_WITH(kernel_includes,
-[  --with-moduledir=DIR    kernel modules in DIR (/lib/modules/`uname -r`/build/include)],
-kernel_includes=${withval},
-kernel_includes=${default_moduledir})
-
-default_asmdir=/lib/modules/`uname -r`/build/arch/x86/include
-AC_ARG_WITH(asm_includes,
-[  --with-moduledir=DIR    kernel modules in DIR (/lib/modules/`uname -r`/build/arch/x86/include)],
-asm_includes=${withval},
-asm_includes=${default_asmdir})
+kernel_includes=/lib/modules/`uname -r`/build/include
+asm_includes=/lib/modules/`uname -r`/build/arch/x86/include
 
 AC_SUBST(OFS_SBIN)
 AC_SUBST(kernel_includes)
