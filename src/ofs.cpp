@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 	strncpy(args[1], env.getMountPoint().c_str(),
 		env.getMountPoint().length()+1);
 	if(env.isAllowOther()) {
-		args[2] = "-o";
-		args[3] = "allow_other";
+		strncpy(args[2], "-o", 3);
+		strncpy(args[3], "allow_other", 12);
 		args[4] = NULL;
 		numargs = 4;
 	} else {

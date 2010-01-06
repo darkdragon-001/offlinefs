@@ -168,12 +168,12 @@ void FilesystemStatusManager::mountfs()
     //////////////////////////////////////////////////////////////////////////
 
     char* pMountArgumente[8];
-    pMountArgumente[0] = "mount";
-    pMountArgumente[1] = "-t";
+    strncpy(pMountArgumente[0], "mount", 6);
+    strncpy(pMountArgumente[1], "-t", 3);
     pMountArgumente[2] = NULL;
     pMountArgumente[3] = NULL;
     pMountArgumente[4] = NULL;
-    pMountArgumente[5] = "-o";
+    strncpy(pMountArgumente[5], "-o", 3);
     pMountArgumente[6] = NULL;
     pMountArgumente[7] = NULL; // terminator
 
@@ -260,8 +260,8 @@ void FilesystemStatusManager::unmountfs()
 	int status;
 	if(childpid == 0) {
 		char *arguments[4];
-		arguments[0] = "umount";
-		arguments[1] = "-f";
+		strncpy(arguments[0], "umount", 7);
+		strncpy(arguments[1], "-f", 3);
 		arguments[2] = (char *)OFSEnvironment::Instance().getRemotePath().c_str();
 		arguments[3] = NULL;
 		execvp(arguments[0], arguments);
