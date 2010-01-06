@@ -18,12 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "persistencemanager.h"
+#include "ofsenvironment.h"
 #include "ofshash.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
-
 using namespace std;
 
 PersistenceManager::PersistenceManager(string modname)
@@ -36,8 +36,8 @@ PersistenceManager::PersistenceManager(string modname)
 	opts=NULL;
 	this->modname = modname;	
 
-	// TODO: put the remote path here
-	str << PERSISTENCE_PATH << "/" << ofs_hash("foobar") << "_" << modname;
+	OFSEnvironment &env = OFSEnvironment::Instance();
+	str << env.getOfsDir() << "/" << env.getShareID() << "_" << modname;
 	filename = str.str();
 }
 

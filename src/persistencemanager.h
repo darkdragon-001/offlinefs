@@ -20,7 +20,6 @@
 #ifndef PERSISTENCEMANAGER_H
 #define PERSISTENCEMANAGER_H
 
-#define PERSISTENCE_PATH "/var/ofs"
 #include <confuse.h>
 #include <string>
 using namespace std;
