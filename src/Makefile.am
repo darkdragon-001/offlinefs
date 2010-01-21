@@ -8,7 +8,7 @@ ofs_SOURCES = backingtree.cpp backingtreemanager.cpp backingtreepersistence.cpp 
 	synclogentry.cpp synclogger.cpp syncronisationmanager.cpp ofslog.cpp
 
 # set the include path found by configure
-INCLUDES = -I$(kernel_includes) -I$(asm_includes) \ 
+INCLUDES =  \ 
 	-I$(top_srcdir)/libraries/libofs \
 	-I$(top_srcdir)/libraries/libofsconf -I$(top_srcdir)/libraries/libofshash $(all_includes) \
 	`pkg-config dbus-1 --cflags-only-I` `pkg-config fuse --cflags-only-I`

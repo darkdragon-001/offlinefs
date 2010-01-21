@@ -7,12 +7,8 @@ AC_LANG_CPLUSPLUS
 AC_PROG_CXX
 AM_PROG_LIBTOOL
 OFS_SBIN=/sbin
-kernel_includes=/lib/modules/`uname -r`/build/include
-asm_includes=/lib/modules/`uname -r`/build/arch/x86/include
 
 AC_SUBST(OFS_SBIN)
-AC_SUBST(kernel_includes)
-AC_SUBST(asm_includes)
 
 AC_OUTPUT(Makefile libraries/Makefile libraries/libofs/Makefile \
 	libraries/libofsconf/Makefile libraries/libofshash/Makefile mounthelper/Makefile ofs-gui/Makefile \
