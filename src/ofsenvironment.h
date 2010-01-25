@@ -55,10 +55,6 @@ public:
     static void init(int argc, char *argv[]) throw(OFSException);
 
     /**
-     * Set connection info for offline recognizer
-     */
-    inline void setConnectionInfo(char* in) { connectionInfo = in; };
-    /**
      * Get the path, the remote share is mounted to
      * @return remote share path
      */
@@ -119,10 +115,6 @@ public:
     inline string getMountOptions() { return mountoptions; };
 
     /**
-     * Needed for offline recognizer
-     */
-    inline char* getConnectionInfo() { return connectionInfo; };
-    /**
      * Return the list of devices the system should listen for plug/unplug
      * @return list of devices as strings
      */
@@ -150,7 +142,6 @@ private:
     bool allowother;
     bool usefscache;
     string ofsdir;
-    char* connectionInfo;
 protected:
     list<string> listendevices;
     static bool initialized;

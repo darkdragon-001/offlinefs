@@ -70,10 +70,7 @@ int main(int argc, char *argv[])
 	
 	// create cache path - ignore errors if it not exists
 	mkdir(env.getCachePath().c_str(), 0777);
-//
-	// save connection info for offline recognition
-	OFSEnvironment::Instance().setConnectionInfo(argv[5]);
-
+	//
         return my_ofs.main(numargs, args, NULL, &my_ofs);
   //return EXIT_SUCCESS;
 }
