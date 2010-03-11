@@ -86,11 +86,20 @@ bool SyncLogger::AddEntry(const char* pszHash,
 	//     modType = ?
 	// }
 
+    //oreiche
+    // every file needs only ONE syncentry
+    // depending on earlier entries
+    string strFilePath = pszFilePath;
+    char newType = getModDependingOnOtherEntries(pszHash, strFilePath, chType);
+    if (newType == 'x') //nothing to do
+        return false;
+
 	// Creates the new entry.
     char szEntry[MAX_PATH + 1024];
     char *szIndex = itoa(m_nNewIndex, 10);
     char strtype[2];
-    strtype[0] = chType;
+    //strtype[0] = chType;
+    strtype[0] = newType;
     strtype[1] = '\0';
 
     // Writes the new entry.
@@ -314,4 +323,57 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	delete[] pszBuffer;
 
 	return true;
+}
+
+char SyncLogger::getModDependingOnOtherEntries(const char* pszHash, const string strFilePath, const char chType) {
+    /* get the whole list with iterator */
+    list<SyncLogEntry> entrylist = GetEntries(pszHash, strFilePath);
+    list<SyncLogEntry>::iterator iter;
+    char modType = (char)0;
+
+    /* search for entries on given path and delete ALL... */
+    for (iter = entrylist.begin(); iter != entrylist.end(); iter++) {
+        SyncLogEntry sle = (SyncLogEntry)*iter;
+        if (sle == strFilePath) {
+            /* ... but store FIRST modification type */
+            if ((int)modType == 0)
+                modType = sle.GetModType();
+            RemoveEntry(pszHash, sle);
+        }
+    }
+    
+    /* determine the correct modtype of the entry */
+    switch (modType) {
+        case 'c': //Not Exist
+        if (chType == 'c')
+            return 'c'; //c + c => c
+        else if (chType == 'm')
+            return 'c'; //c + m => c
+        else if (chType == 'd')
+            return 'x'; //c + d => none (nothing to do)
+        break;
+
+        case 'm': //Exist
+        if (chType == 'c')
+            return 'm'; //m + c => m
+        else if (chType == 'm')
+            return 'm'; //m + m => m
+        else if (chType == 'd')
+            return 'd'; //m + d => d
+        break;
+
+        case 'd': //Exist
+        if (chType == 'c')
+            return 'm'; //d + c => m
+        else if (chType == 'm')
+            return 'm'; //d + m => m
+        else if (chType == 'd')
+            return 'd'; //d + d => d
+        break;
+
+        default: //no earlier entry found
+        return chType; //return new entry type
+    }
+    
+    return chType; //return unknown change type
 }
