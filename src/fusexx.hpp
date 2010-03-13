@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "ofslog.h"
 
 namespace fusexx {
     /*
@@ -66,7 +67,9 @@ namespace fusexx {
 					return -1;
 				T::self = t;
 				
+
 				// Execute fuse_main
+				ofslog::info("Starting FUSE");
 				return fuse_main (argc, argv, &T::operations, user_data);
 			}
 			

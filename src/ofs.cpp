@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
 		cout << OFSEnvironment::getUsageString();
 		return 0;
 	}
+	ofslog::debug("Adopting parameters");
 	OFSEnvironment &env = OFSEnvironment::Instance();
 	char *args[5];
 	int numargs;
@@ -59,7 +60,9 @@ int main(int argc, char *argv[])
 	strncpy(args[1], env.getMountPoint().c_str(),
 		env.getMountPoint().length()+1);
 	if(env.isAllowOther()) {
+		args[2] = new char[3];
 		strncpy(args[2], "-o", 3);
+		args[3] = new char[12];
 		strncpy(args[3], "allow_other", 12);
 		args[4] = NULL;
 		numargs = 4;
@@ -67,11 +70,11 @@ int main(int argc, char *argv[])
 		args[2] = NULL;
 		numargs = 2;
 	}
-	
+
 	// create cache path - ignore errors if it not exists
 	mkdir(env.getCachePath().c_str(), 0777);
 //
-        return my_ofs.main(numargs, args, NULL, &my_ofs);
+	return my_ofs.main(numargs, args, NULL, &my_ofs);
 
   //return EXIT_SUCCESS;
 }
