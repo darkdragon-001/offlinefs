@@ -903,7 +903,7 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 	// create offline recognition thread
 	//if (argv[5]) {
 		pthread_t thread;
-		pthread_create( &thread, NULL, runOfflineRecognizer, (void *)OFSEnvironment::Instance().getShareURL().c_str());
+		pthread_create( &thread, NULL, runOfflineRecognizer, (void *)OFSEnvironment::Instance().getConnectionInfo());
 	//}
 
 	return NULL;
