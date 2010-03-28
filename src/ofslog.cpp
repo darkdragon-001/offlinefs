@@ -64,7 +64,9 @@ void
 ofslog::info(const char *fmt, ...)
 {
     va_list args;
+    va_start(args, fmt);
     log(LOG_INFO,fmt,args);
+    va_end(args);
 }
 
 /*!
@@ -74,7 +76,9 @@ void
 ofslog::debug(const char *fmt, ...)
 {
     va_list args;
+    va_start(args, fmt);
     log(LOG_DEBUG,fmt,args);
+    va_end(args);
 }
 
 /*!
@@ -84,7 +88,9 @@ void
 ofslog::error(const char *fmt, ...)
 {
     va_list args;
+    va_start(args, fmt);
     log(LOG_ERR,fmt,args);
+    va_end(args);
 }
 
 /*!
@@ -94,7 +100,9 @@ void
 ofslog::warning(const char *fmt, ...)
 {
     va_list args;
+    va_start(args, fmt);
     log(LOG_WARNING,fmt,args);
+    va_end(args);
 }
 
 /*!
@@ -104,7 +112,9 @@ void
 ofslog::notice(const char *fmt, ...)
 {
     va_list args;
+    va_start(args, fmt);
     log(LOG_NOTICE,fmt,args);
+    va_end(args);
 }
 
 /*!
@@ -114,7 +124,9 @@ void
 ofslog::critical(const char *fmt, ...)
 {
     va_list args;
+    va_start(args, fmt);
     log(LOG_CRIT,fmt,args);
+    va_end(args);
 }
 
 
