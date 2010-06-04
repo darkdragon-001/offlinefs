@@ -39,8 +39,19 @@
 #include "filesystemstatusmanager.h"
 #include "backingtreemanager.h"
 #include "ofsenvironment.h"
+#include "offlinerecognizer.h"
+#include <pthread.h>
 
 using namespace std;
+
+/**
+ * Run the offline recognizer thread
+ * @todo move this to the OfflineRecognizer class
+ */
+void *runOfflineRecognizer(void*) {
+	OfflineRecognizer offreg(OFSEnvironment::Instance().getShareURL());
+	offreg.startRecognizer();
+}
 
 //ofs_fuse::fuse_ofs_fuse()
 // : fusexx::fuse<ofs_fuse> ()
@@ -890,6 +901,13 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 	BackingtreeManager &btm = BackingtreeManager::Instance();
 //	btm.set_Cache_Path("/tmp/ofscache/");
 	btm.reinstate();
+	
+	// create offline recognition thread
+	//if (argv[5]) {
+		pthread_t thread;
+		pthread_create( &thread, NULL, runOfflineRecognizer, NULL);
+	//}
+
 	return NULL;
 }
 

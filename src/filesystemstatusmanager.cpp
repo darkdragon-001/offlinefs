@@ -158,6 +158,7 @@ string FilesystemStatusManager::getRemote(string path)
 void FilesystemStatusManager::mountfs()
 {
     string shareurl = OFSEnvironment::Instance().getShareURL();
+    ofslog::debug("shareURL: %s", shareurl.c_str());
     string sharepath;
     string remotefstype;
     string shareremote;
@@ -168,11 +169,14 @@ void FilesystemStatusManager::mountfs()
     //////////////////////////////////////////////////////////////////////////
 
     char* pMountArgumente[8];
+    pMountArgumente[0] = new char[6];
     strncpy(pMountArgumente[0], "mount", 6);
+    pMountArgumente[1] = new char[3];
     strncpy(pMountArgumente[1], "-t", 3);
     pMountArgumente[2] = NULL;
     pMountArgumente[3] = NULL;
     pMountArgumente[4] = NULL;
+    pMountArgumente[5] = new char[3];
     strncpy(pMountArgumente[5], "-o", 3);
     pMountArgumente[6] = NULL;
     pMountArgumente[7] = NULL; // terminator
@@ -187,7 +191,7 @@ void FilesystemStatusManager::mountfs()
     remotefstype = shareurl.substr(0,nDoppelPunktIndex);
     sharepath = shareurl.substr(nDoppelPunktIndex+3);
     // handle special protocols
-    if(remotefstype == "smb" || remotefstype == "smbfs")
+    if(remotefstype == "smb" || remotefstype == "smbfs" || remotefstype == "cifs")
         shareremote = string("//") + sharepath;
     else if(remotefstype == "file") {
 	shareremote = string("/") + sharepath;
@@ -211,13 +215,21 @@ void FilesystemStatusManager::mountfs()
     	pMountArgumente[4] = (char*)remotemountpoint.c_str();
 
     	//    my_options(argc - 2, &argv[2], &pszOptions);
-    	pMountArgumente[6] = (char *)OFSEnvironment::Instance().getMountOptions().c_str();
+    	if(OFSEnvironment::Instance().getMountOptions().length() > 0)
+    	{
+    		pMountArgumente[6] = (char *)OFSEnvironment::Instance().getMountOptions().c_str();
+    	}
+    	else
+    	{
+    		pMountArgumente[5] = NULL;
+    	}
     	// filesystem options
 	//    pArgumente[2] = szOptions;
     
     	// Mountet die Share, die vom Benutzer übergeben wurde.
     	int childpid = fork();
     	int status;
+        ofslog::info("Mounting filesystem");
     	if(childpid == 0) {
     		/*cout << endl << "mount" << " ";
 		cout << pMountArgumente[1] << " ";
@@ -228,22 +240,29 @@ void FilesystemStatusManager::mountfs()
     		cout << pMountArgumente[6] << " ";
     		cout << endl;*/
     		// make the mount point and ignore errors of it does exits
+       		//ofslog::debug("mkdir %s", pMountArgumente[4]);
        		mkdir(pMountArgumente[4], 0777);
+       		/*ofslog::debug("mount %s %s %s %s %s %s %s",
+       				pMountArgumente[0], pMountArgumente[1], pMountArgumente[2],
+       				pMountArgumente[3], pMountArgumente[4], pMountArgumente[5],
+       				pMountArgumente[6]);*/
        		execvp("mount", pMountArgumente);
-		ofslog::error(strerror(errno));
+       		ofslog::error(strerror(errno));
        		return;
     	}
     	if(childpid < 0) {
-		ofslog::error(strerror(errno));
+    		ofslog::error(strerror(errno));
         	return;
     	}
     	//waitpid(childpid, &status, 0);
     	int childpid2 = wait(&status);
 	//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
     	int exitstatus = WEXITSTATUS(status);
+    	ofslog::debug("Mount finished");
     	if(WIFEXITED(status) && exitstatus) {
        		errno = exitstatus;
-		ofslog::error(strerror(errno));
+    		ofslog::error("Unable to mount the remote filesystem!");
+    		ofslog::error(strerror(exitstatus));
        		return;
     	}
     
@@ -256,14 +275,16 @@ void FilesystemStatusManager::mountfs()
  */
 void FilesystemStatusManager::unmountfs()
 {	
-	int childpid = fork();
 	int status;
+	char *arguments[4];
+	arguments[0] = new char[7];
+	strncpy(arguments[0], "umount", 7);
+	arguments[1] = new char[3];
+	strncpy(arguments[1], "-f", 3);
+	arguments[2] = (char *)OFSEnvironment::Instance().getRemotePath().c_str();
+	arguments[3] = NULL;
+	int childpid = fork();
 	if(childpid == 0) {
-		char *arguments[4];
-		strncpy(arguments[0], "umount", 7);
-		strncpy(arguments[1], "-f", 3);
-		arguments[2] = (char *)OFSEnvironment::Instance().getRemotePath().c_str();
-		arguments[3] = NULL;
 		execvp(arguments[0], arguments);
 		errno = 0;
 		return;
@@ -277,9 +298,12 @@ void FilesystemStatusManager::unmountfs()
 	int exitstatus = WEXITSTATUS(status);
 	if(WIFEXITED(status) && exitstatus) {
 		ofslog::error("Unable to unmount the remote filesystem!");
-		perror(strerror(exitstatus));
+		ofslog::error(strerror(exitstatus));
 		errno = 0;
-		return;
+	}
+	else
+	{
+	    ofslog::debug("Filesystem unmounted");
 	}
 }
 

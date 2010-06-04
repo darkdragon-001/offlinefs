@@ -92,13 +92,13 @@ bool SyncLogger::AddEntry(const char* pszHash,
     string strFilePath = pszFilePath;
     char newType = getModDependingOnOtherEntries(pszHash, strFilePath, chType);
     if (newType == 'x') //nothing to do
-	return false;
+        return false;
 
-    // Creates the new entry.
+	// Creates the new entry.
     char szEntry[MAX_PATH + 1024];
     char *szIndex = itoa(m_nNewIndex, 10);
     char strtype[2];
-    strtype[0] = newType;//chType;
+    strtype[0] = newType;
     strtype[1] = '\0';
 
     // Writes the new entry.

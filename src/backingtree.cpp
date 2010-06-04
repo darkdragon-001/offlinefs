@@ -93,16 +93,27 @@ string Backingtree::get_cache_path(string path)
 void Backingtree::updateCache()
 {
 	ofslog::debug("updateCache");
-	pthread_t *thread = new pthread_t;
-	pthread_create(thread, NULL, Backingtree::updateCacheThread, (void *)this);
+	pthread_t thread;;
+	pthread_create(&thread, NULL, Backingtree::updateCacheThread, (void *)this);
+//	pthread_create(&thread, NULL, Backingtree::updateCacheThread, NULL);
 }
 
 void *Backingtree::updateCacheThread(void *arg)
 {
     Backingtree *back = (Backingtree *)arg;
-    back->status = updating;
-    back->updateCacheRunner(back->get_relative_path());
-    back->status = online;
+	try
+	{
+		ofslog::info("Updating cache.");
+        back->status = updating;
+        back->updateCacheRunner(back->get_relative_path());
+        back->status = online;
+        ofslog::info("Update cache finished.");
+	}
+	catch(OFSException &e)
+	{
+		back->status = online;
+		ofslog::error("An Exception occured while updating the cache: %s (%d)", e.what(), e.get_posixerrno());
+	}
     return NULL;
 }
 
@@ -115,7 +126,12 @@ void Backingtree::updateCacheRunner(string relativeDir)
     // update this directory
     OFSFile file(relativeDir);
     ///\todo What to do if there are local modifications regarding stat information
-    file.update_cache();
+    try {
+        file.update_cache();
+    } catch (OFSException &e) {
+    	ofslog::error("%s (%d) - %s", e.what(), e.get_posixerrno(), file.get_relative_path().c_str());
+    	return;
+    }
     string absoluteRemoteDir = file.get_remote_path();
     string absoluteCacheDir = file.get_cache_path();;
 
@@ -139,11 +155,18 @@ void Backingtree::updateCacheRunner(string relativeDir)
                 subdirs[filename] = fileinfo;
             else
             {
-                regularfiles[filename] = fileinfo;
-                // make sure the file is current
-                OFSFile file(relativePath);
-                ///\todo Only update the file if it has no local modifications
-                file.update_cache();
+            	try
+            	{
+                    regularfiles[filename] = fileinfo;
+            		// make sure the file is current
+                    OFSFile file(relativePath);
+                    ///\todo Only update the file if it has no local modifications
+                    file.update_cache();
+            	}
+            	catch(OFSException &e)
+            	{
+                	ofslog::error("%s (%d) - %s", e.what(), e.get_posixerrno(), relativePath.c_str());
+            	}
             }
         }
     }

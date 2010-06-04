@@ -211,7 +211,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
                 int fdr = open(fileInfo.get_remote_path().c_str(),
                     O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
                 if (fdr < 0)
-		   throw OFSException(strerror(errno), errno,true);
+                    throw OFSException(strerror(errno), errno,true);
                 close(fdr);
             }
             else if (S_ISLNK(fsCache.st_mode))

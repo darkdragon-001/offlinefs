@@ -28,6 +28,7 @@ using namespace std;
 
 /**
  * @author Tobias Jaehnel <tjaehnel@gmail.com>
+ * @author Samuel Walz <samuel.walz@gmail.com>
  *
  * Manages configuration values for the current process. Those are determined
  * - from configuration file via OFSConf
@@ -52,6 +53,7 @@ public:
      * @return true of command line is OK, false other
      */
     static void init(int argc, char *argv[]) throw(OFSException);
+
     /**
      * Get the path, the remote share is mounted to
      * @return remote share path
@@ -93,7 +95,12 @@ public:
      * @return allowother flag
      */
     inline bool isAllowOther() { return allowother; };
-    
+    /**
+     * Should be tried to use FSCache?
+     * @return usefscache flag
+     */
+    inline bool isFSCacheUser() { return usefscache; };
+
     /**
      * Get the global OFS directory where all persistence files,
      * cache and remote mountpoints are in
@@ -106,6 +113,7 @@ public:
      * @return mount parameters
      */
     inline string getMountOptions() { return mountoptions; };
+
     /**
      * Return the list of devices the system should listen for plug/unplug
      * @return list of devices as strings
@@ -132,6 +140,7 @@ private:
     string mountoptions;
     bool unmount;
     bool allowother;
+    bool usefscache;
     string ofsdir;
 protected:
     list<string> listendevices;

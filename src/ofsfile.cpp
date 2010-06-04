@@ -1177,9 +1177,9 @@ void OFSFile::update_cache()
 	ret = lstat ( get_remote_path().c_str(), &fileinfo_remote );
 	if(ret >= 0 && S_ISDIR(fileinfo_remote.st_mode))
 	   isdir = true;
-        // only update if:
+    // only update if:
 	// - the file is marked as offline
-	// - the remote file is available
+	// - the remote filesystem is available
 	// - the file is not in conflict state
 	if ( get_offline_state() && get_availability() 
 	       && (!isConflictPath() || isdir)
@@ -1428,7 +1428,8 @@ int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int
 	if ( strncmp ( name, OFS_ATTRIBUTE_OFFLINE,
 	               strlen ( OFS_ATTRIBUTE_OFFLINE ) +1 ) == 0 )
 	{
-		BackingtreeManager::Instance().register_Backingtree ( get_relative_path() );
+		string rp = get_relative_path();
+		BackingtreeManager::Instance().register_Backingtree ( rp );
 		// availability attribute
 	}
 	else if ( strncmp ( name, OFS_ATTRIBUTE_AVAILABLE,
