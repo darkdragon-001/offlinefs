@@ -204,6 +204,12 @@ void OfflineRecognizer::startRecognizer() {
 	msec = 1000000;
     	while (true) {
 		result = checkConnection();	
+		// if the protocol is unknown, we cannot determine if the server
+		// is available, wherefore we asume availability
+		if(result == UNKNOWN_PROT)
+			result = SUCCESS;
+
+		// online-offfline toggle
 		isAvailable = FilesystemStatusManager::Instance().isAvailable();
 		if (result != SUCCESS && isAvailable) {
 			if (msec < 5000000)
