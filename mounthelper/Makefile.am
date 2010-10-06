@@ -1,4 +1,4 @@
-myexecpdir = $(DESTDIR)@OFS_SBIN@
+myexecpdir = @OFS_SBIN@
 myexecp_PROGRAMS = mount.ofs 
 mount_ofs_SOURCES = ofsmount.cpp options.cpp usage.cpp
 
