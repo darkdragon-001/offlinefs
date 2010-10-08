@@ -94,7 +94,8 @@ void Backingtree::updateCache()
 {
 	ofslog::debug("updateCache");
 	pthread_t thread;;
-	pthread_create(&thread, NULL, Backingtree::updateCacheThread, (void *)this);
+	updateCacheThread((void *)this);
+	//pthread_create(&thread, NULL, Backingtree::updateCacheThread, (void *)this);
 //	pthread_create(&thread, NULL, Backingtree::updateCacheThread, NULL);
 }
 

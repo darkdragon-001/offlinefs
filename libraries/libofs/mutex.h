@@ -32,6 +32,7 @@ class Mutex
     void lock();
     void unlock();
   private:
+	pthread_mutexattr_t mta;
     pthread_mutex_t m;
 };
 

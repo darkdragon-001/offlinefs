@@ -21,7 +21,11 @@
 
 
     Mutex::Mutex()
-    { pthread_mutex_init(&m, 0); }
+    {
+    	pthread_mutexattr_init(&mta);
+    	pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
+    	pthread_mutex_init(&m, &mta);
+    }
  
     void Mutex::lock()
     { pthread_mutex_lock(&m); }
