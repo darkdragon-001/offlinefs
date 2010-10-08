@@ -44,7 +44,7 @@
 <listEntry value="4"/>
 </listAttribute>
 <mapAttribute key="org.eclipse.debug.core.environmentVariables">
-<mapEntry key="LD_LIBRARY_PATH" value="${project_loc}/build-Debug/libraries/libofs/.libs:${project_loc}/build-Debug/libraries/libofshash/.libs:${project_loc}/build-Debug/libraries/libofsconf.libs"/>
+<mapEntry key="LD_LIBRARY_PATH" value="build-Debug/libraries/libofs/.libs:build-Debug/libraries/libofshash/.libs:build-Debug/libraries/libofsconf.libs"/>
 </mapAttribute>
 <mapAttribute key="org.eclipse.debug.core.preferred_launchers"/>
 <listAttribute key="org.eclipse.debug.ui.favoriteGroups">
