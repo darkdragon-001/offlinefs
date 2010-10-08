@@ -183,6 +183,8 @@ void Backingtree::updateCacheRunner(string relativeDir)
     while( (entry = readdir(dir) ) != NULL)
     {
         string filename = entry->d_name;
+        if(filename == "." || filename == "..")
+            continue;
         string absolutePath = absoluteCacheDir+"/"+filename;
         string relativePath = relativeDir+"/"+filename;
         ///\todo Only delete the file if it has no local modifications
@@ -194,7 +196,7 @@ void Backingtree::updateCacheRunner(string relativeDir)
                 map<string, struct stat>::iterator iter = subdirs.find(filename);
                 if(iter == subdirs.end())
                 {
-                    rmdir(absolutePath.c_str());
+                    this->recurs_rmdir(absolutePath);
                 }
             }
             else
@@ -216,4 +218,42 @@ void Backingtree::updateCacheRunner(string relativeDir)
         updateCacheRunner(relativeDir+"/"+iter->first);
         iter++;
     }
+}
+
+/**
+ * \brief Recursively deletes contained directories and files, then the parameter itself.
+ */
+int Backingtree::recurs_rmdir(const string absolutePath)
+{
+	string strChildName;
+	string strChildPath;
+    struct dirent *entry;
+    struct stat fileinfo;
+    int ret = 0;
+    DIR *dir = opendir(absolutePath.c_str());
+    if(dir == NULL) {
+    	errno = ENOENT;
+        return errno;
+    }
+    while(ret == 0 && (entry = readdir(dir)) != NULL)
+    {
+        strChildName.assign(entry->d_name);
+    	strChildPath = absolutePath + "/" + strChildName;
+        if(strChildName == "." || strChildName == "..")
+            continue;
+        ret = lstat(strChildPath.c_str(), &fileinfo);
+        if(ret == 0)
+        {
+            if(S_ISDIR(fileinfo.st_mode))
+            	ret = this->recurs_rmdir(strChildPath);
+            else
+            	ret = unlink(strChildPath.c_str());
+        }
+    }
+    if (ret == 0)
+    	ret = rmdir(absolutePath.c_str());
+    else
+    	errno = ret;
+    closedir(dir);
+    return ret;
 }

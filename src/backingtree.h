@@ -93,7 +93,8 @@ protected:
     string relative_path;
     string cache_path;
 private:
-
+    int recurs_rmdir(const string absolutePath);
 };
 
 #endif
+	  	 
