@@ -1,1 +1,15 @@
- 
+Grundgerüst:
+1) op_write schreibt IMMER nach fd_cache
+2) Damit Eintrag im synclogger
+3) Reintegratin bei folgenden Ereignissen:
+  a) Schließen der Datei (wenn verändert)
+  b) Herrunterfahren bzw.Reboot
+  c) nach Ablauf von x Minuten
+  d) Auslastungsgesteuert
+  e) nach Offlinebetrieb (gibt's schon)
+  
+Zu Untersuchen:
+Was bringt es allgemein?
+Macht es für alle Datei sind oder sollte man gewissen Dateien ausschließen?
+Welche Probleme tretten auf und wo gibts es vermehrt Syncfehler?
+Performancesteigerung durch lazyread/write?
