@@ -6,7 +6,7 @@ ofs_SOURCES = backingtree.cpp backingtreemanager.cpp backingtreepersistence.cpp 
 	offlinerecognizer.cpp ofs.cpp ofs_fuse.cpp ofsbroadcast.cpp ofsenvironment.cpp \
 	ofsexception.cpp ofsfile.cpp ofslog.cpp persistable.cpp persistencemanager.cpp \
 	synchronizationmanager.cpp synchronizationpersistence.cpp synclogentry.cpp synclogger.cpp \
-	syncronisationmanager.cpp
+	syncronisationmanager.cpp lazywrite.cpp
 
 # set the include path found by configure
 INCLUDES = -I$(top_srcdir)/libraries/libofs \

@@ -225,6 +225,7 @@ void OfflineRecognizer::startRecognizer() {
 				ofslog::info("OfflineRecognizer triggering reconnection to server");
 				//connect
 				FilesystemStatusManager::Instance().setAvailability(true);
+				//pthread LW wieder aktivieren
 			}
 			msec = 1000000;
 		}

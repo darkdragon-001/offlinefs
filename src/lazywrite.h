@@ -21,6 +21,24 @@
 
 #ifndef LAZYWRITE_H_
 #define LAZYWRITE_H_
+#include <string.h>
+#include <stdlib.h>
+using namespace std;
 
+
+/**
+	@author
+*/
+class Lazywrite {
+public:
+    Lazywrite(int i);
+
+    ~Lazywrite();
+
+	private:
+
+    public:
+	void startLazywrite();
+};
 
 #endif /* LAZYWRITE_H_ */
