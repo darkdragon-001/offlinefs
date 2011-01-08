@@ -35,7 +35,7 @@ void Sighandler(int sig)
 {
 	if(FilesystemStatusManager::Instance().islazywrite())
 	{
-	ofslog::info("Veränderte Daten werden auf das Netzlaufwerk geschrieben");
+	ofslog::info("Write back Changes");
 	SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
 	FilesystemStatusManager::Instance().setsync(true);
 	}
@@ -53,22 +53,29 @@ Lazywrite::~Lazywrite()
 
 void Lazywrite::startLazywrite()
 {
-	ofslog::info("Layzwrite gestartet");
+	ofslog::info("Lazy write activated");
 	int sec = 300;
 	//Catch Signal for Reintegration on Shutdown
-	typedef void (*sighandler_t)(int);
-	signal(SIGTERM, &Sighandler);
+	struct sigaction new_action;
+
+	/* Set up the structure to specify the new action. */
+	new_action.sa_handler = Sighandler;
+	sigemptyset (&new_action.sa_mask);
+	new_action.sa_flags = 0;
+	sigaction (SIGHUP, &new_action, NULL);
+	sigaction (SIGTERM, &new_action, NULL);
+
 
 	//Reintegration alle 5 Minuten
 	while (true) {
 			if (FilesystemStatusManager::Instance().islazywrite()) {
-				ofslog::info("Start Reintegration");
+				ofslog::info("Start Write back");
 				SynchronizationManager::Instance().ReintegrateAll(
 				                OFSEnvironment::Instance().getShareID().c_str());
 
 			}
 			else {
-				ofslog::info("Lazywrite deaktiviert");
+				ofslog::info("Lazy write disabled");
 				//return;
 			}
 			sleep(sec);

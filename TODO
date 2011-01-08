@@ -1,29 +1,22 @@
 Grundgerüst:
 1) Neuer Zustand (LW_aktiv) => alle Schreiboperationen -> Cache
+   neuer Zustand sync => Cache==Remote, für Lesezugriff
 2) Damit Eintrag im synclogger
 3) Reintegration bei folgenden Ereignissen:
-  a) Schließen der Datei (wenn verändert)
-  b) Herrunterfahren bzw.Reboot
+  a) Schließen der Datei (wenn verändert) //Optional
+  b) Herrunterfahren bzw.Reboot UND Ameldung //Done
   c) nach Ablauf von 5 Minuten //Done
   d) Auslastungsgesteuert (dynamisch)
   e) nach Offlinebetrieb (gibt's schon) //Done
   
 Zu Untersuchen:
 Was bringt es allgemein?
-Macht es für alle Datei sind oder sollte man gewissen Dateien ausschließen?
+Macht es für alle Datei sinn oder sollte man gewissen Dateien ausschließen?
 Welche Probleme tretten auf und wo gibts es vermehrt Syncfehler? (verteiltes System)
 Performancesteigerung durch lazyread/write?
 Schreiben von noch offenen Dateien/DB?
-mkdir, create, rename, chmod
-ALLE Schreiboperationen auf Dateien oder Verzeichnisse müssen geändert werden! (Abhängigkeiten?)
-Reintegration benutzt die direkten schreibfunktionen
-Beim syncen, welcher timestamp hat die Datei, als Änderung passiert oder als auf server geschrieben?
-ist es möglich während der RI einen neuen eintrag ins log zumachen?
 
 WICHTIG:
 Lazywrite wird nur auf Offline markierte F&F angewand!
 
 Frage:
-Werden chmod Änderungen beim reintegration mitkopiert?
-chmod Änderungen sofort aktualisieren oder per lazywrite?
-Datei anlegen in eine offline markierten Verzeichnis => Datei als offline automatisch markiert?

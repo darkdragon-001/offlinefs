@@ -330,7 +330,7 @@ void FilesystemStatusManager::setAvailability(bool value)
             SynchronizationManager::Instance().ReintegrateAll(
                 OFSEnvironment::Instance().getShareID().c_str());
             //LW wieder aktiviern
-            ofslog::info("Lazywrite wieder aktiv");
+            ofslog::info("Lazywrite reactivated");
             //Remote==Cache
             sync=true;
         }

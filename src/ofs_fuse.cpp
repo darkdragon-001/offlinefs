@@ -922,11 +922,18 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 
 /**
  * Exit the filesystem - unmount the remote share
+ * Write Cache back to Fileserver (Lazywrite)
  * @param  
  */
 void ofs_fuse::fuse_destroy(void *)
 {
     if(!OFSEnvironment::Instance().isUnmount())
         return;
+	if(FilesystemStatusManager::Instance().islazywrite())
+	{
+	ofslog::info("Veränderte Daten werden auf das Netzlaufwerk geschrieben");
+	SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
+	FilesystemStatusManager::Instance().setsync(true);
+	}
     FilesystemStatusManager::Instance().unmountfs();
 }

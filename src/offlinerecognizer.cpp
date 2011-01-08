@@ -209,7 +209,7 @@ void OfflineRecognizer::startRecognizer() {
 		if(result == UNKNOWN_PROT)
 			result = SUCCESS;
 
-		// online-offfline toggle
+		// online-offline toggle
 		isAvailable = FilesystemStatusManager::Instance().isAvailable();
 		if (result != SUCCESS && isAvailable) {
 			if (msec < 5000000)
