@@ -216,6 +216,7 @@ void OfflineRecognizer::startRecognizer() {
 				msec = msec + 1000000;
 			else {
 				ofslog::warning("OfflineRecognizer failed to connect to server, setting mountpoint unavailable!");
+				ofslog::info("Lazy write disabled");
 				//disconnect
 				FilesystemStatusManager::Instance().setAvailability(false);
 				msec = 1000000;

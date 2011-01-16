@@ -24,23 +24,11 @@
 #include "filesystemstatusmanager.h"
 #include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
-/* diese funktion ist für das anstoßen der reintegration zuständig
-   dafür muss sie permanent laufen oder zumindest im Netzbetrieb
-   muss die im TODO beschrieben Ereignisse behandeln
-
-   IDEE: Thread wird im Offline Modus suspended bis das Signal für Netz kommt
+#include <stdio.h>
+/* This Method control the Reintegration if Lazywrite active
+ * on Shutdown or Log-off the reintegration will start in fuse_destroy
+ *
 */
-void Sighandler(int sig)
-{
-	if(FilesystemStatusManager::Instance().islazywrite())
-	{
-	ofslog::info("Write back Changes");
-	SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
-	FilesystemStatusManager::Instance().setsync(true);
-	}
-	return;
-}
 Lazywrite::Lazywrite(int i)
 {
 
@@ -55,29 +43,62 @@ void Lazywrite::startLazywrite()
 {
 	ofslog::info("Lazy write activated");
 	int sec = 300;
-	//Catch Signal for Reintegration on Shutdown
-	struct sigaction new_action;
+	bool tosync=false;  //For Sync ever x Seconds set it to 'true'!!
 
-	/* Set up the structure to specify the new action. */
-	new_action.sa_handler = Sighandler;
-	sigemptyset (&new_action.sa_mask);
-	new_action.sa_flags = 0;
-	sigaction (SIGHUP, &new_action, NULL);
-	sigaction (SIGTERM, &new_action, NULL);
+	//Variable for load CPU
+	FILE *fpipe;
+	char *command ="grep -o \'[0-9]\\+\\.[0-9]\\+*\' /proc/loadavg | sed -n \"3p\"";
+	char line[10];
+	int is, max = 5;
 
-
-	//Reintegration alle 5 Minuten
+	//Variable for Load Network
+/*	FILE *fpipe;
+	char *command ="grep eth0 /proc/net/dev | awk -F: \'{print  $2}\' | awk \'{print $9}\'";
+	char line[255];
+	long int is=0, old = 0;
+	long int diff=0;
+*/
 	while (true) {
-			if (FilesystemStatusManager::Instance().islazywrite()) {
-				ofslog::info("Start Write back");
-				SynchronizationManager::Instance().ReintegrateAll(
-				                OFSEnvironment::Instance().getShareID().c_str());
+		if (!(FilesystemStatusManager::Instance().issync())) {
 
+			// re-integration per Load CPU
+			fpipe=(FILE*)popen(command,"r");
+			fgets(line, sizeof line, fpipe);
+			is=atol(line);
+			if(is<max)
+			{
+				tosync=true;
 			}
-			else {
-				ofslog::info("Lazy write disabled");
-				//return;
+
+			//re-integration per Load Network
+			//get the Different for the next 5 Minutes of the Transmitted Byte from /proc/net/dev
+/*			for(int x=0;x<30;x++)
+			{
+			fpipe=(FILE*)popen(command,"r");
+			fgets(line, sizeof line, fpipe);
+			is=(atol(line))/1024; //byte->Kbyte
+			if(is>old && old!=0)
+			{
+			  diff = diff + (is - old);
 			}
-			sleep(sec);
+			old = is;
+			sleep(10);
+			}
+			diff=diff/1024; //Kbyte->Mbyte
+			if(diff<10) //if the different smaller then 10 Mbyte
+			{
+				tosync=true;
+			}
+*/
+			if(FilesystemStatusManager::Instance().islazywrite() && tosync){
+			ofslog::info("Start Write back");
+			SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
+			FilesystemStatusManager::Instance().setsync(true);
+			}
+		}
+		else {
+			ofslog::info("No Changes");
+			}
+		sleep(sec);
 		}
 }

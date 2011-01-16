@@ -929,9 +929,9 @@ void ofs_fuse::fuse_destroy(void *)
 {
     if(!OFSEnvironment::Instance().isUnmount())
         return;
-	if(FilesystemStatusManager::Instance().islazywrite())
+	if(FilesystemStatusManager::Instance().islazywrite() && !(FilesystemStatusManager::Instance().issync()))
 	{
-	ofslog::info("Veränderte Daten werden auf das Netzlaufwerk geschrieben");
+	ofslog::info("Write back Changes");
 	SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
 	FilesystemStatusManager::Instance().setsync(true);
 	}

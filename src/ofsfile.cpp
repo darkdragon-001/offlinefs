@@ -455,14 +455,14 @@ int OFSFile::op_mknod ( mode_t mode, dev_t rdev )
 		{
 			// Sends a signal: Couldn't create file on remote share.
 			OFSBroadcast::Instance().SendError( "FileError", "RemoteNotWritable",
-				       "File error: Could not create file on remote share.",0);
+				       "File error: Could not create node on remote share.",0);
 			return nErrNo;
 		}
 		if ( !bCacheOK )
 		{
 			// Sends a signal: Couldn't create file on cache.
 			OFSBroadcast::Instance().SendError( "FileError", "CacheNotWritable",
-				       "File error: Could not create file on cache.",nErrNo );
+				       "File error: Could not create node on cache.",nErrNo );
 			return nErrNo;
 		}
 		return 0;
@@ -968,8 +968,7 @@ int OFSFile::op_write ( const char *buf, size_t size, off_t offset )
 	{
 		res = pwrite ( fd_cache, buf, size, offset );
 		// Inserts a sync log entry if a file was successfully written to the cache but not or incompletely written to the remote.
-		if ( nNumberOfWrittenBytes != size - offset &&
-		        res == size - offset )
+		if ( nNumberOfWrittenBytes != size - offset && res == size - offset )
 			SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'm' );
 		if ( res == -1 )
 		{
