@@ -929,7 +929,7 @@ void ofs_fuse::fuse_destroy(void *)
 {
     if(!OFSEnvironment::Instance().isUnmount())
         return;
-	if(FilesystemStatusManager::Instance().islazywrite() && !(FilesystemStatusManager::Instance().issync()))
+	if(OFSEnvironment::Instance().getlazywrite() && !(FilesystemStatusManager::Instance().issync()))
 	{
 	ofslog::info("Write back Changes");
 	SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());

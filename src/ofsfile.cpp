@@ -1551,3 +1551,16 @@ void OFSFile::savemtime()
     }
 }
 
+bool OFSFile::filesync()
+{
+	list<SyncLogEntry> listOfEntries = SyncLogger::GetEntries(OFSEnvironment::Instance().getShareID().c_str());
+	for (list<SyncLogEntry>::iterator it = listOfEntries.begin();it != listOfEntries.end(); it++)
+	{
+		SyncLogEntry& sle = *it;
+		if (strcmp(sle.GetFilePath(),get_cache_path()))
+		{
+			return false;
+		}
+	}
+	return true;
+}

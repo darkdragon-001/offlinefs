@@ -36,6 +36,8 @@ public:
     ~Lazywrite();
 
 	private:
+    bool loadnetwork();
+    bool loadcpu();
 
     public:
 	void startLazywrite();

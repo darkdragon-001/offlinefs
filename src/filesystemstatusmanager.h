@@ -83,8 +83,6 @@ public:
     void setAvailability(bool value);
     void unmountfs();
     void mountfs();
-    void setlazywrite(bool value);
-    bool islazywrite();
     void setsync(bool value);
     bool issync();
 protected:
@@ -94,7 +92,7 @@ protected:
 		theFilesystemStatusManagerInstance;
 
 protected:
-    bool available, lazywrite, sync;
+    bool available, sync;
     static Mutex m; 
 };
 #endif

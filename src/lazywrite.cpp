@@ -22,6 +22,7 @@
 #include "lazywrite.h"
 #include "ofslog.h"
 #include "filesystemstatusmanager.h"
+#include "ofsenvironment.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -39,61 +40,81 @@ Lazywrite::~Lazywrite()
 
 }
 
-void Lazywrite::startLazywrite()
+bool Lazywrite::loadnetwork()
 {
-	ofslog::info("Lazy write activated");
-	int sec = 300;
-	bool tosync=false;  //For Sync ever x Seconds set it to 'true'!!
-
-	//Variable for load CPU
 	FILE *fpipe;
-	char *command ="grep -o \'[0-9]\\+\\.[0-9]\\+*\' /proc/loadavg | sed -n \"3p\"";
-	char line[10];
-	int is, max = 5;
-
-	//Variable for Load Network
-/*	FILE *fpipe;
 	char *command ="grep eth0 /proc/net/dev | awk -F: \'{print  $2}\' | awk \'{print $9}\'";
 	char line[255];
 	long int is=0, old = 0;
 	long int diff=0;
-*/
+
+	//re-integration per Load Network
+	//get the Different for the next 5 Minutes of the Transmitted Byte from /proc/net/dev
+
+	for(int x=0;x<30;x++)
+	{
+	fpipe=(FILE*)popen(command,"r");
+	fgets(line, sizeof line, fpipe);
+	is=(atol(line))/1024; //byte->Kbyte
+	if(is>old && old!=0)
+	{
+	  diff = diff + (is - old);
+	}
+	old = is;
+	sleep(10);
+	}
+	diff=diff/1024; //Kbyte->Mbyte
+	if(diff<10) //if the different smaller then 10 Mbyte
+	{
+		 return true;
+	}
+	else return false;
+}
+
+bool Lazywrite::loadcpu()
+{
+	FILE *fpipe;
+	char *command ="grep -o \'[0-9]\\+\\.[0-9]\\+*\' /proc/loadavg | sed -n \"3p\"";
+	char line[10];
+	int is, max = 5;
+	// re-integration per Load CPU
+	fpipe=(FILE*)popen(command,"r");
+	fgets(line, sizeof line, fpipe);
+	is=atol(line);
+	if(is<max)
+	{
+		 return true;
+	}
+	else return false;
+}
+void Lazywrite::startLazywrite()
+{
+	ofslog::info("Lazy write activated");
+	int sec = 300, timer = 0;
+	bool tosync=false;
+
 	while (true) {
-		if (!(FilesystemStatusManager::Instance().issync())) {
+		if (!(FilesystemStatusManager::Instance().issync()) && FilesystemStatusManager::Instance().isAvailable()) {
 
-			// re-integration per Load CPU
-			fpipe=(FILE*)popen(command,"r");
-			fgets(line, sizeof line, fpipe);
-			is=atol(line);
-			if(is<max)
+			timer++;
+			switch(OFSEnvironment::Instance().getlwoption())
 			{
-				tosync=true;
+			case 'c':
+				tosync=loadcpu();
+				break;
+			case 'n':
+				tosync=loadnetwork();
+				break;
+			case 't':
+				tosync=true; //Sync ever x Minutes
+				break;
 			}
-
-			//re-integration per Load Network
-			//get the Different for the next 5 Minutes of the Transmitted Byte from /proc/net/dev
-/*			for(int x=0;x<30;x++)
-			{
-			fpipe=(FILE*)popen(command,"r");
-			fgets(line, sizeof line, fpipe);
-			is=(atol(line))/1024; //byte->Kbyte
-			if(is>old && old!=0)
-			{
-			  diff = diff + (is - old);
-			}
-			old = is;
-			sleep(10);
-			}
-			diff=diff/1024; //Kbyte->Mbyte
-			if(diff<10) //if the different smaller then 10 Mbyte
-			{
-				tosync=true;
-			}
-*/
-			if(FilesystemStatusManager::Instance().islazywrite() && tosync){
+			if (timer<5) tosync=true; //hard sync after timer*sec (default max 25 Minutes between two sync)
+			if (tosync){
 			ofslog::info("Start Write back");
 			SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
 			FilesystemStatusManager::Instance().setsync(true);
+			timer=0;
 			}
 		}
 		else {

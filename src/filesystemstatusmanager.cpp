@@ -49,7 +49,7 @@ using namespace std;
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
 
-FilesystemStatusManager::FilesystemStatusManager() : available(true) {lazywrite=true; sync=true;}
+FilesystemStatusManager::FilesystemStatusManager() : available(true) {sync=true;}
 FilesystemStatusManager::~FilesystemStatusManager(){}
 FilesystemStatusManager& FilesystemStatusManager::Instance()
 {
@@ -68,11 +68,6 @@ FilesystemStatusManager& FilesystemStatusManager::Instance()
 bool FilesystemStatusManager::isAvailable()
 {
 	return available;
-}
-
-bool FilesystemStatusManager::islazywrite()
-{
-	return lazywrite;
 }
 
 bool FilesystemStatusManager::issync()
@@ -138,7 +133,6 @@ void *FilesystemStatusManager::DbusListenerRun(void *)
 				string Netpath= "/org/freedesktop/NetworkManager/Devices/"+ (*it);
                                 if(Netpath==device_obj){
 					FilesystemStatusManager::Instance().available=false;
-					FilesystemStatusManager::Instance().lazywrite=false;
 				}
 }
      
@@ -317,20 +311,17 @@ void FilesystemStatusManager::unmountfs()
 	    ofslog::debug("Filesystem unmounted");
 	}
 }
-//Gleichzeitiges Setzen von Available&Lazywrite???
+
 void FilesystemStatusManager::setAvailability(bool value)
 {
     if(available != value)
     {
         available = value;
-        lazywrite = value;
         if(available)
         { // mount share and reintegrate
             mountfs();
             SynchronizationManager::Instance().ReintegrateAll(
                 OFSEnvironment::Instance().getShareID().c_str());
-            //LW wieder aktiviern
-            ofslog::info("Lazywrite reactivated");
             //Remote==Cache
             sync=true;
         }
@@ -339,11 +330,6 @@ void FilesystemStatusManager::setAvailability(bool value)
             unmountfs();
         }
     }
-}
-
-void FilesystemStatusManager::setlazywrite(bool value)
-{
-	lazywrite=value;
 }
 
 void FilesystemStatusManager::setsync(bool value)

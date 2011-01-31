@@ -95,6 +95,7 @@ public:
     int op_removexattr(const char *name);
     int op_listxattr(char *list, size_t size);
     void savemtime();
+    bool filesync();
 private:
     File fileinfo;
     DIR *dh_cache;
