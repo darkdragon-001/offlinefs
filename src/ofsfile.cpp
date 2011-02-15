@@ -20,7 +20,7 @@
 #include "ofsfile.h"
 #include "synclogger.h"
 #include "filestatusmanager.h"
-#include "filesystemstatusmanager.h" 
+#include "filesystemstatusmanager.h"
 #include "backingtreemanager.h"
 #include "ofsbroadcast.h"
 #include "ofsenvironment.h"
@@ -220,7 +220,7 @@ int OFSFile::op_create ( mode_t mode, int flags )
     {
         // make sure the cache is sync regarding this file
 	update_cache();
-                
+
 	if ( get_offline_state() )
 	{
             fdc = open ( get_cache_path().c_str(), flags, mode );
@@ -247,7 +247,7 @@ int OFSFile::op_create ( mode_t mode, int flags )
             }
         }
         // DON'T UNDERSTAND THIS COMMENT: Inserts a sync log entry if the file couldn't be created on the remote or if the network is not connected but could be created on the cache.
-        
+
         // If the remote file is not available, create a log entry
         if ( get_offline_state() && !get_availability() )
         {
@@ -312,6 +312,7 @@ int OFSFile::op_fgetattr ( struct stat *stbuf )
 int OFSFile::op_flush()
 {
 	// TODO: Implement this
+	return 0;
 }
 
 /**
@@ -506,7 +507,7 @@ int OFSFile::op_open ( int flags )
 	try
 	{
 		update_cache();
-                
+
 		if ( get_offline_state() )
 		{
 			fdc = open ( get_cache_path().c_str(), flags );
@@ -868,7 +869,7 @@ int OFSFile::op_unlink()
 	try
 	{
 		update_cache();
-		
+
                 if ( get_offline_state() && !get_availability() )
                     savemtime();
 
@@ -971,7 +972,7 @@ int OFSFile::op_write ( const char *buf, size_t size, off_t offset )
 {
 	int res;
 	int nNumberOfWrittenBytes = -1;
-        
+
         if ( get_offline_state() && !get_availability() )
             savemtime();
 
@@ -979,7 +980,7 @@ int OFSFile::op_write ( const char *buf, size_t size, off_t offset )
 	{
 		errno = EBADF;
 		// Sends a signal: Couldn't write file due to missing network connection.
-		OFSBroadcast::Instance().SendError( "FileError", 
+		OFSBroadcast::Instance().SendError( "FileError",
 		  "NeitherRemoteNorCacheAvailable","File error: Could not write file due to missing network connection.",-EBADF );
 		return -errno;
 	}
@@ -1052,7 +1053,7 @@ int OFSFile::op_rename ( OFSFile *to )
 	{
 		update_cache();
 		bool bOK = true;
-		
+
                 if ( get_offline_state() && !get_availability() )
                     savemtime();
 
@@ -1181,7 +1182,7 @@ void OFSFile::update_cache()
 	// - the file is marked as offline
 	// - the remote filesystem is available
 	// - the file is not in conflict state
-	if ( get_offline_state() && get_availability() 
+	if ( get_offline_state() && get_availability()
 	       && (!isConflictPath() || isdir)
 	   )
 	{
@@ -1501,7 +1502,7 @@ int OFSFile::op_listxattr ( char *list, size_t size )
 	// This of course failes for most ofs attributes
 	// not listing them makes them invisible for the application
  	return llistxattr ( get_remote_path().c_str(), list, 0 ); // works
-	
+
 /*	int res = 0;
 	int fsres = 0;
 	char *fslist = list;
@@ -1517,11 +1518,11 @@ int OFSFile::op_listxattr ( char *list, size_t size )
 
 		strncpy ( fslist, OFS_ATTRIBUTE_AVAILABLE,
 		          strlen ( OFS_ATTRIBUTE_AVAILABLE ) +1 );
-		fslist += strlen ( OFS_ATTRIBUTE_AVAILABLE ) +1;		
+		fslist += strlen ( OFS_ATTRIBUTE_AVAILABLE ) +1;
 
 		strncpy ( fslist, OFS_ATTRIBUTE_STATE,
 		          strlen ( OFS_ATTRIBUTE_STATE ) +1 );
-		fslist += strlen ( OFS_ATTRIBUTE_STATE ) +1;		
+		fslist += strlen ( OFS_ATTRIBUTE_STATE ) +1;
 
 		//fsres = llistxattr ( get_remote_path().c_str(),
 		//                     fslist, size-res );

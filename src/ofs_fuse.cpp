@@ -51,6 +51,8 @@ using namespace std;
 void *runOfflineRecognizer(void*) {
 	OfflineRecognizer offreg(OFSEnvironment::Instance().getShareURL());
 	offreg.startRecognizer();
+	// FIXME Need to return something real here?
+	return NULL;
 }
 
 //ofs_fuse::fuse_ofs_fuse()
@@ -63,7 +65,7 @@ ofs_fuse::~ofs_fuse()
 {
 }
 
-ofs_fuse::ofs_fuse () { 
+ofs_fuse::ofs_fuse () {
 }
 
 
@@ -72,9 +74,9 @@ ofs_fuse::ofs_fuse () {
  *
  * Similar to stat(). The 'st_dev' and 'st_blksize' fields are ignored.
  * The 'st_ino' field is ignored except if the 'use_ino' mount option is given.
- * @param path 
- * @param stbuf 
- * @return 
+ * @param path
+ * @param stbuf
+ * @return
  */
 int ofs_fuse::fuse_getattr(const char *path, struct stat *stbuf)
 {
@@ -91,14 +93,14 @@ int ofs_fuse::fuse_getattr(const char *path, struct stat *stbuf)
 /**
  * Get attributes from an open file
  *
- * This method is called instead of the getattr() method if the file 
+ * This method is called instead of the getattr() method if the file
  * information is available.
  * Currently this is only called after the create() method if that
  * is implemented (see above). Later it may be called for invocations of fstat() too.
- * @param path 
- * @param stbuf 
- * @param fi 
- * @return 
+ * @param path
+ * @param stbuf
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
                         struct fuse_file_info *fi)
@@ -126,9 +128,9 @@ int ofs_fuse::fuse_fgetattr(const char *path, struct stat *stbuf,
  * this method is not called.
  *
  * This method is not called under Linux kernel versions 2.4.x
- * @param path 
- * @param mask 
- * @return 
+ * @param path
+ * @param mask
+ * @return
  */
 int ofs_fuse::fuse_access(const char *path, int mask)
 {
@@ -148,10 +150,10 @@ int ofs_fuse::fuse_access(const char *path, int mask)
  * The buffer size argument includes the space for the terminating null
  * character. If the linkname is too long to fit in the buffer,
  * it should be truncated. The return value should be 0 for success.
- * @param path 
- * @param buf 
- * @param size 
- * @return 
+ * @param path
+ * @param buf
+ * @param size
+ * @return
  */
 int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
 {
@@ -168,9 +170,9 @@ int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
 /**
  * Open directory
  *
- * @param path 
- * @param fi 
- * @return 
+ * @param path
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
 {
@@ -180,7 +182,7 @@ int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
 	res = file->op_opendir();
 	if (res < 0)
 		delete file;
-	else	
+	else
 		fi->fh = (unsigned long)file;
 	ofslog::debug("Leave fuse_opendir");
 	return res;
@@ -203,12 +205,12 @@ int ofs_fuse::fuse_opendir(const char *path, struct fuse_file_info *fi)
  *    entries. It uses the offset parameter and always passes non-zero offset
  *    to the filler function. When the buffer is full (or an error happens)
  *    the filler function will return '1'.
- * @param path 
- * @param buf 
- * @param filler 
- * @param offset 
- * @param fi 
- * @return 
+ * @param path
+ * @param buf
+ * @param filler
+ * @param offset
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
                        off_t offset, struct fuse_file_info *fi)
@@ -229,9 +231,9 @@ int ofs_fuse::fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
 /**
  * Release directory
- * @param path 
- * @param fi 
- * @return 
+ * @param path
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
 {
@@ -256,11 +258,11 @@ int ofs_fuse::fuse_releasedir(const char *path, struct fuse_file_info *fi)
  *
  * This is called for creation of all non-directory, non-symlink nodes.
  * If the filesystem defines a create() method, then for regular files
- * that will be called instead. 
- * @param path 
- * @param mode 
- * @param rdev 
- * @return 
+ * that will be called instead.
+ * @param path
+ * @param mode
+ * @param rdev
+ * @return
  */
 int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 {
@@ -275,9 +277,9 @@ int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 
 /**
  * Create a directory
- * @param path 
- * @param mode 
- * @return 
+ * @param path
+ * @param mode
+ * @return
  */
 int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 {
@@ -292,8 +294,8 @@ int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 
 /**
  * Remove a file
- * @param path 
- * @return 
+ * @param path
+ * @return
  */
 int ofs_fuse::fuse_unlink(const char *path)
 {
@@ -309,8 +311,8 @@ int ofs_fuse::fuse_unlink(const char *path)
 
 /**
  * Remove a directory
- * @param path 
- * @return 
+ * @param path
+ * @return
  */
 int ofs_fuse::fuse_rmdir(const char *path)
 {
@@ -328,9 +330,9 @@ int ofs_fuse::fuse_rmdir(const char *path)
  * TODO: I think 'from' is the exact path as specified in the command line.
  *       The 'to' parameter is relative to the current filesystem
  *       Check this!
- * @param from 
- * @param to 
- * @return 
+ * @param from
+ * @param to
+ * @return
  */
 int ofs_fuse::fuse_symlink(const char *from, const char *to)
 {
@@ -345,9 +347,9 @@ int ofs_fuse::fuse_symlink(const char *from, const char *to)
 
 /**
  * Rename a file
- * @param from 
- * @param to 
- * @return 
+ * @param from
+ * @param to
+ * @return
  */
 int ofs_fuse::fuse_rename(const char *from, const char *to)
 {
@@ -366,9 +368,9 @@ int ofs_fuse::fuse_rename(const char *from, const char *to)
 
 /**
  * Create a hard link to a file
- * @param from 
- * @param to 
- * @return 
+ * @param from
+ * @param to
+ * @return
  */
 int ofs_fuse::fuse_link(const char *from, const char *to)
 {
@@ -385,9 +387,9 @@ int ofs_fuse::fuse_link(const char *from, const char *to)
 
 /**
  * Change the permission bits of a file
- * @param path 
- * @param mode 
- * @return 
+ * @param path
+ * @param mode
+ * @return
  */
 int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 {
@@ -403,10 +405,10 @@ int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 
 /**
  * Change the owner and group of a file
- * @param path 
- * @param uid 
- * @param gid 
- * @return 
+ * @param path
+ * @param uid
+ * @param gid
+ * @return
  */
 int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 {
@@ -422,9 +424,9 @@ int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 
 /**
  * Change the size of a file
- * @param path 
- * @param size 
- * @return 
+ * @param path
+ * @param size
+ * @return
  */
 int ofs_fuse::fuse_truncate(const char *path, off_t size)
 {
@@ -446,10 +448,10 @@ int ofs_fuse::fuse_truncate(const char *path, off_t size)
  *
  * If this method is not implemented or under Linux kernel versions earlier
  * than 2.6.15, the truncate() method will be called instead.
- * @param path 
- * @param size 
- * @param fi 
- * @return 
+ * @param path
+ * @param size
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
                          struct fuse_file_info *fi)
@@ -472,9 +474,9 @@ int ofs_fuse::fuse_ftruncate(const char *path, off_t size,
 /**
  * Change the access and modification times of
  * a file with nanosecond resolution
- * @param path 
- * @param ts[] 
- * @return 
+ * @param path
+ * @param ts[]
+ * @return
  */
 int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
 {
@@ -495,10 +497,10 @@ int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
  *
  * If this method is not implemented or under Linux kernel versions earlier
  * than 2.6.15, the mknod() and open() methods will be called instead.
- * @param path 
- * @param mode 
- * @param fi 
- * @return 
+ * @param path
+ * @param mode
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_create(const char *path, mode_t mode,
 	struct fuse_file_info *fi)
@@ -519,14 +521,14 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode,
 /**
  * File open operation
  *
- * No creation, or truncation flags (O_CREAT, O_EXCL, O_TRUNC) will be 
+ * No creation, or truncation flags (O_CREAT, O_EXCL, O_TRUNC) will be
  * passed to open(). Open should check if the operation is permitted for
- * the given flags. Optionally open may also return an arbitrary filehandle 
+ * the given flags. Optionally open may also return an arbitrary filehandle
  * in the fuse_file_info structure, which will be passed
  * to all file operations.
- * @param path 
- * @param fi 
- * @return 
+ * @param path
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_open(const char *path, struct fuse_file_info *fi)
 {
@@ -551,12 +553,12 @@ int ofs_fuse::fuse_open(const char *path, struct fuse_file_info *fi)
  * An exception to this is when the 'direct_io' mount option is specified, in
  * which case the return value of the read system call will reflect the
  * return value of this operation.
- * @param path 
- * @param buf 
- * @param size 
- * @param offset 
- * @param fi 
- * @return 
+ * @param path
+ * @param buf
+ * @param size
+ * @param offset
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_read(const char *path, char *buf, size_t size, off_t offset,
                     struct fuse_file_info *fi)
@@ -572,7 +574,7 @@ int ofs_fuse::fuse_read(const char *path, char *buf, size_t size, off_t offset,
 		ofslog::debug("Leave fuse_read (EBADF)");
 		return -errno;
 	}
-	
+
 	res = file->op_read(buf, size, offset);
 	ofslog::debug("Leave fuse_read");
 	return res;
@@ -581,15 +583,15 @@ int ofs_fuse::fuse_read(const char *path, char *buf, size_t size, off_t offset,
 /**
  * Write data to an open file
  *
- * Write should return exactly the number of bytes requested except on 
+ * Write should return exactly the number of bytes requested except on
  * error. An exception to this is when the 'direct_io' mount option is
  * specified (see read operation).
- * @param path 
- * @param buf 
- * @param size 
- * @param offset 
- * @param fi 
- * @return 
+ * @param path
+ * @param buf
+ * @param size
+ * @param offset
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
                      off_t offset, struct fuse_file_info *fi)
@@ -613,9 +615,9 @@ int ofs_fuse::fuse_write(const char *path, const char *buf, size_t size,
  * Get file system statistics
  *
  * The 'f_frsize', 'f_favail', 'f_fsid' and 'f_flag' fields are ignored
- * @param path 
- * @param stbuf 
- * @return 
+ * @param path
+ * @param stbuf
+ * @return
  */
 int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
 {
@@ -639,7 +641,7 @@ int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
  * this is a good place to write back data and return any errors. Since many
  * applications ignore close() errors this is not always useful.
  *
- * NOTE: The flush() method may be called more than once for each open(). 
+ * NOTE: The flush() method may be called more than once for each open().
  * This happens if more than one file descriptor refers to an opened file
  * due to dup(), dup2() or fork() calls. It is not possible to determine if
  * a flush is final, so each flush should be treated equally. Multiple
@@ -647,9 +649,9 @@ int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
  *
  * Filesystems shouldn't assume that flush will always be called after some
  * writes, or that if will be called at all.
- * @param path 
- * @param fi 
- * @return 
+ * @param path
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_flush(const char *path, struct fuse_file_info *fi)
 {
@@ -679,15 +681,15 @@ int ofs_fuse::fuse_flush(const char *path, struct fuse_file_info *fi)
  *
  * Release is called when there are no more references to an open file:
  * all file descriptors are closed and all memory mappings are unmapped.
- * 
+ *
  * For every open() call there will be exactly one release() call with the
  * same flags and file descriptor. It is possible to have a file opened more
  * than once, in which case only the last release will mean, that no more
  * reads/writes will happen on the file.
  * The return value of release is ignored.
- * @param path 
- * @param fi 
- * @return 
+ * @param path
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
 {
@@ -705,7 +707,7 @@ int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
 	res = file->op_release();
 	delete file;
 	fi->fh = 0;
-	
+
 	ofslog::debug("Leave fuse_release");
 	return res;
 }
@@ -715,10 +717,10 @@ int ofs_fuse::fuse_release(const char *path, struct fuse_file_info *fi)
  *
  * If the datasync parameter is non-zero, then only the user data should be
  * flushed, not the meta data.
- * @param path 
- * @param isdatasync 
- * @param fi 
- * @return 
+ * @param path
+ * @param isdatasync
+ * @param fi
+ * @return
  */
 int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
                      struct fuse_file_info *fi)
@@ -777,7 +779,7 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
  *
  * The function is called twice. First with size = 0, in irder to determine
  * the size, values must have to hold the result.
- * On the second call, value points to a buffer of apropriate size an we 
+ * On the second call, value points to a buffer of apropriate size an we
  * can fill it with the actual result
  *
  * @param path Path to the File (relative to filesystem root)
@@ -792,7 +794,7 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 	ofslog::debug(path);
 	ofslog::debug((string("Name: ")+string(name)).c_str());
 	int ret;
-	OFSFile file = OFSFile(path);	
+	OFSFile file = OFSFile(path);
 	ret = file.op_getxattr(name, value, size);
 	ofslog::debug("Leave fuse_getxattr");
 	return ret;
@@ -800,7 +802,7 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 
 /**
  * Give a list of extended attributes
- * 
+ *
  * Returns the attributes as a list of NULL seperated char-strings
  * First and second call @see fust_getxattr
  *
@@ -818,7 +820,7 @@ int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 
 /**
  * Remove an extended attribute
- * 
+ *
  * Removing the offline attribute results in setting it to "no" and
  * clearing the offline cache.
  * The availability flag is read only
@@ -864,11 +866,11 @@ int ofs_fuse::fuse_removexattr(const char *path, const char *name)
  * locking to work locally. Hence it is only interesting for network
  * filesystems and similar.
  * TODO: Implement this
- * @param path 
- * @param fi 
- * @param cmd 
- * @param lock 
- * @return 
+ * @param path
+ * @param fi
+ * @param cmd
+ * @param lock
+ * @return
  */
 // int ofs_fuse::fuse_lock(const char *path, struct fuse_file_info *fi, int cmd,
 //                     struct flock *lock)
@@ -890,10 +892,10 @@ int ofs_fuse::fuse_removexattr(const char *path, const char *name)
  *
  * The return value will passed in the private_data field of fuse_context
  * to all file operations and as a parameter to the destroy() method.
- * @param conn 
- * @return 
+ * @param conn
+ * @return
  */
-void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) { 
+void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 /*	pthread_t *thread = new pthread_t();
 	if (!pthread_create(thread, NULL, ofs_daemon::start_daemon, (void *)self))
 		perror(strerror(errno));*/
@@ -901,7 +903,7 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 	BackingtreeManager &btm = BackingtreeManager::Instance();
 //	btm.set_Cache_Path("/tmp/ofscache/");
 	btm.reinstate();
-	
+
 	// create offline recognition thread
 	//if (argv[5]) {
 		pthread_t thread;
@@ -914,7 +916,7 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 
 /**
  * Exit the filesystem - unmount the remote share
- * @param  
+ * @param
  */
 void ofs_fuse::fuse_destroy(void *)
 {

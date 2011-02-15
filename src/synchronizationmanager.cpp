@@ -78,7 +78,7 @@ syncstate SynchronizationManager::has_been_modified(const File& fileInfo)
         if (lstat(fileInfo.get_remote_path().c_str(), &fileinfo_remote) < 0)
             return deleted_on_server;
         timesRemote = fileinfo_remote.st_mtime;
-        
+
         // Fetch saved modification time, or the mtime of the local file is there is none
         timesCache = SynchronizationManager::Instance().getmtime(fileInfo.get_relative_path());
         if(timesCache == 0)
@@ -87,7 +87,7 @@ syncstate SynchronizationManager::has_been_modified(const File& fileInfo)
                 return no_state_avail;
             timesCache = fileinfo_cache.st_mtime;
         }
-        
+
         // utime can not be used with symbolic links because there
         // is no possibility to prevent it from following the link
         if (!S_ISLNK(fileinfo_remote.st_mode))
@@ -115,6 +115,8 @@ syncstate SynchronizationManager::has_been_deleted(const File& fileInfo)
                 throw OFSException(strerror(errno), errno,true);
         }
     }
+    // FIXME Some cases not covered.
+    throw OFSException("Missing error handling in SynchronizationManager::has_been_deleted",0,true);
 }
 
 void SynchronizationManager::persist() const
@@ -230,7 +232,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
                 if (symlink(buf, fileInfo.get_remote_path().c_str()) < 0)
                     throw OFSException(strerror(errno), errno,true);
             } // TODO: Other file types
-            
+
             // set atime and mtime
             //update_amtime();
             OFSFile(fileInfo.get_relative_path()).update_amtime();
@@ -247,6 +249,8 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
 		ConflictManager::Instance().addConflictFile(fileInfo.get_relative_path());
 		return 1;
 	} // else both have created directories -> we can merge
+	// FIXME Return code for "merge"
+	return 2;
 }
 
 int SynchronizationManager::ModifyFile(const File& fileInfo)
@@ -338,7 +342,7 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 				if (symlink(buf, fileInfo.get_remote_path().c_str()) < 0)
 					throw OFSException(strerror(errno), errno,true);
 			} // TODO: Other file types
-	
+
 			// set atime and mtime
 			//update_amtime();
 		}
