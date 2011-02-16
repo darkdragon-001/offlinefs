@@ -1,16 +1,21 @@
-AC_INIT(configure.in)
+AC_INIT([ofs], [0.1])
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(ofs, 0.1)
+AM_INIT_AUTOMAKE()
 
 AC_LANG_CPLUSPLUS
 AC_PROG_CXX
 AM_PROG_LIBTOOL
+AC_PROG_INSTALL
 OFS_SBIN=/sbin
 AC_SUBST(OFS_SBIN)
 
+PKG_CHECK_MODULES([DBUS], [dbus-1])
+PKG_CHECK_MODULES([FUSE], [fuse])
+PKG_CHECK_MODULES([CONFUSE], [libconfuse])
 
-
-AC_OUTPUT(Makefile libraries/Makefile libraries/libofs/Makefile \
+AC_CONFIG_FILES([Makefile libraries/Makefile libraries/libofs/Makefile \
 	libraries/libofsconf/Makefile libraries/libofshash/Makefile mounthelper/Makefile ofs-gui/Makefile \
-	src/Makefile)
+	src/Makefile])
+AC_OUTPUT
