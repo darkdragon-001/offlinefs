@@ -66,7 +66,7 @@ OFSFile::~OFSFile()
 int OFSFile::op_access ( int mask )
 {
 	int res;
-	if ( get_availability() && FilesystemStatusManager::Instance().issync())
+	if ( get_availability() && filesync())
 		res = access ( get_remote_path().c_str(), mask );
 	else
 		res = access ( get_cache_path().c_str(), mask );
@@ -118,7 +118,7 @@ int OFSFile::op_getattr ( struct stat *stbuf )
 {
 	int res;
 
-	if ( get_availability() && FilesystemStatusManager::Instance().issync() )
+	if ( get_availability() && filesync() )
 	{
 		res = lstat ( get_remote_path().c_str(), stbuf );
 	}
@@ -150,7 +150,7 @@ int OFSFile::op_readlink ( char *buf, size_t size )
 	{
 		update_cache();
 
-		if ( get_availability() && FilesystemStatusManager::Instance().issync())
+		if ( get_availability() && filesync())
 			res = readlink ( get_remote_path().c_str(), buf, size - 1 );
 		else
 			res = readlink ( get_cache_path().c_str(), buf, size - 1 );
@@ -275,7 +275,7 @@ int OFSFile::op_create ( mode_t mode, int flags )
 int OFSFile::op_fgetattr ( struct stat *stbuf )
 {
 	int res;
-	if ( get_availability() && FilesystemStatusManager::Instance().issync())
+	if ( get_availability() && filesync())
 		res = fstat ( fd_remote, stbuf );
 	else
 		res = fstat ( fd_cache, stbuf );
@@ -498,7 +498,7 @@ int OFSFile::op_open ( int flags )
 			if ( fdc == -1 )
 				return -errno;
 		}
-		if ( get_availability() && FilesystemStatusManager::Instance().issync())
+		if ( get_availability() && filesync())
 		{
 			fdr = open ( get_remote_path().c_str(), flags );
 			if ( fdr == -1 )
@@ -529,7 +529,7 @@ int OFSFile::op_opendir()
 	try
 	{
 		update_cache();
-		if ( get_availability() && FilesystemStatusManager::Instance().issync())
+		if ( get_availability() && filesync())
 		{
 			dh_remote = opendir ( get_remote_path().c_str() );
 			if ( dh_remote == NULL )
@@ -607,7 +607,7 @@ int OFSFile::op_readdir ( void *buf, fuse_fill_dir_t filler, off_t offset )
 	bool cache;
 	long loc;
 
-	if ( dh_remote && FilesystemStatusManager::Instance().issync())
+	if ( dh_remote && filesync())
 		cache = false;
 	else if ( dh_cache )
 		cache = true;
@@ -1550,17 +1550,22 @@ void OFSFile::savemtime()
         SynchronizationManager::Instance().addmtime(get_relative_path(), finfo.st_mtime);
     }
 }
-
+/*
+ * Check if File sync with the Networkversion
+ */
 bool OFSFile::filesync()
 {
-	list<SyncLogEntry> listOfEntries = SyncLogger::GetEntries(OFSEnvironment::Instance().getShareID().c_str());
-	for (list<SyncLogEntry>::iterator it = listOfEntries.begin();it != listOfEntries.end(); it++)
+	list<SyncLogEntry> listOfEntries = SyncLogger::Instance().GetEntries(OFSEnvironment::Instance().getShareID().c_str(),get_cache_path());
+	if(listOfEntries.size())return false;
+
+
+	/*for (list<SyncLogEntry>::iterator it = listOfEntries.begin();it != listOfEntries.end(); it++)
 	{
 		SyncLogEntry& sle = *it;
-		if (strcmp(sle.GetFilePath(),get_cache_path()))
+		if (sle == get_cache_path())
 		{
 			return false;
 		}
-	}
+	}*/
 	return true;
 }
