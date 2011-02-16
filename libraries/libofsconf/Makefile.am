@@ -1,5 +1,5 @@
 INCLUDES = -I$(top_srcdir)/libraries/libofs
 METASOURCES = AUTO
-lib_LIBRARIES = libofsconf.a
-libofsconf_a_SOURCES = ofsconf.cpp
-libofsconf_a_LIBADD = $(top_builddir)/libraries/libofs/libofs.la
+noinst_LTLIBRARIES = libofsconf.la
+libofsconf_la_SOURCES = ofsconf.cpp
+libofsconf_la_LIBADD = $(top_builddir)/libraries/libofs/libofs.la
