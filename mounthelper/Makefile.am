@@ -7,10 +7,10 @@ INCLUDES = -I$(top_srcdir)/libraries/libofs \
 	-I$(top_srcdir)/libraries/libofsconf -I$(top_srcdir)/libraries/libofshash $(all_includes)
 
 # the library search path.
-mount_ofs_LDFLAGS = $(all_libraries) -lpthread
+mount_ofs_LDFLAGS = $(all_libraries) -lpthread $(CONFUSE_LIBS)
 noinst_HEADERS = options.h printusage.h
 mount_ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
-	$(top_builddir)/libraries/libofs/libofs.la $(top_builddir)/libraries/libofsconf/libofsconf.la -lconfuse
+	$(top_builddir)/libraries/libofs/libofs.la $(top_builddir)/libraries/libofsconf/libofsconf.la
 
 install-exec-hook:
 	mkdir -p $(DESTDIR)/var/ofs/remote

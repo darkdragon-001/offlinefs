@@ -19,7 +19,9 @@ noinst_HEADERS = backingtreepersistence.h conflictmanager.h \
 	conflictpersistence.h file.h file_sync.h fileref.h filestatusmanager.h \
 	offlinerecognizer.h ofs_fuse.h ofsenvironment.h ofsexception.h ofsfile.h ofslog.h \
 	persistable.h persistencemanager.h synchronizationpersistence.h \
-	syncronisationmanager.h syncstatetype.h
+	syncronisationmanager.h syncstatetype.h backingtree.h filesystemstatusmanager.h\
+	synchronizationmanager.h fusexx.hpp backingtreemanager.h logger.h synclogentry.h\
+	ofsbroadcast.h synclogger.h
 AM_CXXFLAGS = -ansi
 ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
 	$(top_builddir)/libraries/libofsconf/libofsconf.la $(top_builddir)/libraries/libofs/libofs.la
