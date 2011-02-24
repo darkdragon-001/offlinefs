@@ -1,4 +1,4 @@
-AC_INIT([ofs], [0.1])
+AC_INIT([ofs], [0.2])
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_CONFIG_HEADER(config.h)
