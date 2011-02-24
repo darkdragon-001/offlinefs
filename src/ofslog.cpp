@@ -53,8 +53,6 @@ ofslog::log(int loglvl,const char *fmt,va_list ap)
     int len = vsnprintf(buf,MAX_LOGENTRY_LEN,fmt,ap);
     
     syslog(loglvl,"%s",buf);
-
-    //fprintf(stdout,"%s",buf); // TODO 
 }
 
 /*!
