@@ -1,5 +1,4 @@
-myexecpdir= @OFS_SBIN@
-myexecp_PROGRAMS = ofs
+sbin_PROGRAMS = ofs
 ofs_SOURCES = backingtree.cpp backingtreemanager.cpp backingtreepersistence.cpp \
 	conflictmanager.cpp conflictpersistence.cpp file.cpp file_sync.cpp fileref.cpp \
 	filestatusmanager.cpp filesystemstatusmanager.cpp logger.cpp \

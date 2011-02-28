@@ -28,6 +28,7 @@
 #define LISTEN_DEVICES_VARNAME "listen"
 #define LOGLEVEL_VARNAME "loglevel"
 
+// TODO: Do not hardcode paths here. See Makefile.am in mounthelper!
 #define BACKING_TREE_PATH_DEFAULT "/var/ofs/backing"
 #define MOUNT_REMOTE_PATHS_TO_DEFAULT "/var/ofs/remote"
 #define LISTEN_DEVICES_DEFAULT "{eth0}"
