@@ -177,6 +177,7 @@ void SynchronizationManager::ReintegrateFiles(const char* pszHash, list<SyncLogE
 	}
 }
 
+// TODO: return an enumeration type
 int SynchronizationManager::CreateFile(const File& fileInfo)
 {
 	if (!fileInfo.get_availability() || !fileInfo.get_offline_state())
@@ -218,7 +219,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
             }
             else if (S_ISLNK(fsCache.st_mode))
             {
-                // TODO: Could be buggy!!!
+                // FIXME: Could be buggy!!!
                 char buf[1024];
                 ssize_t len;
 		// remove the old link if it exists
@@ -253,6 +254,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
 	return 2;
 }
 
+// TODO: return an enumeration type
 int SynchronizationManager::ModifyFile(const File& fileInfo)
 {
 	if (!fileInfo.get_availability() || !fileInfo.get_offline_state())
@@ -327,7 +329,7 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 			}
 			else if (S_ISLNK(fsCache.st_mode))
 			{
-				// TODO: Could be buggy!!!
+				// FIXME: Could be buggy!!!
 				char buf[1024];
 				ssize_t len;
 				// remove the old link if it exists

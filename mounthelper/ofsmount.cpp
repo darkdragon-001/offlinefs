@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 //    cout << pArgumente[2] << endl;
 
     // Ruft das Offline-Dateisystem auf.
-    execvp("/sbin/ofs", pArgumente);    
+    execvp("OFS_BINARY", pArgumente);
     perror(strerror(errno));
 
     return -errno;

@@ -24,15 +24,11 @@
 
 #include <string>
 #include <list>
+#include <fstream>
+
 using namespace std;
 
 #define MAX_PATH 512
-/**
- * This method converts from integer to char array
- * This method is not available on linux
- * taken from http://www.jb.man.ac.uk/~slowe/cpp/itoa.html
- */
-char* itoa(int val, int base);
 
 struct cfg_t;
 
@@ -52,7 +48,7 @@ public:
     virtual list<SyncLogEntry> GetEntries(const char* pszHash, const string strFilePath) = 0;
     virtual bool RemoveEntry(const char* pszHash, SyncLogEntry& sle) = 0;
 
-    FILE* OpenLogFile(const char* pszHash, const char* szMode);
+    fstream *OpenLogFile(const char* pszHash, ios::openmode mode);
 
 protected:
     int m_nNewIndex;

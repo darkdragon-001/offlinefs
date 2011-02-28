@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by                                                 *
- *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
+ *   Copyright (C) 2007, 2011                                              *
+ *    Peter Trommler, Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,30 +19,11 @@
  ***************************************************************************/
 
 #include "logger.h"
-#include <stdio.h>
+#include <fstream>
 
 //////////////////////////////////////////////////////////////////////////////
 // CONSTRUCTION/ DESTRUCTION
 //////////////////////////////////////////////////////////////////////////////
-char* itoa(int val, int base) {
-	
-    static char buf[32] = {0};
-    
-    int i = 30;
-    
-    if(val == 0)
-    {
-        buf[i] = '0';
-        return &buf[i];
-    }    
-    
-    for(; val && i ; --i, val /= base)
-
-        buf[i] = "0123456789abcdef"[val % base];
-        
-    return &buf[i+1];
-}
-
 Logger::Logger()
 {
 	m_pCFG = NULL;
@@ -50,16 +31,11 @@ Logger::Logger()
 	m_szCurShare[0] = '\0';
 }
 
-FILE* Logger::OpenLogFile(const char* pszHash, const char* szMode)
+fstream *Logger::OpenLogFile(const char* pszHash, ios::openmode mode)
 {
 	// Creates the file name of the sync log.
 	char szLogName[MAX_PATH];
 	CalcLogFileName(pszHash, szLogName);
-/*
-	strcpy(szLogName, "Sync_");
-	strcat(szLogName, pszHash);
-	strcat(szLogName, ".log");
-*/
-	// Opens the sync log file.
-	return fopen(szLogName, szMode);
+//	fstream *res = new fstream(szLogName, mode);
+	return new fstream(szLogName, mode);
 }

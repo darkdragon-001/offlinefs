@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
+#include <fstream>
+#include <strstream>
 #include <assert.h>
 #include <time.h>
 #include <sys/types.h>
@@ -40,7 +42,8 @@
 #define MOD_TYPE_VARNAME "modType"
 #define MOD_NUMBER_VARNAME "modNumber"
 
-#define FILE_PATH_DEFAULT "C:\\WINDOWS\\SYSTEM\\win.ini"
+// TODO: What is a reasonable default here?
+#define FILE_PATH_DEFAULT "/etc/fstab"
 #define MOD_TIME_DEFAULT "0000/00/00 25:00:00"
 #define MOD_TYPE_DEFAULT "e"
 
@@ -94,59 +97,26 @@ bool SyncLogger::AddEntry(const char* pszHash,
     if (newType == 'x') //nothing to do
         return false;
 
-	// Creates the new entry.
-    char szEntry[MAX_PATH + 1024];
-    char *szIndex = itoa(m_nNewIndex, 10);
-    char strtype[2];
-    strtype[0] = newType;
-    strtype[1] = '\0';
-
-    // Writes the new entry.
-    strcpy(szEntry, MOD_NUMBER_VARNAME);
-    strcat(szEntry, " ");
-    strcat(szEntry, szIndex);
-    strcat(szEntry, "\n\{\n\t");
-    strcat(szEntry, FILE_PATH_VARNAME);
-    strcat(szEntry, " = \"");
-    strcat(szEntry, pszFilePath);
-    strcat(szEntry, "\"\n\t");
-    strcat(szEntry, MOD_TIME_VARNAME);
-    strcat(szEntry, " = ");
-    strcat(szEntry, itoa(time(NULL),10));
-    strcat(szEntry, "\n\t");
-    strcat(szEntry, MOD_TYPE_VARNAME);
-    strcat(szEntry, " = ");
-    strcat(szEntry, strtype);
-    strcat(szEntry, "\n}\n\n");
-//    strncpy(&szEntry[8], (char*)&szTime, sizeof(time_t)); // sizeof(FILETIME));
-/*
-	// Creates the file name of the sync log.
-	char szLogName[MAX_PATH];
-	strcpy(szLogName, "Sync_");
-	strcat(szLogName, pszHash);
-	strcat(szLogName, ".log");
-
-	// Opens the sync log file.
-	FILE* pFile = fopen(szLogName, "a");
-	if (pFile == 0)
-		return false;
-*/
-	// Opens the sync log file.
-	FILE* pFile = OpenLogFile(pszHash, "a");
-	if (pFile == NULL)
+	fstream& logStream = *(OpenLogFile(pszHash, ios::ate));
+	if (logStream == NULL)
 		return false;
 
-	// Writes the new entry into the sync log.
-//    fwrite(szEntry, sizeof(char), 32 + strlen(szEntry), pFile);
-    fwrite(szEntry, sizeof(char), strlen(szEntry), pFile);
-    fclose(pFile);
+	// Writes new entry into sync log.
+	// TODO: define << operator in SyncLogEntry
+	logStream << MOD_NUMBER_VARNAME << " " << m_nNewIndex << endl;
+	logStream << "{" << endl;
+	logStream << "\t" << FILE_PATH_VARNAME << " = \"" << pszFilePath << "\"" << endl;
+	logStream << "\t" << MOD_TIME_VARNAME << " = " << time(NULL) << endl;
+	logStream << "\t" << MOD_TYPE_VARNAME << " = " << newType << endl;
+	logStream << "}" << endl << endl;
+    logStream.close();
 
     m_nNewIndex++;
 
     return true;
 }
 
-//bool SyncLogger::ReadFirstEntry(const char* pszHash, char* pszFilePath, char& chType)
+
 SyncLogEntry SyncLogger::ReadFirstEntry(const char* pszHash)
 {
 	ParseFile(pszHash);
@@ -220,13 +190,11 @@ bool SyncLogger::ParseFile(const char* pszHash)
     };
 
     // Initializes the parser.
-//    cfg_t* pCFG = cfg_init(entries, CFGF_NONE);
     m_pCFG = cfg_init(entries, CFGF_NONE);
 
     // Parses the file.
 	char szLogName[MAX_PATH];
 	CalcLogFileName(pszHash, szLogName);
-//    if (cfg_parse(pCFG, szLogName) == CFG_PARSE_ERROR)
     if (cfg_parse(m_pCFG, szLogName) == CFG_PARSE_ERROR)
         return false;
     return true;
@@ -272,20 +240,19 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	char* pszBuffer = new char[fileinfo.st_size];
 
 	// Opens the sync log file for reading.
-	FILE* pFile = OpenLogFile(pszHash, "r");
-	if (pFile == NULL)
-		return false;
+	fstream& logStream = *(OpenLogFile(pszHash, ios::in));
+	//if (logStream == NULL)
+	//	return false;
 
-	ssize_t nBytesRead;
-	if ((nBytesRead = fread(pszBuffer, sizeof(char), fileinfo.st_size, pFile)) 
-	   < 0)
-	{
-		throw new OFSException(strerror(errno), errno);
-	}
-	fclose(pFile);
+	logStream.read(pszBuffer, fileinfo.st_size);
+	logStream.close();
 
 	// Looks for the begin of the entry.
-	char *szIndex = itoa(sle.GetNumber(), 10);
+	// TODO: Replace deprecated strstream with sstream
+	char *szIndex = new char [32];
+	ostrstream ost(szIndex, 30);
+	ost << sle.GetNumber();
+
 	strcpy(szSubstring, MOD_NUMBER_VARNAME);
 	strcat(szSubstring, " ");
 	strcat(szSubstring, szIndex);
@@ -299,25 +266,26 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	int nEntryBegin = pszEntry - pszBuffer;
 
 	// Looks for the end of the entry.
-	//strcpy(szSubstring, "\n}\n\n");
-	//strcat(szSubstring, MOD_NUMBER_VARNAME);
+	// FIXME: breaks on '}' in file path
 	pszEntry = strstr(pszEntry, "}");
 
 	// Opens the sync log file for writing.
-	pFile = OpenLogFile(pszHash, "w");
-	if (pFile == NULL)
-		return false;
+	fstream& outStream = *(OpenLogFile(pszHash, ios::out));
+	//if (outStream == NULL)
+	//	return false;
 
-	fwrite(pszBuffer, sizeof(char), nEntryBegin, pFile);
+	outStream.write(pszBuffer,nEntryBegin);
+	// fwrite(pszBuffer, sizeof(char), nEntryBegin, logStream);
 
 	if (pszEntry != NULL)
 	{
-		// Entry already removed, nothing to do
+		// Entry removed, write rest
 		int nEntryEnd = pszEntry - pszBuffer;
-		fwrite(pszEntry+1, sizeof(char), fileinfo.st_size - nEntryEnd-1, pFile);
+		outStream.write(pszBuffer, fileinfo.st_size - nEntryEnd-1);
+		//fwrite(pszEntry+1, sizeof(char), fileinfo.st_size - nEntryEnd-1, logStream);
 	}
 
-	fclose(pFile);
+	outStream.close();
 
 	delete[] pszBuffer;
 
