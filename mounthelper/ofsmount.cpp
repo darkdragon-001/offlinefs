@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 	//    cout << pArgumente[2] << endl;
 
 	// Ruft das Offline-Dateisystem auf.
-	execvp("OFS_BINARY", pArgumente);
+	execvp(OFS_BINARY, pArgumente);
 	perror("mount.ofs: exec: ");
 
 	return -errno;
