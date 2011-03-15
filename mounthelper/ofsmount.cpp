@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Frank Gsellmann,,,   *
- *   frank@frank-laptop   *
+ *   Copyright (C) 2008, 2011 by Frank Gsellmann, Peter Trommler           *
+ *   frank@frank-laptop                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -41,7 +41,7 @@ using namespace std;
 #define MAX_PATH 1024
 
 /**
- * @TODO: This is very very unclean
+ * @TODO: This is very unclean
  * @param argc 
  * @param argv[] 
  * @return 
@@ -49,7 +49,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	assert(argc > 2);
-	// Ermittelt die Optionen aus der Kommandozeile.
+	// TODO: treat options properly
 	char szOptions[10];
 	char* pszOptions = szOptions;
 	string shareurl = argv[1];
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	// MOUNT
 	//////////////////////////////////////////////////////////////////////////
 
-	char* pMountArgumente[8];
+	char const* pMountArgumente[8];
 	pMountArgumente[0] = "mount";
 	pMountArgumente[1] = "-t";
 	pMountArgumente[2] = NULL;
@@ -72,8 +72,7 @@ int main(int argc, char *argv[])
 	pMountArgumente[6] = NULL;
 	pMountArgumente[7] = NULL; // terminator
 
-	// Ermittelt die Remote-Pfade.
-	//cout << argv[0] << endl;
+	// get remote path
 	char* pchDoppelPunktPos = strchr(argv[1], ':');
 	assert(pchDoppelPunktPos != NULL);
 	int nDoppelPunktIndex = int (pchDoppelPunktPos - argv[1]);
@@ -91,61 +90,48 @@ int main(int argc, char *argv[])
 	} else
 		shareremote = sharepath;
 
-	char* pArgumente[8];
+	char const* pArgumente[8];
 
 	if(remotefstype != "file") {
-		// Legt das Dateisystem fest.
+		// set filesystem type
 		pMountArgumente[2] = (char*)remotefstype.c_str();
 
-		// Oeffnet die Konfigurationsdatei.
 		OFSConf& conf = OFSConf::Instance();
-		//conf.ParseFile(); //obsolete
 
-		// Legt die Server-Share fest.
-		pMountArgumente[3] = (char*)shareremote.c_str();
+		// set remote path and mount point
+		pMountArgumente[3] = shareremote.c_str();
 		remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
-		pMountArgumente[4] = (char*)remotemountpoint.c_str();
+		pMountArgumente[4] = remotemountpoint.c_str();
 
-		//    my_options(argc - 2, &argv[2], &pszOptions);
 		my_options(argc, argv, &pszOptions);
 		pMountArgumente[6] = pszOptions;
-		//    pArgumente[2] = szOptions;
 
+		// create mount point and check and if it exits check it is actually a directory
+		struct stat s;
+		int stat_result = stat(pMountArgumente[4], &s);
+		if ((stat_result == 0) && !S_ISDIR(s.st_mode)) {
+			return -ENOTDIR;
+		}
 
-		// Mountet die Share, die vom Benutzer übergeben wurde.
+		if (stat_result == -1 && errno == ENOENT) {
+			if (mkdir(pMountArgumente[4], 0777) == -1) {
+				return -errno;
+			}
+		}
+
+		// Mount remote filesystem
 		int childpid = fork();
 		int status;
 		if(childpid == 0) {
-			/*cout << endl << "mount" << " ";
-		    cout << pMountArgumente[1] << " ";
-    		cout << pMountArgumente[2] << " ";
-    		cout << pMountArgumente[3] << " ";
-    		cout << pMountArgumente[4] << " ";
-    		cout << pMountArgumente[5] << " ";
-    		cout << pMountArgumente[6] << " ";
-    		cout << endl;*/
-			// create mount point and check and if it exits check it is actually a directory
-			if (mkdir(pMountArgumente[4], 0777) == -1) {
-				if (errno == EEXIST) {
-					struct stat s;
-					stat(pMountArgumente[4], &s);
-					if (!S_ISDIR(s.st_mode)) {
-						return -ENOTDIR;
-					}
-				} else {
-					return -errno;
-				}
-			}
-			execvp("mount", pMountArgumente);
+			execvp("mount", (char * const*)pMountArgumente);
 			return -errno;
 		}
 		if(childpid < 0) {
 			perror("mount.ofs");
 			return -errno;
 		}
-		//waitpid(childpid, &status, 0);
+
 		int childpid2 = wait(&status);
-		//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
 		int exitstatus = WEXITSTATUS(status);
 		if(WIFEXITED(status) && exitstatus) {
 			errno = exitstatus;
@@ -159,8 +145,8 @@ int main(int argc, char *argv[])
 
 
 		pArgumente[0] = "ofs";
-		pArgumente[1] = (char *)ofsmountpoint.c_str();
-		pArgumente[2] = (char *)shareurl.c_str();
+		pArgumente[1] = ofsmountpoint.c_str();
+		pArgumente[2] = shareurl.c_str();
 		pArgumente[3] = "-o"; // allow all user access to filesystem
 
 		pArgumente[4] = "-p"; // mount options
@@ -168,10 +154,10 @@ int main(int argc, char *argv[])
 		pArgumente[6] = NULL; // terminator
 	} else {
 		pArgumente[0] = "ofs";
-		pArgumente[1] = (char *)ofsmountpoint.c_str();
-		pArgumente[2] = (char *)shareurl.c_str();
+		pArgumente[1] = ofsmountpoint.c_str();
+		pArgumente[2] = shareurl.c_str();
 		pArgumente[3] = "-r";
-		pArgumente[4] = (char *)sharepath.c_str();
+		pArgumente[4] = sharepath.c_str();
 		pArgumente[5] = "-n";
 		if(geteuid() == 0) {
 			pArgumente[6] = "-o";
@@ -179,13 +165,10 @@ int main(int argc, char *argv[])
 		} else
 			pArgumente[6] = NULL;
 	}
-	//    cout << pArgumente[1] << endl;
-	//    cout << pArgumente[2] << endl;
 
-	// Ruft das Offline-Dateisystem auf.
-	execvp(OFS_BINARY, pArgumente);
+	// let ofs do the rest
+	execvp(OFS_BINARY, (char* const*)pArgumente);
 	perror("mount.ofs: exec: ");
 
 	return -errno;
-	//return 0;
 }
