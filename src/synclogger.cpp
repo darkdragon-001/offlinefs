@@ -29,7 +29,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
-#include <strstream>
+#include <sstream>
 #include <assert.h>
 #include <time.h>
 #include <sys/types.h>
@@ -248,19 +248,15 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	logStream.close();
 
 	// Looks for the begin of the entry.
-	// TODO: Replace deprecated strstream with sstream
-	char *szIndex = new char [32];
-	ostrstream ost(szIndex, 30);
-	ost << sle.GetNumber();
+	ostringstream ost;
+	ost << MOD_NUMBER_VARNAME << " " << sle.GetNumber();
 
-	strcpy(szSubstring, MOD_NUMBER_VARNAME);
-	strcat(szSubstring, " ");
-	strcat(szSubstring, szIndex);
-	char* pszEntry = strstr(pszBuffer, szSubstring);
+	char* pszEntry = strstr(pszBuffer, ost.str().c_str());
 
 	if (pszEntry == NULL)
 	{
 		// Entry already removed, nothing to do
+		delete[] pszBuffer;
 		return true;
 	}
 	int nEntryBegin = pszEntry - pszBuffer;
