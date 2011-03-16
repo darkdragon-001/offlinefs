@@ -27,9 +27,11 @@
 class MutexLocker
 {
   public:
-    MutexLocker(Mutex& pm);
+    explicit MutexLocker(Mutex& pm);
     ~MutexLocker();
   private:
     Mutex& m;
+    MutexLocker(const MutexLocker&);
+    MutexLocker& operator=(const MutexLocker&);
 };
 #endif

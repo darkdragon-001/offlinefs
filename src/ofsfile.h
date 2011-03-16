@@ -45,13 +45,13 @@
 	handles and is responsible for performing the
 	operations on this file.
 	Most of the methods are called by the ofs_fuse callback functions
-	
+
 	TODO: There might be one class for directories and one for files
 */
 class OFSFile{
 public:
-    OFSFile(const string path);
-    OFSFile(const char *path);
+    explicit OFSFile(const string path);
+    explicit OFSFile(const char *path);
     int op_access(int mask);
     int op_getattr(struct stat *stbuf);
     int op_readlink(char *buf, size_t size);

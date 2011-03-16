@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	ofslog::info("Starting ofs daemon");
 	try {
 		OFSEnvironment::init(argc, argv);
-	} catch (OFSException e) {
+	} catch (OFSException& e) {
 		cout << OFSEnvironment::getUsageString();
 		return 0;
 	}

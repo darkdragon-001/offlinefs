@@ -26,10 +26,10 @@ using namespace std;
 
 /**
 	@author Tobias Jaehnel <tjaehnel@gmail.com>
-	
+
 	Manages files, which hold persisent data.
 	Each subclass gets its own file to store the data
-	and is identified by 
+	and is identified by
 */
 class PersistenceManager{
 public:
@@ -54,7 +54,7 @@ protected:
      * ctor
      * @param modname Name of the module - is used for the filename
      */
-    PersistenceManager(string modname);
+    explicit PersistenceManager(string modname);
     /**
      * Set the parser options
      * @return array of parser options
@@ -87,6 +87,9 @@ protected:
 private:
     string filename;
     string modname;
+
+    PersistenceManager(const PersistenceManager&);
+    PersistenceManager& operator=(const PersistenceManager&);
 };
 
 #endif

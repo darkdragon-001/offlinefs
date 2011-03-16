@@ -43,11 +43,11 @@ const int UNKNOWN_PROT = -8;
 const int MALFORMED = -16;
 
 /**
-	@author 
+	@author
 */
 class OfflineRecognizer {
 public:
-    OfflineRecognizer(string strconninfo);
+    explicit OfflineRecognizer(string strconninfo);
 
     ~OfflineRecognizer();
 
@@ -58,6 +58,8 @@ public:
 		int checkConnection(/*char* in*/);
         public:
 		void startRecognizer();
+		OfflineRecognizer(const OfflineRecognizer &);
+		OfflineRecognizer& operator=(const OfflineRecognizer&);
 };
 
 #endif
