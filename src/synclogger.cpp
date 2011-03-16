@@ -97,7 +97,7 @@ bool SyncLogger::AddEntry(const char* pszHash,
     if (newType == 'x') //nothing to do
         return false;
 
-	fstream& logStream = *(OpenLogFile(pszHash, ios::ate));
+	fstream& logStream = *(OpenLogFile(pszHash, ios::app));
 	if (logStream == NULL)
 		return false;
 
