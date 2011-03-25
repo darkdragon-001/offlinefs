@@ -24,13 +24,13 @@ PKG_CHECK_MODULES([FUSE], [fuse])
 PKG_CHECK_MODULES([CONFUSE], [libconfuse])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h stdlib.h string.h sys/file.h sys/socket.h sys/time.h syslog.h unistd.h utime.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h stdlib.h string.h sys/file.h sys/mount.h sys/socket.h sys/time.h syslog.h unistd.h utime.h])
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
 AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
-AC_CHECK_FUNCS([ftruncate gethostbyname lchown memset mkdir mkfifo rmdir select socket strchr strerror strstr utime])
+AC_CHECK_FUNCS([ftruncate gethostbyname lchown memset mkdir mkfifo rmdir select socket strchr strerror strstr umount2 utime])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
