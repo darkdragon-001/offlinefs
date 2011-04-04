@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by ,,,   *
- *   xxx@blacktron2   *
+ *   Copyright (C) 2011 by Peter Trommler                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,19 +17,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <getopt.h>
-#include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
-void print_usage (FILE* stream, int exit_code)
-{
-fprintf(stream, "Usage: auto_test options\n");
-fprintf(stream, "-m --max Maximal Packet size in the test\n");
-fprintf(stream, "-i --min Minimal Packet size in the test\n");
-fprintf(stream, "-r --repetitions Repetitions of every Packet size per at once\n");
-fprintf(stream, "-o --overalrep overal repetitions \n");
-fprintf(stream, "-f --footstep Footstep size \n");
-fprintf(stream, "-s --sleep sleep between packetsizes\n");
-fprintf(stream, "-h --help Display this usage information.\n");
 
-exit (exit_code);
+using namespace std;
+
+void print_usage (std::ostream & stream, int exit_code)
+{
+	stream << "Usage: mount.ofs remotetarget dir -hV -o remotefsoptions" << endl;
+	stream << "\t-o --option\tOptions for remote file system mount" << endl;
+	stream << "\t-h --help\tPrint this information." << endl;
+	stream << "\t-V --version\tPrint version" << endl;
+
+	exit (exit_code);
 };

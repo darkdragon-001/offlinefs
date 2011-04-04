@@ -1,6 +1,5 @@
 /***************************************************************************
  *   Copyright (C) 2008, 2011 by Frank Gsellmann, Peter Trommler           *
- *   frank@frank-laptop                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -48,10 +47,15 @@ using namespace std;
  */
 int main(int argc, char *argv[])
 {
-	assert(argc > 2);
+	// No! see --help! assert(argc > 2);
 	// TODO: treat options properly
 	char szOptions[10];
 	char* pszOptions = szOptions;
+
+	// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
+	// look at cryptfs and how they pass multiple name value pairs under one "key"
+	my_options(argc, argv, &pszOptions);
+
 	string shareurl = argv[1];
 	string sharepath;
 	string remotefstype;
@@ -103,7 +107,6 @@ int main(int argc, char *argv[])
 		remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
 		pMountArgumente[4] = remotemountpoint.c_str();
 
-		my_options(argc, argv, &pszOptions);
 		pMountArgumente[6] = pszOptions;
 
 		// create mount point and check and if it exits check it is actually a directory
@@ -147,7 +150,7 @@ int main(int argc, char *argv[])
 		pArgumente[0] = "ofs";
 		pArgumente[1] = ofsmountpoint.c_str();
 		pArgumente[2] = shareurl.c_str();
-		pArgumente[3] = "-o"; // allow all user access to filesystem
+		pArgumente[3] = "-o"; // allow all users access to file system
 
 		pArgumente[4] = "-p"; // mount options
 		pArgumente[5] = pszOptions;

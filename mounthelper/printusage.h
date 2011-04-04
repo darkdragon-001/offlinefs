@@ -20,16 +20,14 @@
 #ifndef __PRINTUSAGE_H__
 #define __PRINTUSAGE_H__
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <getopt.h>
-#include <time.h>
+#include <iostream>
+
 #ifdef PRINTUSAGE_C
 #define PUBLIC
 #else
 #define PUBLIC extern
 #endif
 
-PUBLIC void print_usage (FILE* stream, int exit_code);
+PUBLIC void print_usage (std::ostream &  stream, int exit_code);
 
 #endif
