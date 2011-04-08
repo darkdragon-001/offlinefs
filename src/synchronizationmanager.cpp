@@ -219,7 +219,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
             }
             else if (S_ISLNK(fsCache.st_mode))
             {
-                // FIXME: Could be buggy!!!
+                // FIXME: Could be buggy!!! Use similar code found on readlink(2)
                 char buf[1024];
                 ssize_t len;
 		// remove the old link if it exists
@@ -329,7 +329,7 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 			}
 			else if (S_ISLNK(fsCache.st_mode))
 			{
-				// FIXME: Could be buggy!!!
+				// FIXME: Could be buggy!!! See line 222 (refactor into separate private method)
 				char buf[1024];
 				ssize_t len;
 				// remove the old link if it exists

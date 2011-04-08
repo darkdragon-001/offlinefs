@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 	}
 
 	// create cache path - ignore errors if it not exists
+	// FIXME: check if directory exists and mkdir if not
 	mkdir(env.getCachePath().c_str(), 0777);
 //
 	return my_ofs.main(numargs, args, NULL, &my_ofs);
