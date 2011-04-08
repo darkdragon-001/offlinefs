@@ -1,12 +1,14 @@
-.TH mount.ofs 8 "April 5, 2011" "version 0.2.2" ""
+.TH mount.ofs 8 "April 5, 2011" "version 0.2.3" ""
 .SH NAME
 mount.ofs \- mount an Offline File System
 .SH SYNOPSIS
 .B mount.ofs
 .I remotetarget dir
-.B [\-Vh] [\-o
+.B [\-o
 .I options
 .B ]
+.PP
+.B mount.ofs [\-Vh] 
 .SH DESCRIPTION
 .B mount.ofs
 is meant to be used by the
@@ -22,7 +24,9 @@ Print version.
 Print help message.
 .TP
 .B ofsoptions
-Options passed on to mount command that mounts the remote file system
+Options passed on to the
+.BR mount (8)
+command that mounts the remote file system
 .I remotetarget
 .SH FILES
 .I /etc/fstab
@@ -42,7 +46,7 @@ Currently
 .B mount.ofs
 runs with the uid and gid of the calling
 .B mount
-command and all file operations on the remote file system will be carried out using these
+command, and all file operations on the remote file system will be carried out using these
 ids. NFS access will only work if
 .B mount.ofs
 is run with the user's uid and gid. Multiple simultaneous users are not supported.
