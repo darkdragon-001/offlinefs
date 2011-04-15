@@ -20,7 +20,7 @@
 					<folderInfo id="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.840909010." name="/" resourcePath="">
 						<toolChain id="org.eclipse.linuxtools.cdt.autotools.core.toolChain.2017508528" name="GNU Autotools Toolchain" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolChain">
 							<targetPlatform id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.targetPlatform.544974309" isAbstract="false" name="GNU Autotools Target Platform" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.targetPlatform"/>
-							<builder autoBuildTarget="" buildPath="${workspace_loc:/ofs}/build-Release" cleanBuildTarget="" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.builder.972686633" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" parallelizationNumber="1" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.builder"/>
+							<builder autoBuildTarget="" buildPath="${workspace_loc}/offlinefs/build-Release" cleanBuildTarget="" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.builder.972686633" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" parallelizationNumber="1" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.builder"/>
 							<tool id="org.eclipse.linuxtools.cdt.autotools.core.gnu.toolchain.tool.configure.414140814" name="configure" superClass="org.eclipse.linuxtools.cdt.autotools.core.gnu.toolchain.tool.configure">
 								<option id="org.eclipse.linuxtools.cdt.autotools.core.option.configure.name.1102667898" name="Name" superClass="org.eclipse.linuxtools.cdt.autotools.core.option.configure.name" value="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.840909010" valueType="string"/>
 							</tool>
@@ -457,7 +457,7 @@
 				<buildTargets>
 					<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>all</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -465,7 +465,7 @@
 					</target>
 					<target name="am--refresh" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>am--refresh</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -473,7 +473,7 @@
 					</target>
 					<target name="check" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>check</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -481,7 +481,7 @@
 					</target>
 					<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>clean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -489,7 +489,7 @@
 					</target>
 					<target name="clean-libtool" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>clean-libtool</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -497,7 +497,7 @@
 					</target>
 					<target name="config.h" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>config.h</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -505,7 +505,7 @@
 					</target>
 					<target name="ctags" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>ctags</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -513,7 +513,7 @@
 					</target>
 					<target name="ctags-recursive" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>ctags-recursive</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -521,7 +521,7 @@
 					</target>
 					<target name="dist" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -529,7 +529,7 @@
 					</target>
 					<target name="dist-all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-all</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -537,7 +537,7 @@
 					</target>
 					<target name="dist-bzip2" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-bzip2</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -545,7 +545,7 @@
 					</target>
 					<target name="dist-gzip" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-gzip</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -553,7 +553,7 @@
 					</target>
 					<target name="dist-lzma" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-lzma</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -561,7 +561,7 @@
 					</target>
 					<target name="dist-shar" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-shar</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -569,7 +569,7 @@
 					</target>
 					<target name="dist-tarZ" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-tarZ</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -577,7 +577,7 @@
 					</target>
 					<target name="dist-xz" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-xz</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -585,7 +585,7 @@
 					</target>
 					<target name="dist-zip" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-zip</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -593,7 +593,7 @@
 					</target>
 					<target name="distcheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distcheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -601,7 +601,7 @@
 					</target>
 					<target name="distclean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -609,7 +609,7 @@
 					</target>
 					<target name="distclean-hdr" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean-hdr</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -617,7 +617,7 @@
 					</target>
 					<target name="distclean-libtool" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean-libtool</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -625,7 +625,7 @@
 					</target>
 					<target name="distclean-tags" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean-tags</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -633,7 +633,7 @@
 					</target>
 					<target name="distcleancheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distcleancheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -641,7 +641,7 @@
 					</target>
 					<target name="distdir" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distdir</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -649,7 +649,7 @@
 					</target>
 					<target name="distuninstallcheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distuninstallcheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -657,7 +657,7 @@
 					</target>
 					<target name="dvi" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dvi</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -665,7 +665,7 @@
 					</target>
 					<target name="html" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>html</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -673,7 +673,7 @@
 					</target>
 					<target name="info" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>info</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -681,7 +681,7 @@
 					</target>
 					<target name="install" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -689,7 +689,7 @@
 					</target>
 					<target name="install-data" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-data</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -697,7 +697,7 @@
 					</target>
 					<target name="install-dvi" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-dvi</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -705,7 +705,7 @@
 					</target>
 					<target name="install-exec" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-exec</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -713,7 +713,7 @@
 					</target>
 					<target name="install-html" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-html</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -721,7 +721,7 @@
 					</target>
 					<target name="install-info" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-info</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -729,7 +729,7 @@
 					</target>
 					<target name="install-man" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-man</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -737,7 +737,7 @@
 					</target>
 					<target name="install-pdf" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-pdf</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -745,7 +745,7 @@
 					</target>
 					<target name="install-ps" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-ps</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -753,7 +753,7 @@
 					</target>
 					<target name="install-strip" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-strip</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -761,7 +761,7 @@
 					</target>
 					<target name="installcheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>installcheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -769,7 +769,7 @@
 					</target>
 					<target name="installdirs" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>installdirs</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -777,7 +777,7 @@
 					</target>
 					<target name="maintainer-clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>maintainer-clean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -785,7 +785,7 @@
 					</target>
 					<target name="Makefile" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>Makefile</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -793,7 +793,7 @@
 					</target>
 					<target name="mostlyclean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>mostlyclean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -801,7 +801,7 @@
 					</target>
 					<target name="mostlyclean-libtool" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>mostlyclean-libtool</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -809,7 +809,7 @@
 					</target>
 					<target name="pdf" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>pdf</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -817,7 +817,7 @@
 					</target>
 					<target name="ps" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>ps</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -825,7 +825,7 @@
 					</target>
 					<target name="stamp-h1" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>stamp-h1</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -833,7 +833,7 @@
 					</target>
 					<target name="tags" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>tags</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -841,7 +841,7 @@
 					</target>
 					<target name="tags-recursive" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>tags-recursive</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -849,7 +849,7 @@
 					</target>
 					<target name="uninstall" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>uninstall</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1312,7 +1312,7 @@
 				<buildTargets>
 					<target name="all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>all</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1320,7 +1320,7 @@
 					</target>
 					<target name="am--refresh" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>am--refresh</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1328,7 +1328,7 @@
 					</target>
 					<target name="check" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>check</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1336,7 +1336,7 @@
 					</target>
 					<target name="clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>clean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1344,7 +1344,7 @@
 					</target>
 					<target name="clean-libtool" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>clean-libtool</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1352,7 +1352,7 @@
 					</target>
 					<target name="config.h" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>config.h</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1360,7 +1360,7 @@
 					</target>
 					<target name="ctags" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>ctags</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1368,7 +1368,7 @@
 					</target>
 					<target name="ctags-recursive" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>ctags-recursive</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1376,7 +1376,7 @@
 					</target>
 					<target name="dist" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1384,7 +1384,7 @@
 					</target>
 					<target name="dist-all" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-all</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1392,7 +1392,7 @@
 					</target>
 					<target name="dist-bzip2" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-bzip2</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1400,7 +1400,7 @@
 					</target>
 					<target name="dist-gzip" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-gzip</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1408,7 +1408,7 @@
 					</target>
 					<target name="dist-lzma" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-lzma</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1416,7 +1416,7 @@
 					</target>
 					<target name="dist-shar" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-shar</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1424,7 +1424,7 @@
 					</target>
 					<target name="dist-tarZ" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-tarZ</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1432,7 +1432,7 @@
 					</target>
 					<target name="dist-xz" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-xz</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1440,7 +1440,7 @@
 					</target>
 					<target name="dist-zip" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dist-zip</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1448,7 +1448,7 @@
 					</target>
 					<target name="distcheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distcheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1456,7 +1456,7 @@
 					</target>
 					<target name="distclean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1464,7 +1464,7 @@
 					</target>
 					<target name="distclean-hdr" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean-hdr</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1472,7 +1472,7 @@
 					</target>
 					<target name="distclean-libtool" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean-libtool</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1480,7 +1480,7 @@
 					</target>
 					<target name="distclean-tags" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distclean-tags</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1488,7 +1488,7 @@
 					</target>
 					<target name="distcleancheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distcleancheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1496,7 +1496,7 @@
 					</target>
 					<target name="distdir" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distdir</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1504,7 +1504,7 @@
 					</target>
 					<target name="distuninstallcheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>distuninstallcheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1512,7 +1512,7 @@
 					</target>
 					<target name="dvi" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>dvi</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1520,7 +1520,7 @@
 					</target>
 					<target name="html" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>html</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1528,7 +1528,7 @@
 					</target>
 					<target name="info" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>info</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1536,7 +1536,7 @@
 					</target>
 					<target name="install" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1544,7 +1544,7 @@
 					</target>
 					<target name="install-data" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-data</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1552,7 +1552,7 @@
 					</target>
 					<target name="install-dvi" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-dvi</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1560,7 +1560,7 @@
 					</target>
 					<target name="install-exec" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-exec</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1568,7 +1568,7 @@
 					</target>
 					<target name="install-html" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-html</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1576,7 +1576,7 @@
 					</target>
 					<target name="install-info" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-info</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1584,7 +1584,7 @@
 					</target>
 					<target name="install-man" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-man</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1592,7 +1592,7 @@
 					</target>
 					<target name="install-pdf" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-pdf</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1600,7 +1600,7 @@
 					</target>
 					<target name="install-ps" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-ps</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1608,7 +1608,7 @@
 					</target>
 					<target name="install-strip" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>install-strip</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1616,7 +1616,7 @@
 					</target>
 					<target name="installcheck" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>installcheck</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1624,7 +1624,7 @@
 					</target>
 					<target name="installdirs" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>installdirs</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1632,7 +1632,7 @@
 					</target>
 					<target name="maintainer-clean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>maintainer-clean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1640,7 +1640,7 @@
 					</target>
 					<target name="Makefile" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>Makefile</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1648,7 +1648,7 @@
 					</target>
 					<target name="mostlyclean" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>mostlyclean</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1656,7 +1656,7 @@
 					</target>
 					<target name="mostlyclean-libtool" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>mostlyclean-libtool</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1664,7 +1664,7 @@
 					</target>
 					<target name="pdf" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>pdf</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1672,7 +1672,7 @@
 					</target>
 					<target name="ps" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>ps</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1680,7 +1680,7 @@
 					</target>
 					<target name="stamp-h1" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>stamp-h1</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1688,7 +1688,7 @@
 					</target>
 					<target name="tags" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>tags</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1696,7 +1696,7 @@
 					</target>
 					<target name="tags-recursive" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>tags-recursive</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
@@ -1704,7 +1704,7 @@
 					</target>
 					<target name="uninstall" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 						<buildCommand>make</buildCommand>
-						<buildArguments>CXXFLAGS="-g -O0"</buildArguments>
+						<buildArguments/>
 						<buildTarget>uninstall</buildTarget>
 						<stopOnError>true</stopOnError>
 						<useDefaultCommand>true</useDefaultCommand>
