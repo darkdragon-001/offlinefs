@@ -40,6 +40,7 @@
 #include "backingtreemanager.h"
 #include "ofsenvironment.h"
 #include "offlinerecognizer.h"
+#include "lazywrite.h"
 #include <pthread.h>
 
 using namespace std;
@@ -58,8 +59,13 @@ void *runOfflineRecognizer(void*) {
 // : fusexx::fuse<ofs_fuse> ()
 //{
 //}
-
-
+/**
+ * Run the Lazywrite supervisor thread
+ */
+void *runlazywrite(void*){
+	Lazywrite lw(1);
+	lw.startLazywrite();
+}
 ofs_fuse::~ofs_fuse()
 {
 }
@@ -82,8 +88,9 @@ int ofs_fuse::fuse_getattr(const char *path, struct stat *stbuf)
 	ofslog::debug("Enter fuse_getattr");
 	ofslog::debug(path);
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_getattr(stbuf);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_getattr(stbuf);
+	delete file;
 	ofslog::debug("Leave fuse_getattr");
 	return res;
 }
@@ -134,8 +141,9 @@ int ofs_fuse::fuse_access(const char *path, int mask)
 {
 	ofslog::debug("Enter fuse_access");
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_access(mask);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_access(mask);
+	delete file;
 	ofslog::debug("Leave fuse_fgetattr");
 	return res;
 }
@@ -156,8 +164,9 @@ int ofs_fuse::fuse_readlink(const char *path, char *buf, size_t size)
 {
 	ofslog::debug("Enter fuse_readlink");
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_readlink(buf, size);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_readlink(buf, size);
+	delete file;
 	ofslog::debug("Leave fuse_fgetattr");
 	return res;
 }
@@ -264,8 +273,9 @@ int ofs_fuse::fuse_mknod(const char *path, mode_t mode, dev_t rdev)
 {
 	ofslog::debug("Enter fuse_mknod");
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_mknod(mode, rdev);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_mknod(mode, rdev);
+	delete file;
 	ofslog::debug("Leave fuse_mknod");
 	return res;
 }
@@ -280,8 +290,9 @@ int ofs_fuse::fuse_mkdir(const char *path, mode_t mode)
 {
 	ofslog::debug("Enter fuse_mkdir");
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_mkdir(mode);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_mkdir(mode);
+	delete file;
 	ofslog::debug("Leave fuse_mknod");
 	return res;
 }
@@ -296,8 +307,9 @@ int ofs_fuse::fuse_unlink(const char *path)
 	ofslog::debug("Enter fuse_unlink");
 	ofslog::debug(path);
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_unlink();
+	OFSFile *file = new OFSFile(path);
+	res = file->op_unlink();
+	delete file;
 	ofslog::debug("Leave fuse_unlink");
 	return res;
 }
@@ -311,8 +323,9 @@ int ofs_fuse::fuse_rmdir(const char *path)
 {
 	ofslog::debug("Enter fuse_rmdir");
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_rmdir();
+	OFSFile *file = new OFSFile(path);
+	res = file->op_rmdir();
+	delete file;
 	ofslog::debug("leave fuse_rmdir");
 	return res;
 }
@@ -330,8 +343,9 @@ int ofs_fuse::fuse_symlink(const char *from, const char *to)
 {
 	ofslog::debug("Enter fuse_symlink");
 	int res;
-	OFSFile file_to = OFSFile(to);
-	res = file_to.op_symlink(from);
+	OFSFile *file_to = new OFSFile(to);
+	res = file_to->op_symlink(from);
+	delete file_to;
 	ofslog::debug("Leave fuse_symlink");
 	return res;
 }
@@ -348,9 +362,11 @@ int ofs_fuse::fuse_rename(const char *from, const char *to)
 	ofslog::debug((string("from: ")+string(from)).c_str());
 	ofslog::debug((string("to: ")+string(to)).c_str());
 	int res;
-	OFSFile file_from = OFSFile(from);
-	OFSFile file_to = OFSFile(to);
-	res = file_from.op_rename(&file_to);
+	OFSFile *file_from = new OFSFile(from);
+	OFSFile *file_to = new OFSFile(to);
+	res = file_from->op_rename(file_to);
+	delete file_from;
+	delete file_to;
 	ofslog::debug("Leave fuse_rename");
 	return res;
 }
@@ -365,9 +381,11 @@ int ofs_fuse::fuse_link(const char *from, const char *to)
 {
 	ofslog::debug("Enter fuse_link");
 	int res;
-	OFSFile file_from = OFSFile(from);
-	OFSFile file_to = OFSFile(to);
-	res = file_from.op_link(&file_to);
+	OFSFile *file_from = new OFSFile(from);
+	OFSFile *file_to = new OFSFile(to);
+	res = file_from->op_link(file_to);
+	delete file_from;
+	delete file_to;
 	ofslog::debug("Leave fuse_link");
 	return res;
 }
@@ -383,8 +401,9 @@ int ofs_fuse::fuse_chmod(const char *path, mode_t mode)
 	ofslog::debug("Enter fuse_chmod");
 	ofslog::debug(path);
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_chmod(mode);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_chmod(mode);
+	delete file;
 	ofslog::debug("Leave fuse_chmod");
 	return res;
 }
@@ -401,8 +420,9 @@ int ofs_fuse::fuse_chown(const char *path, uid_t uid, gid_t gid)
 	ofslog::debug("Enter fuse_chown");
 	ofslog::debug(path);
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_chown(uid, gid);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_chown(uid, gid);
+	delete file;
 	ofslog::debug("Leave fuse_chown");
 	return res;
 }
@@ -418,8 +438,9 @@ int ofs_fuse::fuse_truncate(const char *path, off_t size)
 	ofslog::debug("Enter fuse_truncate");
 	ofslog::debug(path);
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_truncate(size);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_truncate(size);
+	delete file;
 	ofslog::debug("Leave fuse_truncate");
 	return res;
 }
@@ -466,8 +487,9 @@ int ofs_fuse::fuse_utimens(const char *path, const struct timespec ts[2])
 {
 	ofslog::debug("Enter fuse_utimens");
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_utimens(ts);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_utimens(ts);
+	delete file;
 	ofslog::debug("Leave fuse_utimens");
 	return res;
 }
@@ -492,7 +514,7 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode,
 	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
-	res = file->op_create(mode);
+	res = file->op_create(mode, fi->flags);
 	if (res < 0)
 		delete file;
 	else
@@ -606,8 +628,9 @@ int ofs_fuse::fuse_statfs(const char *path, struct statvfs *stbuf)
 {
 	ofslog::debug("Enter fuse_statfs");
 	int res;
-	OFSFile file = OFSFile(path);
-	res = file.op_statfs(stbuf);
+	OFSFile *file = new OFSFile(path);
+	res = file->op_statfs(stbuf);
+	delete file;
 	ofslog::debug("Leave fuse_statfs");
 	return res;
 }
@@ -888,8 +911,10 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 
 	// create offline recognition thread
 	//if (argv[5]) {
-		pthread_t thread;
+		pthread_t thread, threadlw;
 		pthread_create( &thread, NULL, runOfflineRecognizer, NULL);
+		pthread_create( &threadlw, NULL, runlazywrite, NULL);
+
 	//}
 
 	return NULL;
@@ -898,11 +923,18 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 
 /**
  * Exit the filesystem - unmount the remote share
+ * Write Cache back to Fileserver (Lazywrite)
  * @param
  */
 void ofs_fuse::fuse_destroy(void *)
 {
     if(!OFSEnvironment::Instance().isUnmount())
         return;
+	if(OFSEnvironment::Instance().getlazywrite() && !(FilesystemStatusManager::Instance().issync()))
+	{
+	ofslog::info("Write back Changes");
+	SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
+	FilesystemStatusManager::Instance().setsync(true);
+	}
     FilesystemStatusManager::Instance().unmountfs();
 }

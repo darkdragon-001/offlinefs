@@ -47,11 +47,12 @@ using namespace std;
 #include "ofsconf.h"
 #include "ofshash.h"
 #include "ofslog.h"
+#include "lazywrite.h"
 
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
 
-FilesystemStatusManager::FilesystemStatusManager() : available(true) {}
+FilesystemStatusManager::FilesystemStatusManager() : available(true) {sync=true;}
 FilesystemStatusManager::~FilesystemStatusManager(){}
 FilesystemStatusManager& FilesystemStatusManager::Instance()
 {
@@ -72,6 +73,10 @@ bool FilesystemStatusManager::isAvailable()
 	return available;
 }
 
+bool FilesystemStatusManager::issync()
+{
+	return sync;
+}
 
 /*!
     \fn FilesystemStatusManager::filesystemError()
@@ -332,10 +337,16 @@ void FilesystemStatusManager::setAvailability(bool value)
 			mountfs();
 			SynchronizationManager::Instance().ReintegrateAll(
 					OFSEnvironment::Instance().getShareID().c_str());
+            //Remote==Cache
+            sync=true;
 		}
 		else
 		{ // unmount fs
 			unmountfs();
 		}
 	}
+}
+void FilesystemStatusManager::setsync(bool value)
+{
+	sync=value;
 }

@@ -124,6 +124,16 @@ public:
      * @param executable the called executable
      * @return the usage string
      */
+
+    inline bool getlazywrite() { return lazywrite; };
+    /**
+     * Return if lazywrite activated or not
+     */
+
+    inline int getlwoption() { return lwoption; };
+    /**
+     * Return which Syncmodus is selected
+     */
     static string getUsageString(string executable="ofs");
 protected:
     OFSEnvironment();
@@ -141,6 +151,8 @@ private:
     bool unmount;
     bool allowother;
     bool usefscache;
+    bool lazywrite;
+    int lwoption;  //c=CPU n=Network t=Timer
     string ofsdir;
 protected:
     list<string> listendevices;

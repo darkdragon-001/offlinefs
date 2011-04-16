@@ -60,6 +60,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	bool lAllowOther = false;
 	bool lUnmount = true;
     bool lUseFSCache = false;
+
 	list<string> lListenDevices;
     list<string> lMountOptionsList;
 		
@@ -68,6 +69,8 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	OFSEnvironment &env = Instance();
 	
 	env.ofsdir = "/var/ofs";
+	env.lazywrite=true;
+	env.lwoption='n';  //c=CPU n=Network t=Timer
 	
 	// parse command line
 	// TODO: cache-and remote path have to be custom for each share
