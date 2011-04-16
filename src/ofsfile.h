@@ -57,7 +57,7 @@ public:
     int op_readlink(char *buf, size_t size);
     int op_chmod(mode_t mode);
     int op_chown(uid_t uid, gid_t gid);
-    int op_create(mode_t mode);
+    int op_create(mode_t mode, int flags );
     int op_fgetattr(struct stat *stbuf);
     int op_flush();
     int op_fsync(int isdatasync);
