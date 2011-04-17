@@ -49,8 +49,7 @@ int main(int argc, char *argv[])
 {
 	// No! see --help! assert(argc > 2);
 	// TODO: treat options properly
-	char szOptions[10];
-	char* pszOptions = szOptions;
+	char* pszOptions = NULL;
 
 	// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
 	// look at cryptfs and how they pass multiple name value pairs under one "key"
@@ -107,7 +106,11 @@ int main(int argc, char *argv[])
 		remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
 		pMountArgumente[4] = remotemountpoint.c_str();
 
-		pMountArgumente[6] = pszOptions;
+		if (pszOptions == NULL) {
+			pMountArgumente [5] = NULL;
+		} else {
+			pMountArgumente[6] = pszOptions;
+		}
 
 		// create mount point and check and if it exits check it is actually a directory
 		struct stat s;
@@ -151,10 +154,13 @@ int main(int argc, char *argv[])
 		pArgumente[1] = ofsmountpoint.c_str();
 		pArgumente[2] = shareurl.c_str();
 		pArgumente[3] = "-o"; // allow all users access to file system
-
-		pArgumente[4] = "-p"; // mount options
-		pArgumente[5] = pszOptions;
-		pArgumente[6] = NULL; // terminator
+		if (pszOptions == NULL) {
+			pArgumente[4] = NULL;
+		} else {
+			pArgumente[4] = "-p"; // mount options
+			pArgumente[5] = pszOptions;
+			pArgumente[6] = NULL; // terminator
+		}
 	} else {
 		pArgumente[0] = "ofs";
 		pArgumente[1] = ofsmountpoint.c_str();

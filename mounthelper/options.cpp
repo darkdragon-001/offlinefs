@@ -50,10 +50,8 @@ int my_options(int argc, char* argv[], char** ppszOptions)
             output, and exit with exit code zero (normal termination). */
             print_usage (cout, 0);
         case 'o': /* -o or --options */
-            optarg;
-            *ppszOptions = new char[strlen(optarg)+1];
-            // TODO: use getsubopt(3) here
-            strncpy(*ppszOptions, optarg, strlen(optarg)+1);
+            // TODO: parse options properly and split off OFS options
+            *ppszOptions = optarg;
             break;
         case 'V': /* -V or --version */
             /* User has requested version information. Print it to standard
