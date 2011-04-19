@@ -24,58 +24,70 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <string>
+#include <cstring>
+#include <assert.h>
+#include <getopt.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "ofs_fuse.h"
 #include "backingtreepersistence.h"
 #include "filesystemstatusmanager.h"
+#include "ofsconf.h"
 #include "ofsenvironment.h"
+#include "ofshash.h"
 #include "ofslog.h"
-#include <string>
-#include <cstring>
 
-using namespace std;
-
+/**
+ * @TODO: This is very unclean
+ * @param argc
+ * @param argv[]
+ * @return
+ */
 int main(int argc, char *argv[])
 {
 	if(! ofslog::init() ){
-		fprintf(stderr,"failed to init log system\n");
-		return 1;
+		std::cerr << argv[0] << ": Failed to init log system\n";
+		return 2; // system error return code, see mount(8)
 	}
 
-	ofs_fuse my_ofs;
-	ofslog::info("Starting ofs daemon");
 	try {
 		OFSEnvironment::init(argc, argv);
 	} catch (OFSException& e) {
 		cout << OFSEnvironment::getUsageString();
 		return 0;
 	}
+
+	FilesystemStatusManager::Instance().mountfs();
+
+	ofs_fuse my_ofs;
+	ofslog::info("Starting ofs daemon");
 	ofslog::debug("Adopting parameters");
 	OFSEnvironment &env = OFSEnvironment::Instance();
-	char *args[5];
+	char *fuse_arguments[5];
 	int numargs;
-	args[0] = new char[env.getBinaryPath().length()+1];
-	strncpy(args[0], env.getBinaryPath().c_str(),
+	// TODO: check if we really need to copy here, if yes use strdup(3)
+	fuse_arguments[0] = new char[env.getBinaryPath().length()+1];
+	strncpy(fuse_arguments[0], env.getBinaryPath().c_str(),
 		env.getBinaryPath().length()+1);
-	args[1] = new char[env.getMountPoint().length()+1];
-	strncpy(args[1], env.getMountPoint().c_str(),
+	fuse_arguments[1] = new char[env.getMountPoint().length()+1];
+	strncpy(fuse_arguments[1], env.getMountPoint().c_str(),
 		env.getMountPoint().length()+1);
 	if(env.isAllowOther()) {
-		args[2] = new char[3];
-		strncpy(args[2], "-o", 3);
-		args[3] = new char[12];
-		strncpy(args[3], "allow_other", 12);
-		args[4] = NULL;
+		fuse_arguments[2] = new char[3];
+		strncpy(fuse_arguments[2], "-o", 3);
+		fuse_arguments[3] = new char[12];
+		strncpy(fuse_arguments[3], "allow_other", 12);
+		fuse_arguments[4] = NULL;
 		numargs = 4;
 	} else {
-		args[2] = NULL;
+		fuse_arguments[2] = NULL;
 		numargs = 2;
 	}
 
 	// create cache path - ignore errors if it not exists
 	// FIXME: check if directory exists and mkdir if not
 	mkdir(env.getCachePath().c_str(), 0777);
-//
-	return my_ofs.main(numargs, args, NULL, &my_ofs);
 
-  //return EXIT_SUCCESS;
+	return my_ofs.main(numargs, fuse_arguments, NULL, &my_ofs);
 }

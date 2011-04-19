@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by                                                 *
- *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
+ *   Copyright (C) 2007, 2011 by                                           *
+ *      Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa, Peter Trommler   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,12 +17,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "ofsenvironment.h"
 #include "ofsexception.h"
 #include "ofsconf.h"
 #include "ofshash.h"
 #include "ofslog.h"
 #include <getopt.h>
+#include <stdlib.h>
 #include <sstream>
 #include <cstring>
 
@@ -69,31 +74,34 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	OFSEnvironment &env = Instance();
 	
 	env.ofsdir = "/var/ofs";
-	env.lazywrite=true;
+	env.lazywrite=false;
 	env.lwoption='n';  //c=CPU n=Network t=Timer
 	
-	// parse command line
 	// TODO: cache-and remote path have to be custom for each share
 	int nextopt;
-	// define allowed options
-	const char* const short_options = ":r:b:l:i:p:onh";
+
+	const char* const short_options = ":r:b:l:i:p:onhVz:";
 	const struct option long_options[] = {
-		{"remote", required_argument, NULL, 'r'},
-		{"backing", required_argument, NULL, 'b'},
-		{"listen", required_argument, NULL, 'l'},
-		{"shareid", required_argument, NULL, 'i'},
-		{"allowother", no_argument, NULL, 'o'},
-		{"nounmount", required_argument, NULL, 'n'},
-		{"options", required_argument, NULL, 'p'},
-		{"help", no_argument, NULL, 'h'}
+	        {"version",0,NULL,'V'},
+			{"options", required_argument, NULL, 'o'},
+			{"help", no_argument, NULL, 'h'},
+			{"remote", required_argument, NULL, 'r'},
+			{"backing", required_argument, NULL, 'b'},
+			{"listen", required_argument, NULL, 'l'},
+			{"shareid", required_argument, NULL, 'i'},
+			{"allowother", no_argument, NULL, 't'},
+			{"nounmount", required_argument, NULL, 'n'},
+			{"lazywrite", required_argument, NULL, 'z'},
+	        {NULL,0,NULL,0} /* Required at end of array. */
 	};
 	
 	if (argc < 3)
 		throw OFSException("Not enough parameters", 1,true);
 	// binary name, mountpoint and remote path
+// TODO: support multiple remote file systems
 	env.binarypath = argv[0];
-	env.mountPoint = argv[1];
-	env.shareURL = argv[2];
+	env.mountPoint = argv[2];
+	env.shareURL = argv[1];
 	ofslog::debug("shareURL: %s", env.shareURL.c_str());
 	// parsing paramaters ('man getopt_long' for usage)
 	while((nextopt =
@@ -118,11 +126,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		   case 'i': // custom share identifier
 			lShareID = optarg;
 			break;
-		   case 'p': // mount options
-               char *mntopt;
+		   case 'o': // mount options
+				// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
+				// look at cryptfs and how they pass multiple name value pairs under one "key"
+			   char *mntopt;
                mntopt = optarg;
 			   lMountOptions = mntopt;
                char *optsaveptr;
+               // TODO: use getsubopt(3)
                char *stroption;
                stroption = strtok_r(mntopt, ",", &optsaveptr);
                lMountOptionsList.clear();
@@ -131,22 +142,34 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
                   stroption = strtok_r(NULL, ",", &optsaveptr);
                }
 			   break;
-		   case 'o': // allow other users access to the filesystem
+		   case 't': // allow other users access to the file system
 			lAllowOther = true;
 			break;
-		   case 'n': // do not unmount remote share after ext
+		   case 'n': // do not unmount remote share after exit
 			lUnmount = false;
 			break;
 		   case 'h': // display help
 			throw OFSException("User wants help",1);
+		   case 'z': // TODO: Perhaps need another parameter here (timeout, ?)
+			   env.lazywrite = true;
+			   env.lwoption = optarg[0];
+			   break;
+		   case 'V': /* -V or --version */
+	            /* User has requested version information. Print it to standard
+	            output, and exit with exit code zero (normal termination). */
+#if HAVE_CONFIG_H
+	        	cout << argv[0] << " (" << PACKAGE_NAME << " version " << PACKAGE_VERSION << ")" << endl;
+	        	exit(EXIT_SUCCESS);
+	        	break;
+#endif /* HAVE_CONFIG_H */
 		   case '?': // invalid parameter
 			throw OFSException("Unknown parameter: "+optopt,1);
 		   case ':': // missing argument
 			throw OFSException(
 				"Missing argument for parameter: "+optopt,1);
-		   default: // unknown behaviour
+		   default: // unknown behavior
 			throw OFSException(
-			"Undefined parameter or error while parsing commandline"
+			"Undefined parameter or error while parsing command line"
 			,1,true);
 		}
 		
@@ -204,20 +227,21 @@ list<string> OFSEnvironment::getListenDevices()
 string OFSEnvironment::getUsageString(string executable)
 {
 	stringstream usage;
-	usage << "Usage: "+executable+" <mountpoint> <url> [<options>]"
+	usage << "Usage: "+executable+" <remotetargeturl> <dir>[<options>]"
 		<< endl;
 	usage << "Options are:" << endl;
-	usage << "-r --remote     Absolute path to the remote mountpoint"
+	usage << "\t-V --version\tPrint version" << endl;
+	usage << "\t-r --remote     Absolute path to the remote mountpoint"
 		<< endl;
-	usage << "-b --backing    Absolute path to the backing (cache) root"
+	usage << "\t-b --backing    Absolute path to the backing (cache) root"
 		<< endl;
-	usage << "-l --listen     Comma separated list of network interfaces to "
-		<< " listen for plug/unplug events" << endl;
-	usage << "-i --shareid    Internal unique share identifier" << endl;
-	usage << "-o --allowother Allow all users access to the filesystem" << endl;
-	usage << "-p --options    Mount options as given to the mount command via -o" << endl;
-	usage << "-n --nounmount  Do not unmount the remote share on exit" << endl;
-	usage << "-h --help       Print this screen and exit" << endl;
+	usage << "\t-l --listen     Comma separated list of network interfaces to "
+		<< "listen for plug/unplug events" << endl;
+	usage << "\t-i --shareid    Internal unique share identifier" << endl;
+	usage << "\t-t --allowother Allow all users access to the filesystem" << endl;
+	usage << "\t-o --options    Mount options as given to the mount command via -o" << endl;
+	usage << "\t-n --nounmount  Do not unmount the remote share on exit" << endl;
+	usage << "\t-h --help       Print this screen and exit" << endl;
 	return usage.str();
 }
 
