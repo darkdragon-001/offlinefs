@@ -86,6 +86,10 @@ public:
      */
     inline string getBinaryPath() { return binarypath; };
     /**
+     * Mount read write?
+     */
+    inline bool isReadWrite() {return readwrite; };
+    /**
      * Should the remote share be unmounted when this fs is unmounted
      * @return unmount flag
      */
@@ -148,6 +152,7 @@ private:
     string shareURL;
     string binarypath;
     string mountoptions;
+    bool readwrite;
     bool unmount;
     bool allowother;
     bool usefscache;

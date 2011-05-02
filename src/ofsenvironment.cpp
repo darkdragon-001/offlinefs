@@ -57,11 +57,13 @@ OFSEnvironment::~OFSEnvironment()
 }
 
 void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
-		{
+				{
 	string lRemotePath = "";
 	string lCachePath = "";
 	string lShareID = "";
 	string lMountOptions = "";
+	bool lReadWrite = false;
+	bool lReadOnly = false;
 	bool lAllowOther = false;
 	bool lUnmount = true;
 	bool lUseFSCache = false;
@@ -108,6 +110,8 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 
 	enum {
 		REMOTE_OPTIONS_OPT = 0,
+		READ_WRITE_OPT,
+		READ_ONLY_OPT,
 		BACKING_OPT,
 		LISTEN_OPT,
 		SHARE_ID_OPT,
@@ -118,6 +122,8 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 
 	char const * const mount_option_names[] = {
 			"remoteoptions",
+			"rw",
+			"ro",
 			"backing",
 			"listen",
 			"shareid",
@@ -155,94 +161,105 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		case 'o': // ofs options
 			// TODO: this method is too long re-factor sub options parsing into private method
 			subopts = optarg;
-			switch (getsubopt(&subopts, const_cast<char* const*>(mount_option_names), &value)) {
-			case REMOTE_OPTIONS_OPT:
-				// TODO: check if value == NULL
-				// FIXME: need to change ':' to ',' in mount options
-				lMountOptions = value;
-				break;
-			case BACKING_OPT:
-				// TODO: check if value == NULL;
-				lCachePath = value;
-				break;
-			case LISTEN_OPT:
-				// TODO: check if value == NULL
-				char *saveptr;
-				char *strdevice;
-				strdevice = strtok_r(value, ":", &saveptr);
-				lListenDevices.clear();
-				while(strdevice != NULL) {
-					lListenDevices.push_back(strdevice);
-					strdevice = strtok_r(NULL, ":", &saveptr);
+			while (*subopts != '\0') {
+				switch (getsubopt(&subopts, const_cast<char* const*>(mount_option_names), &value)) {
+				case REMOTE_OPTIONS_OPT:
+					// TODO: check if value == NULL
+					// FIXME: need to change ':' to ',' in mount options
+					lMountOptions = value;
+					break;
+				case READ_WRITE_OPT:
+					if (lReadOnly) throw OFSException("Cannot set ro and rw", 1, true);
+					lReadWrite = true;
+					break;
+				case READ_ONLY_OPT:
+					if (lReadWrite) throw OFSException("Cannot set ro and rw", 1, true);
+					lReadOnly = true;
+					break;
+				case BACKING_OPT:
+					// TODO: check if value == NULL;
+					lCachePath = value;
+					break;
+				case LISTEN_OPT:
+					// TODO: check if value == NULL
+					char *saveptr;
+					char *strdevice;
+					strdevice = strtok_r(value, ":", &saveptr);
+					lListenDevices.clear();
+					while(strdevice != NULL) {
+						lListenDevices.push_back(strdevice);
+						strdevice = strtok_r(NULL, ":", &saveptr);
+					}
+					break;
+				case SHARE_ID_OPT:
+					// TODO: check if value == NULL
+					lShareID = value;
+					break;
+				case ALLOWOTHER_OPT:
+					lAllowOther = true;
+					break;
+				case NOUNMOUNT_OPT:
+					lUnmount = false;
+				case LAZYWRITE_OPT:
+					// TODO: check if value == NULL
+					env.lazywrite = true;
+					env.lwoption = value[0];
+				default:
+					throw OFSException(
+							(string("Undefined parameter or error while parsing command line: ") + subopts).c_str(),
+							1,true);
 				}
-				break;
-			case SHARE_ID_OPT:
-				// TODO: check if value == NULL
-				lShareID = value;
-				break;
-			case ALLOWOTHER_OPT:
-				lAllowOther = true;
-				break;
-			case NOUNMOUNT_OPT:
-				lUnmount = false;
-			case LAZYWRITE_OPT:
-				// TODO: check if value == NULL
-				env.lazywrite = true;
-				env.lwoption = value[0];
-			default:
-				throw OFSException(
-						"Undefined parameter or error while parsing command line"
-						,1,true);
 			}
-			case 'p': // mount options
-				// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
-				// look at cryptfs and how they pass multiple name value pairs under one "key"
-				char *mntopt;
-				mntopt = optarg;
-				lMountOptions = mntopt;
-				char *optsaveptr;
-				// TODO: use getsubopt(3)
-				char *stroption;
-				stroption = strtok_r(mntopt, ",", &optsaveptr);
-				lMountOptionsList.clear();
-				while(stroption != NULL) {
-					lMountOptionsList.push_back(stroption);
-					stroption = strtok_r(NULL, ",", &optsaveptr);
-				}
-				break;
-			case 't': // allow other users access to the file system
-				lAllowOther = true;
-				break;
-			case 'n': // do not unmount remote share after exit
-				lUnmount = false;
-				break;
-			case 'h': // display help
-				throw OFSException("User wants help",1);
-			case 'z': // TODO: Perhaps need another parameter here (timeout, ?)
-				env.lazywrite = true;
-				env.lwoption = optarg[0];
-				break;
-			case 'V': /* -V or --version */
-				/* User has requested version information. Print it to standard
+		case 'p': // mount options
+			// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
+			// look at cryptfs and how they pass multiple name value pairs under one "key"
+			char *mntopt;
+			mntopt = optarg;
+			lMountOptions = mntopt;
+			char *optsaveptr;
+			// TODO: use getsubopt(3)
+			char *stroption;
+			stroption = strtok_r(mntopt, ",", &optsaveptr);
+			lMountOptionsList.clear();
+			while(stroption != NULL) {
+				lMountOptionsList.push_back(stroption);
+				stroption = strtok_r(NULL, ",", &optsaveptr);
+			}
+			break;
+		case 't': // allow other users access to the file system
+			lAllowOther = true;
+			break;
+		case 'n': // do not unmount remote share after exit
+			lUnmount = false;
+			break;
+		case 'h': // display help
+			throw OFSException("User wants help",1);
+		case 'z': // TODO: Perhaps need another parameter here (timeout, ?)
+			env.lazywrite = true;
+			env.lwoption = optarg[0];
+			break;
+		case 'V': /* -V or --version */
+			/* User has requested version information. Print it to standard
 	            output, and exit with exit code zero (normal termination). */
 #if HAVE_CONFIG_H
-				cout << argv[0] << " (" << PACKAGE_NAME << " version " << PACKAGE_VERSION << ")" << endl;
-				exit(EXIT_SUCCESS);
-				break;
+			cout << argv[0] << " (" << PACKAGE_NAME << " version " << PACKAGE_VERSION << ")" << endl;
+			exit(EXIT_SUCCESS);
+			break;
 #endif /* HAVE_CONFIG_H */
-			case '?': // invalid parameter
-				throw OFSException("Unknown parameter: "+optopt,1);
-			case ':': // missing argument
-				throw OFSException(
-						"Missing argument for parameter: "+optopt,1);
-			default: // unknown behavior
-				throw OFSException(
-						"Undefined parameter or error while parsing command line"
-						,1,true);
+		case '?': // invalid parameter
+			throw OFSException("Unknown parameter: "+optopt,1);
+		case ':': // missing argument
+			throw OFSException(
+					"Missing argument for parameter: "+optopt,1);
+		default: // unknown behavior
+			throw OFSException(
+					"Undefined parameter or error while parsing command line"
+					,1,true);
 		}
 
 	}
 
+	// TODO: should be handled above
 	// parsing the mount options
 	if (!lMountOptionsList.empty())
 	{
@@ -257,6 +274,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 
 	// variable from config file
 	OFSConf &ofsconf = OFSConf::Instance();
+
 	// share ID
 	if(lShareID=="")
 		env.shareID = ofs_hash(env.shareURL);
@@ -285,7 +303,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	env.allowother = lAllowOther;
 	// use FSCache flag
 	env.usefscache = lUseFSCache;
-		}
+				}
 
 list<string> OFSEnvironment::getListenDevices()
 {

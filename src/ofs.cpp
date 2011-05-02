@@ -54,8 +54,9 @@ int main(int argc, char *argv[])
 	try {
 		OFSEnvironment::init(argc, argv);
 	} catch (OFSException& e) {
-		cout << OFSEnvironment::getUsageString();
-		return 0;
+		cerr << e.what() << endl;
+		cerr << OFSEnvironment::getUsageString();
+		return 1; // see mount(8) for return codes
 	}
 
 	FilesystemStatusManager::Instance().mountfs();
@@ -66,6 +67,7 @@ int main(int argc, char *argv[])
 	OFSEnvironment &env = OFSEnvironment::Instance();
 	char *fuse_arguments[5];
 	int numargs;
+	// TODO: Pass on rw or ro option?
 	// TODO: check if we really need to copy here, if yes use strdup(3)
 	fuse_arguments[0] = new char[env.getBinaryPath().length()+1];
 	strncpy(fuse_arguments[0], env.getBinaryPath().c_str(),
