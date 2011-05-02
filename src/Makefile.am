@@ -31,4 +31,4 @@ install-exec-hook:
 	${MKDIR_P} $(DESTDIR)${localstatedir}/ofs/remote
 	${MKDIR_P} $(DESTDIR)${localstatedir}/ofs/backing
 	${MKDIR_P} $(DESTDIR)/sbin && \
-	${LN_S} -f ${sbindir}/mount.ofs $(DESTDIR)/sbin/ofs; fi 
+	${LN_S} -f ${sbindir}/ofs $(DESTDIR)/sbin/mount.ofs
