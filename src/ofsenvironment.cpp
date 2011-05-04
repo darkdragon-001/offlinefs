@@ -117,6 +117,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		SHARE_ID_OPT,
 		ALLOWOTHER_OPT,
 		NOUNMOUNT_OPT,
+		FS_CACHE_OPT,
 		LAZYWRITE_OPT
 	};
 
@@ -129,12 +130,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			"shareid",
 			"allowother",
 			"nounmount",
+			"fsc",
 			"lazywrite",
 			NULL
 	};
 
 	char * subopts;
 	char * value;
+	string remote_options;
 
 	while((nextopt =
 			getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
@@ -161,12 +164,20 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		case 'o': // ofs options
 			// TODO: this method is too long re-factor sub options parsing into private method
 			subopts = optarg;
+			int position;
+
 			while (*subopts != '\0') {
 				switch (getsubopt(&subopts, const_cast<char* const*>(mount_option_names), &value)) {
 				case REMOTE_OPTIONS_OPT:
 					// TODO: check if value == NULL
-					// FIXME: need to change ':' to ',' in mount options
-					lMountOptions = value;
+					// this would be so much nicer with boost::regex
+					remote_options = string(value);
+					position = remote_options.find(':');
+					while (position != string::npos) {
+						remote_options.replace(position, 1, ",");
+						position = remote_options.find(':', position + 1);
+					}
+					lMountOptions = remote_options.c_str();
 					break;
 				case READ_WRITE_OPT:
 					if (lReadOnly) throw OFSException("Cannot set ro and rw", 1, true);
@@ -200,6 +211,9 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 					break;
 				case NOUNMOUNT_OPT:
 					lUnmount = false;
+				case FS_CACHE_OPT:
+					lUseFSCache = true;
+					break;
 				case LAZYWRITE_OPT:
 					// TODO: check if value == NULL
 					env.lazywrite = true;
@@ -211,20 +225,9 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 				}
 			}
 		case 'p': // mount options
-			// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
-			// look at cryptfs and how they pass multiple name value pairs under one "key"
 			char *mntopt;
 			mntopt = optarg;
 			lMountOptions = mntopt;
-			char *optsaveptr;
-			// TODO: use getsubopt(3)
-			char *stroption;
-			stroption = strtok_r(mntopt, ",", &optsaveptr);
-			lMountOptionsList.clear();
-			while(stroption != NULL) {
-				lMountOptionsList.push_back(stroption);
-				stroption = strtok_r(NULL, ",", &optsaveptr);
-			}
 			break;
 		case 't': // allow other users access to the file system
 			lAllowOther = true;
@@ -239,8 +242,6 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			env.lwoption = optarg[0];
 			break;
 		case 'V': /* -V or --version */
-			/* User has requested version information. Print it to standard
-	            output, and exit with exit code zero (normal termination). */
 #if HAVE_CONFIG_H
 			cout << argv[0] << " (" << PACKAGE_NAME << " version " << PACKAGE_VERSION << ")" << endl;
 			exit(EXIT_SUCCESS);
@@ -253,23 +254,10 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 					"Missing argument for parameter: "+optopt,1);
 		default: // unknown behavior
 			throw OFSException(
-					"Undefined parameter or error while parsing command line"
-					,1,true);
+					"Undefined parameter or error while parsing command line",
+					1,true);
 		}
 
-	}
-
-	// TODO: should be handled above
-	// parsing the mount options
-	if (!lMountOptionsList.empty())
-	{
-		list<string>::iterator i;
-		for(i=lMountOptionsList.begin(); i != lMountOptionsList.end(); ++i)
-		{
-			// option 'fsc': "Try to use FSCache"
-			if (*i == "fsc")
-				lUseFSCache = true;
-		}
 	}
 
 	// variable from config file
