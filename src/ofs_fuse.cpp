@@ -65,6 +65,7 @@ void *runOfflineRecognizer(void*) {
 void *runlazywrite(void*){
 	Lazywrite lw(1);
 	lw.startLazywrite();
+	return 0;
 }
 ofs_fuse::~ofs_fuse()
 {
