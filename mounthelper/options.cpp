@@ -50,12 +50,14 @@ int my_options(int argc, char* argv[], char** ppszOptions, bool* sloppy)
             /* User has requested usage information. Print it to standard
             output, and exit with exit code zero (normal termination). */
             print_usage (cout, 0);
+            break;
         case 'o': /* -o or --options */
             optarg;
-            *ppszOptions = new char[strlen(optarg)+1];
-            // TODO: use getsubopt(3) here
-            strncpy(*ppszOptions, optarg, strlen(optarg)+1);
+            *ppszOptions = strdup(optarg);
             break;
+        case 's':
+        	*sloppy = true;
+        	break;
         case 'V': /* -V or --version */
             /* User has requested version information. Print it to standard
             output, and exit with exit code zero (normal termination). */
@@ -64,8 +66,7 @@ int my_options(int argc, char* argv[], char** ppszOptions, bool* sloppy)
         	exit(EXIT_SUCCESS);
         	break;
 #endif /* HAVE_CONFIG_H */
-        case 's':
-        	*sloppy = true;
+
         case '?': /* The user specified an invalid option. */
             /* Print usage information to standard error, and exit with exit
             code one (indicating abnormal termination). */

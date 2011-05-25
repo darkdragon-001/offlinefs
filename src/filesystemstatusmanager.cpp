@@ -263,8 +263,10 @@ void FilesystemStatusManager::mountfs()
 
 		// TODO: Handle errors
 		seteuid(OFSEnvironment::Instance().getUid());
+
 		ofslog::debug("Mount finished");
 		if(WIFEXITED(status) && exitstatus) {
+			// TODO: Perhaps "already mounted" should not be reported as error
 			errno = exitstatus;
 			ofslog::error("Unable to mount the remote filesystem!");
 			ofslog::error(strerror(exitstatus));

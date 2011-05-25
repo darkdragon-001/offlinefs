@@ -78,8 +78,7 @@ int main(int argc, char *argv[])
 		shareremote = sharepath;
 
 	// TODO: treat options properly
-	char szOptions[10];
-	char* pszOptions = szOptions;
+	char* pszOptions;
 
 	// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
 	// look at cryptfs and how they pass multiple name value pairs under one "key"
