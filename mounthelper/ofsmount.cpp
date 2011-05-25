@@ -22,7 +22,6 @@
 #include <config.h>
 #endif
 
-//#include <iostream>
 #include <cstdlib>
 #include <stdio.h>
 #include <ofsconf.h>
@@ -48,13 +47,9 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	// No! see --help! assert(argc > 2);
-	// TODO: treat options properly
-	char szOptions[10];
-	char* pszOptions = szOptions;
-
-	// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
-	// look at cryptfs and how they pass multiple name value pairs under one "key"
-	my_options(argc, argv, &pszOptions);
+	//////////////////////////////////////////////////////////////////////////
+	// MOUNT
+	//////////////////////////////////////////////////////////////////////////
 
 	string shareurl = argv[1];
 	string sharepath;
@@ -62,19 +57,7 @@ int main(int argc, char *argv[])
 	string shareremote;
 	string remotemountpoint;
 	string ofsmountpoint = argv[2];
-	//////////////////////////////////////////////////////////////////////////
-	// MOUNT
-	//////////////////////////////////////////////////////////////////////////
-
-	char const* pMountArgumente[8];
-	pMountArgumente[0] = "mount";
-	pMountArgumente[1] = "-t";
-	pMountArgumente[2] = NULL;
-	pMountArgumente[3] = NULL;
-	pMountArgumente[4] = NULL;
-	pMountArgumente[5] = "-o";
-	pMountArgumente[6] = NULL;
-	pMountArgumente[7] = NULL; // terminator
+	bool sloppy;
 
 	// get remote path
 	char* pchDoppelPunktPos = strchr(argv[1], ':');
@@ -94,30 +77,32 @@ int main(int argc, char *argv[])
 	} else
 		shareremote = sharepath;
 
-	char const* pArgumente[8];
+	// TODO: treat options properly
+	char szOptions[10];
+	char* pszOptions = szOptions;
+
+	// FIXME: Treat options properly. Need a way to pass options to both OFS and remote FS
+	// look at cryptfs and how they pass multiple name value pairs under one "key"
+	my_options(argc, argv, &pszOptions, &sloppy);
+
+	char const* pArgumente[9];
 
 	if(remotefstype != "file") {
-		// set filesystem type
-		pMountArgumente[2] = (char*)remotefstype.c_str();
-
 		OFSConf& conf = OFSConf::Instance();
 
-		// set remote path and mount point
-		pMountArgumente[3] = shareremote.c_str();
+		// set mount point
 		remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
-		pMountArgumente[4] = remotemountpoint.c_str();
-
-		pMountArgumente[6] = pszOptions;
+		const char * remote = remotemountpoint.c_str();
 
 		// create mount point and check and if it exits check it is actually a directory
 		struct stat s;
-		int stat_result = stat(pMountArgumente[4], &s);
+		int stat_result = stat(remote, &s);
 		if ((stat_result == 0) && !S_ISDIR(s.st_mode)) {
 			return -ENOTDIR;
 		}
 
 		if (stat_result == -1 && errno == ENOENT) {
-			if (mkdir(pMountArgumente[4], 0777) == -1) {
+			if (mkdir(remote, 0777) == -1) {
 				return -errno;
 			}
 		}
@@ -126,7 +111,13 @@ int main(int argc, char *argv[])
 		int childpid = fork();
 		int status;
 		if(childpid == 0) {
-			execvp("mount", (char * const*)pMountArgumente);
+			execlp("mount", "mount",
+					"-t", remotefstype.c_str(),
+					shareremote.c_str(),
+					remotemountpoint.c_str(),
+					"-o", pszOptions,
+					sloppy ? "-s" : NULL,
+					NULL);
 			return -errno;
 		}
 		if(childpid < 0) {
@@ -150,11 +141,13 @@ int main(int argc, char *argv[])
 		pArgumente[0] = "ofs";
 		pArgumente[1] = ofsmountpoint.c_str();
 		pArgumente[2] = shareurl.c_str();
-		pArgumente[3] = "-o"; // allow all users access to file system
+		pArgumente[3] = "-t"; // allow all users access to file system
 
 		pArgumente[4] = "-p"; // mount options
 		pArgumente[5] = pszOptions;
-		pArgumente[6] = NULL; // terminator
+		pArgumente[6] = "-o";
+		pArgumente[7] = pszOptions;
+		pArgumente[8] = NULL;
 	} else {
 		pArgumente[0] = "ofs";
 		pArgumente[1] = ofsmountpoint.c_str();
@@ -163,7 +156,7 @@ int main(int argc, char *argv[])
 		pArgumente[4] = sharepath.c_str();
 		pArgumente[5] = "-n";
 		if(geteuid() == 0) {
-			pArgumente[6] = "-o";
+			pArgumente[6] = "-t";
 			pArgumente[7] = NULL;
 		} else
 			pArgumente[6] = NULL;

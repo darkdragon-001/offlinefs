@@ -30,6 +30,6 @@
 #else
 #define PUBLIC extern
 #endif
-PUBLIC int my_options(int argc, char* argv[], char** ppszOptions);
+PUBLIC int my_options(int argc, char* argv[], char** ppszOptions, bool* sloppy);
 
 #endif

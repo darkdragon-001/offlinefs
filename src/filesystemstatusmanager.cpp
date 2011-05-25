@@ -163,6 +163,9 @@ void FilesystemStatusManager::mountfs()
 	string shareremote;
 	string remotemountpoint;
 
+	// TODO: Handle errors
+	seteuid(0);
+
 	//////////////////////////////////////////////////////////////////////////
 	// MOUNT
 	//////////////////////////////////////////////////////////////////////////
@@ -257,6 +260,9 @@ void FilesystemStatusManager::mountfs()
 		int childpid2 = wait(&status);
 		//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
 		int exitstatus = WEXITSTATUS(status);
+
+		// TODO: Handle errors
+		seteuid(OFSEnvironment::Instance().getUid());
 		ofslog::debug("Mount finished");
 		if(WIFEXITED(status) && exitstatus) {
 			errno = exitstatus;
@@ -275,6 +281,9 @@ void FilesystemStatusManager::mountfs()
 void FilesystemStatusManager::unmountfs()
 {	
 	int status;
+
+	// TODO: Handle errors
+	seteuid(0);
 
 #if HAVE_UMOUNT2
 	const char *target = OFSEnvironment::Instance().getRemotePath().c_str();
@@ -320,6 +329,8 @@ void FilesystemStatusManager::unmountfs()
 		ofslog::debug("Filesystem unmounted");
 	}
 #endif /* HAVE_UMOUNT2 */
+// TODO: handle errors
+	seteuid(OFSEnvironment::Instance().getUid());
 }
 
 void FilesystemStatusManager::setAvailability(bool value)

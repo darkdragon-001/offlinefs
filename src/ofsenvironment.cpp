@@ -26,6 +26,11 @@
 #include <sstream>
 #include <cstring>
 
+#include <cstdlib>
+#include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
+
 std::auto_ptr<OFSEnvironment> OFSEnvironment::theOFSEnvironmentInstance;
 Mutex OFSEnvironment::m;
 Mutex OFSEnvironment::initm;
@@ -51,6 +56,7 @@ OFSEnvironment::~OFSEnvironment()
 {
 }
 
+
 void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 {
 	string lRemotePath = "";
@@ -62,7 +68,27 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
     bool lUseFSCache = false;
 	list<string> lListenDevices;
     list<string> lMountOptionsList;
-		
+
+    enum {
+    	USER_OPT = 0,
+    	UID_OPT,
+    	GROUP_OPT,
+    	GID_OPT
+    };
+
+    char * const token [] = {
+    		"user",
+    		"uid",
+    		"group",
+    		"gid",
+    		NULL
+    };
+
+    uid_t l_uid = -1;
+    gid_t l_gid = -1;
+    char * subopts;
+    char * value;
+
 	MutexLocker obtain_lock(initm);
 	initialized = true;
 	OFSEnvironment &env = Instance();
@@ -73,15 +99,16 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	// TODO: cache-and remote path have to be custom for each share
 	int nextopt;
 	// define allowed options
-	const char* const short_options = ":r:b:l:i:p:onh";
+	const char* const short_options = ":r:b:l:i:p:o:nht";
 	const struct option long_options[] = {
 		{"remote", required_argument, NULL, 'r'},
 		{"backing", required_argument, NULL, 'b'},
 		{"listen", required_argument, NULL, 'l'},
 		{"shareid", required_argument, NULL, 'i'},
-		{"allowother", no_argument, NULL, 'o'},
+		{"options", required_argument, NULL, 'o'},
 		{"nounmount", required_argument, NULL, 'n'},
-		{"options", required_argument, NULL, 'p'},
+		{"remoteoptions", required_argument, NULL, 'p'},
+		{"allowother", required_argument, NULL, 't'},
 		{"help", no_argument, NULL, 'h'}
 	};
 	
@@ -116,7 +143,8 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			lShareID = optarg;
 			break;
 		   case 'p': // mount options
-               char *mntopt;
+   // FIXME: save options for use in mount command, no need to parse those!
+			   char *mntopt;
                mntopt = optarg;
 			   lMountOptions = mntopt;
                char *optsaveptr;
@@ -128,10 +156,60 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
                   stroption = strtok_r(NULL, ",", &optsaveptr);
                }
 			   break;
-		   case 'o': // allow other users access to the filesystem
+			case 'o':
+				subopts = optarg;
+				while (*subopts != '\0') {
+					switch(getsubopt(&subopts, token, &value)) {
+					case USER_OPT:
+						if (l_uid != -1) {
+							cerr << "User id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						struct passwd * userinfo;
+						userinfo = getpwnam(value);
+						if (userinfo == NULL) {
+							cerr << "User not found" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_uid = userinfo->pw_uid;
+						break;
+					case UID_OPT:
+						if (l_uid != -1) {
+							cerr << "User id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_uid = static_cast<uid_t>(atol(value));
+						break;
+					case GROUP_OPT:
+						if (l_gid != -1) {
+							cerr << "Group id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						struct group * groupinfo;
+						groupinfo = getgrnam(value);
+						if (groupinfo == NULL) {
+							cerr << "Group not found" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_gid = groupinfo->gr_gid;
+						break;
+					case GID_OPT:
+						if (l_gid != -1) {
+							cerr << "Group id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_gid = static_cast<gid_t>(atol(value));
+						break;
+					default: // unknown option (ignore)
+						// FIXME: deal with unknown options
+						break;
+					};
+				}
+				break;
+		   case 't': // allow other users access to the file system
 			lAllowOther = true;
 			break;
-		   case 'n': // do not unmount remote share after ext
+		   case 'n': // do not unmount remote share after exit
 			lUnmount = false;
 			break;
 		   case 'h': // display help
@@ -141,14 +219,15 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		   case ':': // missing argument
 			throw OFSException(
 				"Missing argument for parameter: "+optopt,1);
-		   default: // unknown behaviour
+		   default: // unknown behavior
 			throw OFSException(
-			"Undefined parameter or error while parsing commandline"
+			"Undefined parameter or error while parsing command line"
 			,1,true);
 		}
 		
 	}
 
+	// FIXME: This should become an OFS option
     // parsing the mount options
     if (!lMountOptionsList.empty())
     {
@@ -191,6 +270,9 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	env.allowother = lAllowOther;
     // use FSCache flag
     env.usefscache = lUseFSCache;
+    env.uid = (l_uid == -1) ? 0 : l_uid;
+    env.gid = (l_gid == -1) ? 0 : l_gid;
+
 }
 
 list<string> OFSEnvironment::getListenDevices()
@@ -204,17 +286,18 @@ string OFSEnvironment::getUsageString(string executable)
 	usage << "Usage: "+executable+" <mountpoint> <url> [<options>]"
 		<< endl;
 	usage << "Options are:" << endl;
-	usage << "-r --remote     Absolute path to the remote mountpoint"
+	usage << "-r --remote          Absolute path to the remote mount point"
 		<< endl;
-	usage << "-b --backing    Absolute path to the backing (cache) root"
+	usage << "-b --backing         Absolute path to the backing (cache) root"
 		<< endl;
-	usage << "-l --listen     Comma separated list of network interfaces to "
+	usage << "-l --listen          Comma separated list of network interfaces to "
 		<< " listen for plug/unplug events" << endl;
-	usage << "-i --shareid    Internal unique share identifier" << endl;
-	usage << "-o --allowother Allow all users access to the filesystem" << endl;
-	usage << "-p --options    Mount options as given to the mount command via -o" << endl;
-	usage << "-n --nounmount  Do not unmount the remote share on exit" << endl;
-	usage << "-h --help       Print this screen and exit" << endl;
+	usage << "-i --shareid         Internal unique share identifier" << endl;
+	usage << "-t --allowother      Allow all users access to the file system" << endl;
+	usage << "-o --options         Options for OFS" << endl;
+	usage << "-p --remoteoptions   Mount options as given to the remote mount command via -o" << endl;
+	usage << "-n --nounmount       Do not unmount the remote file system on exit" << endl;
+	usage << "-h --help            Print this screen and exit" << endl;
 	return usage.str();
 }
 

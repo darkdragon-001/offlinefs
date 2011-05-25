@@ -29,15 +29,16 @@
 
 using namespace std;
 
-int my_options(int argc, char* argv[], char** ppszOptions)
+int my_options(int argc, char* argv[], char** ppszOptions, bool* sloppy)
 {
     int next_option;
-    const char* const short_options = "ho:Vu:g:";
+    const char* const short_options = "ho:Vs";
     const struct option long_options[]=
     {
         {"help",0,NULL,'h'},
         {"options",1,NULL,'o'},
         {"version",0,NULL,'V'},
+        {"sloppy",0,NULL,'s'},
         {NULL,0,NULL,0} /* Required at end of array. */
     };
     do
@@ -63,6 +64,8 @@ int my_options(int argc, char* argv[], char** ppszOptions)
         	exit(EXIT_SUCCESS);
         	break;
 #endif /* HAVE_CONFIG_H */
+        case 's':
+        	*sloppy = true;
         case '?': /* The user specified an invalid option. */
             /* Print usage information to standard error, and exit with exit
             code one (indicating abnormal termination). */

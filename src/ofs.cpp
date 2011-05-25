@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007, 2011 by Carsten Kolassa, Peter Trommler           *
+ *   Carsten@Kolassa.de                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,6 +23,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include "ofs_fuse.h"
 #include "backingtreepersistence.h"
@@ -31,17 +32,22 @@
 #include "ofslog.h"
 #include <string>
 #include <cstring>
+#include <sys/types.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
 
 using namespace std;
 
 int main(int argc, char *argv[])
 {
 	if(! ofslog::init() ){
-		fprintf(stderr,"failed to init log system\n");
+		cerr << "failed to init log system" << endl;
 		return 1;
 	}
 
 	ofs_fuse my_ofs;
+
 	ofslog::info("Starting ofs daemon");
 	try {
 		OFSEnvironment::init(argc, argv);
@@ -59,6 +65,7 @@ int main(int argc, char *argv[])
 	args[1] = new char[env.getMountPoint().length()+1];
 	strncpy(args[1], env.getMountPoint().c_str(),
 		env.getMountPoint().length()+1);
+#if 0
 	if(env.isAllowOther()) {
 		args[2] = new char[3];
 		strncpy(args[2], "-o", 3);
@@ -67,14 +74,47 @@ int main(int argc, char *argv[])
 		args[4] = NULL;
 		numargs = 4;
 	} else {
-		args[2] = NULL;
-		numargs = 2;
+#endif /* 0 */
+		// FIXME: Do gid, too!
+		ostringstream opt;
+		opt << "user_id=" << env.getUid();
+
+		args[2] = "-o";
+		args[3] = const_cast<char*> (opt.str().c_str());
+		numargs = 4;
+#if 0
 	}
+#endif /* 0 */
 
 	// create cache path - ignore errors if it not exists
 	// FIXME: check if directory exists and mkdir if not
+	// TODO: check ownership
 	mkdir(env.getCachePath().c_str(), 0777);
-//
+//drop privileges to uid and gid
+// TODO: this should probably go into environment, too
+	gid_t gid = env.getGid();
+	if (gid == -1) {
+		struct passwd * userinfo;
+		userinfo = getpwuid(env.getUid());
+		if (userinfo == NULL) {
+			cerr << "Could not determine default group id" << endl;
+			exit (EXIT_FAILURE);
+		}
+		gid = userinfo->pw_gid;
+	}
+
+#if 0
+	if (seteuid(env.getUid()) == -1) {
+		cerr << "Failed to set UID\n";
+		exit(EXIT_FAILURE);
+	}
+
+	if (setegid(gid) == -1) {
+		cerr << "Failed to set GID\n";
+		exit(EXIT_FAILURE);
+	}
+#endif /* 0 */
+
 	return my_ofs.main(numargs, args, NULL, &my_ofs);
 
   //return EXIT_SUCCESS;

@@ -24,11 +24,14 @@
 #include <string>
 #include <list>
 #include <memory>
+#include <sys/types.h>
+
 using namespace std;
 
 /**
  * @author Tobias Jaehnel <tjaehnel@gmail.com>
  * @author Samuel Walz <samuel.walz@gmail.com>
+ * @author Peter Trommler <ptrommler@acm.org>
  *
  * Manages configuration values for the current process. Those are determined
  * - from configuration file via OFSConf
@@ -115,6 +118,16 @@ public:
     inline string getMountOptions() { return mountoptions; };
 
     /**
+     * @return user id for OFS daemon
+     */
+    inline uid_t getUid() { return uid; };
+
+    /**
+     * @return group id for OFS daemon
+     */
+    inline gid_t getGid() { return gid; };
+
+    /**
      * Return the list of devices the system should listen for plug/unplug
      * @return list of devices as strings
      */
@@ -142,6 +155,8 @@ private:
     bool allowother;
     bool usefscache;
     string ofsdir;
+    uid_t uid;
+    gid_t gid;
 protected:
     list<string> listendevices;
     static bool initialized;
