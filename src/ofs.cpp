@@ -75,13 +75,10 @@ int main(int argc, char *argv[])
 		numargs = 4;
 	} else {
 #endif /* 0 */
-		// FIXME: set user_id and do group_id, too!
-		ostringstream opt;
-		opt << "uid=" << env.getUid();
-
-		args[2] = "-o";
+// FIXME: How do we start fuse properly so we don't allow_other?
+		args[2] = const_cast<char*>("-o");
 		args[3] = "allow_other";
-		//args[3] = const_cast<char*> (opt.str().c_str());
+
 		numargs = 4;
 #if 0
 	}
