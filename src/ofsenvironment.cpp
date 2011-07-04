@@ -74,21 +74,6 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	list<string> lListenDevices;
     list<string> lMountOptionsList;
 
-    enum {
-    	USER_OPT = 0,
-    	UID_OPT,
-    	GROUP_OPT,
-    	GID_OPT
-    };
-
-    char * const token [] = {
-    		"user",
-    		"uid",
-    		"group",
-    		"gid",
-    		NULL
-    };
-
     uid_t l_uid = -1;
     gid_t l_gid = -1;
     char * subopts;
@@ -141,10 +126,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		ALLOWOTHER_OPT,
 		NOUNMOUNT_OPT,
 		FS_CACHE_OPT,
-		LAZYWRITE_OPT
+		LAZYWRITE_OPT,
+    	USER_OPT,
+    	UID_OPT,
+    	GROUP_OPT,
+    	GID_OPT
 	};
 
-	char const * const mount_option_names[] = {
+	char * const mount_option_names[] = {
 			"remoteoptions",
 			"rw",
 			"ro",
@@ -155,12 +144,15 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			"nounmount",
 			"fsc",
 			"lazywrite",
+    		"user",
+    		"uid",
+    		"group",
+    		"gid",
 			NULL
 	};
 
-	char * subopts;
-	char * value;
 	string remote_options;
+	int position;
 
 	while((nextopt =
 	    getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
@@ -187,7 +179,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			case 'o':
 				subopts = optarg;
 				while (*subopts != '\0') {
-					switch(getsubopt(&subopts, token, &value)) {
+				switch(getsubopt(&subopts, mount_option_names, &value)) {
 				case REMOTE_OPTIONS_OPT:
 					// TODO: check if value == NULL
 					// this would be so much nicer with boost::regex
