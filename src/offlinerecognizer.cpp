@@ -209,13 +209,14 @@ void OfflineRecognizer::startRecognizer() {
 		if(result == UNKNOWN_PROT)
 			result = SUCCESS;
 
-		// online-offfline toggle
+		// online-offline toggle
 		isAvailable = FilesystemStatusManager::Instance().isAvailable();
 		if (result != SUCCESS && isAvailable) {
 			if (msec < 5000000)
 				msec = msec + 1000000;
 			else {
 				ofslog::warning("OfflineRecognizer failed to connect to server, setting mountpoint unavailable!");
+				ofslog::info("Lazy write disabled");
 				//disconnect
 				FilesystemStatusManager::Instance().setAvailability(false);
 				msec = 1000000;
@@ -225,6 +226,7 @@ void OfflineRecognizer::startRecognizer() {
 				ofslog::info("OfflineRecognizer triggering reconnection to server");
 				//connect
 				FilesystemStatusManager::Instance().setAvailability(true);
+				//pthread LW wieder aktivieren
 			}
 			msec = 1000000;
 		}

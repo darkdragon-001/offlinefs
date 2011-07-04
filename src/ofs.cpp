@@ -25,10 +25,18 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <string>
+#include <cstring>
+#include <assert.h>
+#include <getopt.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "ofs_fuse.h"
 #include "backingtreepersistence.h"
 #include "filesystemstatusmanager.h"
+#include "ofsconf.h"
 #include "ofsenvironment.h"
+#include "ofshash.h"
 #include "ofslog.h"
 #include <string>
 #include <cstring>
@@ -42,42 +50,47 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	if(! ofslog::init() ){
-		cerr << "failed to init log system" << endl;
-		return 1;
+		std::cerr << argv[0] << ": Failed to init log system" << endl;
+		return 2; // system error return code, see mount(8)
 	}
 
-	ofs_fuse my_ofs;
-
-	ofslog::info("Starting ofs daemon");
 	try {
 		OFSEnvironment::init(argc, argv);
 	} catch (OFSException& e) {
-		cout << OFSEnvironment::getUsageString();
-		return 0;
+		cerr << e.what() << endl;
+		cerr << OFSEnvironment::getUsageString();
+		return 1; // see mount(8) for return codes
 	}
+
+	FilesystemStatusManager::Instance().mountfs();
+
+	ofs_fuse my_ofs;
+	ofslog::info("Starting ofs daemon");
 	ofslog::debug("Adopting parameters");
 	OFSEnvironment &env = OFSEnvironment::Instance();
-	char *args[5];
+	char *fuse_arguments[5];
 	int numargs;
-	args[0] = new char[env.getBinaryPath().length()+1];
-	strncpy(args[0], env.getBinaryPath().c_str(),
+	// TODO: Pass on rw or ro option?
+	// TODO: check if we really need to copy here, if yes use strdup(3)
+	fuse_arguments[0] = new char[env.getBinaryPath().length()+1];
+	strncpy(fuse_arguments[0], env.getBinaryPath().c_str(),
 		env.getBinaryPath().length()+1);
-	args[1] = new char[env.getMountPoint().length()+1];
-	strncpy(args[1], env.getMountPoint().c_str(),
+	fuse_arguments[1] = new char[env.getMountPoint().length()+1];
+	strncpy(fuse_arguments[1], env.getMountPoint().c_str(),
 		env.getMountPoint().length()+1);
 #if 0
 	if(env.isAllowOther()) {
-		args[2] = new char[3];
-		strncpy(args[2], "-o", 3);
-		args[3] = new char[12];
-		strncpy(args[3], "allow_other", 12);
-		args[4] = NULL;
+		fuse_arguments[2] = new char[3];
+		strncpy(fuse_arguments[2], "-o", 3);
+		fuse_arguments[3] = new char[12];
+		strncpy(fuse_arguments[3], "allow_other", 12);
+		fuse_arguments[4] = NULL;
 		numargs = 4;
 	} else {
 #endif /* 0 */
 // FIXME: How do we start fuse properly so we don't allow_other?
-		args[2] = const_cast<char*>("-o");
-		args[3] = "allow_other";
+		fuse_arguments[2] = const_cast<char*>("-o");
+		fuse_arguments[3] = "allow_other";
 
 		numargs = 4;
 #if 0
@@ -113,7 +126,7 @@ int main(int argc, char *argv[])
 
 
 
-	return my_ofs.main(numargs, args, NULL, &my_ofs);
+	return my_ofs.main(numargs, fuse_arguments, NULL, &my_ofs);
 
   //return EXIT_SUCCESS;
 }

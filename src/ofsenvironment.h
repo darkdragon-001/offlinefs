@@ -89,6 +89,10 @@ public:
      */
     inline string getBinaryPath() { return binarypath; };
     /**
+     * Mount read write?
+     */
+    inline bool isReadWrite() {return readwrite; };
+    /**
      * Should the remote share be unmounted when this fs is unmounted
      * @return unmount flag
      */
@@ -137,6 +141,16 @@ public:
      * @param executable the called executable
      * @return the usage string
      */
+
+    inline bool getlazywrite() { return lazywrite; };
+    /**
+     * Return if lazywrite activated or not
+     */
+
+    inline int getlwoption() { return lwoption; };
+    /**
+     * Return which Syncmodus is selected
+     */
     static string getUsageString(string executable="ofs");
 protected:
     OFSEnvironment();
@@ -151,9 +165,12 @@ private:
     string shareURL;
     string binarypath;
     string mountoptions;
+    bool readwrite;
     bool unmount;
     bool allowother;
     bool usefscache;
+    bool lazywrite;
+    int lwoption;  //c=CPU n=Network t=Timer
     string ofsdir;
     uid_t uid;
     gid_t gid;

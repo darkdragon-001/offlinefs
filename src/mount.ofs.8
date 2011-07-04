@@ -1,0 +1,135 @@
+.TH mount.ofs 8 "May 10, 2011" "version 0.3" ""
+.SH NAME
+mount.ofs \- mount an Offline File System
+.SH SYNOPSIS
+.B mount.ofs
+.I remotetarget dir
+.B [\-o
+.I options
+.B ]
+.PP
+.B mount.ofs [\-Vh] 
+.SH DESCRIPTION
+.B mount.ofs
+is meant to be used by the
+.BR mount (8)
+command for mounting Offline File Systems. This subcommand, however, can
+also be used as a standalone command with limited functionality.
+.SH OPTIONS
+.TP
+.B \-V --version
+Print version.
+.TP
+.B \-h --help
+Print help message.
+.TP
+.BI "-o --options " ofsoptions
+See section OFS OPTIONS below.
+.TP
+.BI "-b --backing " directory
+Store files in
+.I directory
+for offline use.
+.TP
+.BI "-l --listen " networks
+Check
+.I networks
+devices to detect network disconnects.
+.TP
+.BI "-i --shareid " remotemountpoint
+Mount remote filesystem onto
+.I remotemountpoint
+.TP
+.BI "-p --remoteoptions " opts
+Options passed on to the
+.BR mount (8)
+command that mounts the remote file system
+.TP
+.B -n --nounmount
+Do not unmount remote file system when OFS is unmounted.
+.TP
+.BI "-z --lazywrite " load 
+Delay writes to remote file system (experimental!) depending on
+.I load
+which could be 
+.BR n etwork,
+.BR c pu,
+or a fixed
+.BR t ime
+delay
+.SH OFS OPTIONS
+.TP
+.B remoteoptions
+Options passed on to the
+.BR mount (8)
+command that mounts the remote file system
+.TP
+.B rw
+Mount file system read write. This is the default.
+.TP
+.B ro
+Mount file system read only.
+.TP
+.BI backing =directory
+Store files in
+.I directory
+for offline use.
+.TP
+.BI listen =networks
+Check
+.I networks
+devices to detect network disconnects.
+.TP
+.BI shareid =remotemountpoint
+Mount remote filesystem onto
+.I remotemountpoint
+.TP
+.BI remoteoptions =opts
+Options passed on to the
+.BR mount (8)
+command that mounts the remote file system. Use colon (:) instead of comma as separator.
+.TP
+.B allowother
+Allow other users to access files in mounted file system. Very dangerous as no permissions are checked yet.
+.TP
+.B nounmount
+Do not unmount remote file system when OFS is unmounted.
+.TP
+.BI lazywrite =load
+Delay writes to remote file system (experimental!) depending on
+.I load
+which could be 
+.BR n etwork,
+.BR c pu,
+or a fixed
+.BR t ime
+delay
+.SH FILES
+.I /etc/fstab
+file system table
+.PP
+.I /etc/mtab
+table of mounted file systems
+.PP
+.I /etc/ofs.conf
+ofs configuration file
+.SH AUTHOR
+Peter Trommler <peter.trommler@ohm-hochschule.de>
+.SH SEE ALSO
+.BR mount (8)
+.SH BUGS
+Currently
+.B mount.ofs
+runs with the uid and gid of the calling
+.B mount
+command, and all file operations on the remote file system will be carried out using these
+ids. NFS access will only work if
+.B mount.ofs
+is run with the user's uid and gid. Multiple simultaneous users are not supported.
+Most options should be dropped in favor of their -o counterparts. URL notation to specify
+.I vfstype
+of remote file system is deprecated and should be replaced by subtype suffix.
+.SH CREDITS
+Some of this manual page has been borrowed from the Linux
+.BR mount.nfs (8)
+manual page by Amid Gud.  

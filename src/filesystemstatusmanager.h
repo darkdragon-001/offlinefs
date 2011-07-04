@@ -83,6 +83,8 @@ public:
     void setAvailability(bool value);
     void unmountfs();
     void mountfs();
+    void setsync(bool value);
+    bool issync();
 protected:
     FilesystemStatusManager();
   private:
@@ -90,7 +92,7 @@ protected:
 		theFilesystemStatusManagerInstance;
 
 protected:
-    bool available;
+    bool available, sync;
     static Mutex m; 
 };
 #endif

@@ -219,7 +219,7 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
             }
             else if (S_ISLNK(fsCache.st_mode))
             {
-                // FIXME: Could be buggy!!! Use similar code found on readlink(2)
+                // FIXME: Use code found in readlink(2) or stat first then allocate buffer
                 char buf[1024];
                 ssize_t len;
 		// remove the old link if it exists

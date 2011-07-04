@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by                                                 *
- *                 Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa        *
+ *   Copyright (C) 2007, 2011 by                                           *
+ *      Frank Gsellmann, Tobias Jaehnel, Carsten Kolassa, Peter Trommler   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,6 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "ofsenvironment.h"
 #include "ofsexception.h"
 #include "ofsconf.h"
@@ -56,13 +60,14 @@ OFSEnvironment::~OFSEnvironment()
 {
 }
 
-
 void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 {
 	string lRemotePath = "";
 	string lCachePath = "";
 	string lShareID = "";
 	string lMountOptions = "";
+	bool lReadWrite = false;
+	bool lReadOnly = false;
 	bool lAllowOther = false;
 	bool lUnmount = true;
     bool lUseFSCache = false;
@@ -94,42 +99,79 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	OFSEnvironment &env = Instance();
 	
 	env.ofsdir = "/var/ofs";
-	
-	// parse command line
+	env.lazywrite=false;
+	// TODO: use enumeration for lazy write parameter!
+	env.lwoption='n';  //c=CPU n=Network t=Timer
+
 	// TODO: cache-and remote path have to be custom for each share
 	int nextopt;
-	// define allowed options
-	const char* const short_options = ":r:b:l:i:p:o:nht";
+
+	const char* const short_options = ":r:b:l:i:p:o:nhVz:";
 	const struct option long_options[] = {
-		{"remote", required_argument, NULL, 'r'},
-		{"backing", required_argument, NULL, 'b'},
-		{"listen", required_argument, NULL, 'l'},
-		{"shareid", required_argument, NULL, 'i'},
-		{"options", required_argument, NULL, 'o'},
-		{"nounmount", required_argument, NULL, 'n'},
-		{"remoteoptions", required_argument, NULL, 'p'},
-		{"allowother", required_argument, NULL, 't'},
-		{"help", no_argument, NULL, 'h'}
+			{"version",0,NULL,'V'},
+			{"options", required_argument, NULL, 'o'},
+			{"help", no_argument, NULL, 'h'},
+			{"remote", required_argument, NULL, 'r'},
+			{"remoteoptions", required_argument, NULL, 'p'},
+			{"backing", required_argument, NULL, 'b'},
+			{"listen", required_argument, NULL, 'l'},
+			{"shareid", required_argument, NULL, 'i'},
+			{"allowother", no_argument, NULL, 't'},
+			{"nounmount", required_argument, NULL, 'n'},
+			{"lazywrite", required_argument, NULL, 'z'},
+			{NULL,0,NULL,0}
 	};
 	
 	if (argc < 3)
 		throw OFSException("Not enough parameters", 1,true);
-	// binary name, mountpoint and remote path
+	// binary name, mount point and remote path
+	// TODO: support multiple remote file systems
 	env.binarypath = argv[0];
-	env.mountPoint = argv[1];
-	env.shareURL = argv[2];
+	env.mountPoint = argv[2];
+	env.shareURL = argv[1];
 	ofslog::debug("shareURL: %s", env.shareURL.c_str());
-	// parsing paramaters ('man getopt_long' for usage)
+
+	enum {
+		REMOTE_OPTIONS_OPT = 0,
+		READ_WRITE_OPT,
+		READ_ONLY_OPT,
+		BACKING_OPT,
+		LISTEN_OPT,
+		SHARE_ID_OPT,
+		ALLOWOTHER_OPT,
+		NOUNMOUNT_OPT,
+		FS_CACHE_OPT,
+		LAZYWRITE_OPT
+	};
+
+	char const * const mount_option_names[] = {
+			"remoteoptions",
+			"rw",
+			"ro",
+			"backing",
+			"listen",
+			"shareid",
+			"allowother",
+			"nounmount",
+			"fsc",
+			"lazywrite",
+			NULL
+	};
+
+	char * subopts;
+	char * value;
+	string remote_options;
+
 	while((nextopt =
 	    getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
 		switch(nextopt) {
-		   case 'r': // remote mountpoint
+		case 'r': // remote mount point
 			lRemotePath=optarg;
 			break;
-		   case 'b': // cache tree root
+		case 'b': // cache tree root
 			lCachePath=optarg;
 			break;
-		   case 'l': // devices to listen on
+		case 'l': // devices to listen on
 			char *saveptr;
 			char *strdevice;
 			strdevice = strtok_r(optarg, ",", &saveptr);
@@ -139,27 +181,63 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 				strdevice = strtok_r(NULL, ",", &saveptr);
 			}
 			break;
-		   case 'i': // custom share identifier
+		case 'i': // custom share identifier
 			lShareID = optarg;
 			break;
-		   case 'p': // mount options
-   // FIXME: save options for use in mount command, no need to parse those!
-			   char *mntopt;
-               mntopt = optarg;
-			   lMountOptions = mntopt;
-               char *optsaveptr;
-               char *stroption;
-               stroption = strtok_r(mntopt, ",", &optsaveptr);
-               lMountOptionsList.clear();
-               while(stroption != NULL) {
-                  lMountOptionsList.push_back(stroption);
-                  stroption = strtok_r(NULL, ",", &optsaveptr);
-               }
-			   break;
 			case 'o':
 				subopts = optarg;
 				while (*subopts != '\0') {
 					switch(getsubopt(&subopts, token, &value)) {
+				case REMOTE_OPTIONS_OPT:
+					// TODO: check if value == NULL
+					// this would be so much nicer with boost::regex
+					remote_options = string(value);
+					position = remote_options.find(':');
+					while (position != string::npos) {
+						remote_options.replace(position, 1, ",");
+						position = remote_options.find(':', position + 1);
+					}
+					lMountOptions = remote_options.c_str();
+					break;
+				case READ_WRITE_OPT:
+					if (lReadOnly) throw OFSException("Cannot set ro and rw", 1, true);
+					lReadWrite = true;
+					break;
+				case READ_ONLY_OPT:
+					if (lReadWrite) throw OFSException("Cannot set ro and rw", 1, true);
+					lReadOnly = true;
+					break;
+				case BACKING_OPT:
+					// TODO: check if value == NULL;
+					lCachePath = value;
+					break;
+				case LISTEN_OPT:
+					// TODO: check if value == NULL
+					char *saveptr;
+					char *strdevice;
+					strdevice = strtok_r(value, ":", &saveptr);
+					lListenDevices.clear();
+					while(strdevice != NULL) {
+						lListenDevices.push_back(strdevice);
+						strdevice = strtok_r(NULL, ":", &saveptr);
+					}
+					break;
+				case SHARE_ID_OPT:
+					// TODO: check if value == NULL
+					lShareID = value;
+					break;
+				case ALLOWOTHER_OPT:
+					lAllowOther = true;
+					break;
+				case NOUNMOUNT_OPT:
+					lUnmount = false;
+				case FS_CACHE_OPT:
+					lUseFSCache = true;
+					break;
+				case LAZYWRITE_OPT:
+					// TODO: check if value == NULL
+					env.lazywrite = true;
+					env.lwoption = value[0];
 					case USER_OPT:
 						if (l_uid != -1) {
 							cerr << "User id already set" << endl;
@@ -206,39 +284,42 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 					};
 				}
 				break;
+	case 'p': // mount options
+			char *mntopt;
+			mntopt = optarg;
+			lMountOptions = mntopt;
+			break;
+				
 		   case 't': // allow other users access to the file system
 			lAllowOther = true;
 			break;
-		   case 'n': // do not unmount remote share after exit
+		case 'n': // do not unmount remote share after exit
 			lUnmount = false;
 			break;
-		   case 'h': // display help
+		case 'h': // display help
 			throw OFSException("User wants help",1);
-		   case '?': // invalid parameter
+		case 'z': // TODO: Perhaps need another parameter here (timeout, ?)
+			env.lazywrite = true;
+			env.lwoption = optarg[0];
+			break;
+		case 'V': /* -V or --version */
+#if HAVE_CONFIG_H
+			cout << argv[0] << " (" << PACKAGE_NAME << " version " << PACKAGE_VERSION << ")" << endl;
+			exit(EXIT_SUCCESS);
+			break;
+#endif /* HAVE_CONFIG_H */
+		case '?': // invalid parameter
 			throw OFSException("Unknown parameter: "+optopt,1);
-		   case ':': // missing argument
+		case ':': // missing argument
 			throw OFSException(
-				"Missing argument for parameter: "+optopt,1);
-		   default: // unknown behavior
+					"Missing argument for parameter: "+optopt,1);
+		default: // unknown behavior
 			throw OFSException(
-			"Undefined parameter or error while parsing command line"
-			,1,true);
+					"Undefined parameter or error while parsing command line",
+					1,true);
 		}
 		
 	}
-
-	// FIXME: This should become an OFS option
-    // parsing the mount options
-    if (!lMountOptionsList.empty())
-    {
-       list<string>::iterator i;
-       for(i=lMountOptionsList.begin(); i != lMountOptionsList.end(); ++i)
-       {
-          // option 'fsc': "Try to use FSCache"
-          if (*i == "fsc")
-             lUseFSCache = true;
-       }
-    }
 
 	// variable from config file
 	OFSConf &ofsconf = OFSConf::Instance();
@@ -283,21 +364,21 @@ list<string> OFSEnvironment::getListenDevices()
 string OFSEnvironment::getUsageString(string executable)
 {
 	stringstream usage;
-	usage << "Usage: "+executable+" <mountpoint> <url> [<options>]"
-		<< endl;
+	usage << "Usage: "+executable+" <remotetargeturi> <dir> [<options>]"
+			<< endl;
 	usage << "Options are:" << endl;
-	usage << "-r --remote          Absolute path to the remote mount point"
-		<< endl;
-	usage << "-b --backing         Absolute path to the backing (cache) root"
-		<< endl;
-	usage << "-l --listen          Comma separated list of network interfaces to "
-		<< " listen for plug/unplug events" << endl;
-	usage << "-i --shareid         Internal unique share identifier" << endl;
-	usage << "-t --allowother      Allow all users access to the file system" << endl;
-	usage << "-o --options         Options for OFS" << endl;
-	usage << "-p --remoteoptions   Mount options as given to the remote mount command via -o" << endl;
-	usage << "-n --nounmount       Do not unmount the remote file system on exit" << endl;
-	usage << "-h --help            Print this screen and exit" << endl;
+	usage << "\t-V --version\tPrint version" << endl;
+	usage << "\t-r --remote     URI to remote mount point"
+			<< endl;
+	usage << "\t-b --backing    Absolute path to the backing (cache) root"
+			<< endl;
+	usage << "\t-l --listen     Comma separated list of network interfaces to "
+			<< "listen for plug/unplug events" << endl;
+	usage << "\t-i --shareid    Internal unique share identifier" << endl;
+	usage << "\t-t --allowother Allow all users access to the filesystem" << endl;
+	usage << "\t-p --remoteoptions    Mount options as given to the mount command via -o" << endl;
+	usage << "\t-n --nounmount  Do not unmount the remote share on exit" << endl;
+	usage << "\t-h --help       Print this screen and exit" << endl;
 	return usage.str();
 }
 

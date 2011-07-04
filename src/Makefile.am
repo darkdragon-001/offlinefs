@@ -5,7 +5,9 @@ ofs_SOURCES = backingtree.cpp backingtreemanager.cpp backingtreepersistence.cpp 
 	offlinerecognizer.cpp ofs.cpp ofs_fuse.cpp ofsbroadcast.cpp ofsenvironment.cpp \
 	ofsexception.cpp ofsfile.cpp ofslog.cpp persistable.cpp persistencemanager.cpp \
 	synchronizationmanager.cpp synchronizationpersistence.cpp synclogentry.cpp synclogger.cpp \
-	syncronisationmanager.cpp
+	syncronisationmanager.cpp lazywrite.cpp
+
+dist_man8_MANS = mount.ofs.8
 
 # set the include path found by configure
 INCLUDES = -I$(top_srcdir)/libraries/libofs \
@@ -20,7 +22,13 @@ noinst_HEADERS = backingtreepersistence.h conflictmanager.h \
 	persistable.h persistencemanager.h synchronizationpersistence.h \
 	syncronisationmanager.h syncstatetype.h backingtree.h filesystemstatusmanager.h\
 	synchronizationmanager.h fusexx.hpp backingtreemanager.h logger.h synclogentry.h\
-	ofsbroadcast.h synclogger.h
+	ofsbroadcast.h synclogger.h lazywrite.h
 AM_CXXFLAGS = -ansi
 ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
-	$(top_builddir)/libraries/libofsconf/libofsconf.la $(top_builddir)/libraries/libofs/libofs.la
+	$(top_builddir)/libraries/libofsconf/libofsconf.la $(top_builddir)/libraries/libofs/libofs.la $(CONFUSE_LIBS)
+
+install-exec-hook:
+	${MKDIR_P} $(DESTDIR)${localstatedir}/ofs/remote
+	${MKDIR_P} $(DESTDIR)${localstatedir}/ofs/backing
+	${MKDIR_P} $(DESTDIR)/sbin && \
+	${LN_S} -f ${sbindir}/ofs $(DESTDIR)/sbin/mount.ofs

@@ -47,11 +47,12 @@ using namespace std;
 #include "ofsconf.h"
 #include "ofshash.h"
 #include "ofslog.h"
+#include "lazywrite.h"
 
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
 
-FilesystemStatusManager::FilesystemStatusManager() : available(true) {}
+FilesystemStatusManager::FilesystemStatusManager() : available(true) {sync=true;}
 FilesystemStatusManager::~FilesystemStatusManager(){}
 FilesystemStatusManager& FilesystemStatusManager::Instance()
 {
@@ -72,6 +73,10 @@ bool FilesystemStatusManager::isAvailable()
 	return available;
 }
 
+bool FilesystemStatusManager::issync()
+{
+	return sync;
+}
 
 /*!
     \fn FilesystemStatusManager::filesystemError()
@@ -170,26 +175,10 @@ void FilesystemStatusManager::mountfs()
 	// MOUNT
 	//////////////////////////////////////////////////////////////////////////
 
-	char* pMountArgumente[8];
-	pMountArgumente[0] = new char[6];
-	strncpy(pMountArgumente[0], "mount", 6);
-	pMountArgumente[1] = new char[3];
-	strncpy(pMountArgumente[1], "-t", 3);
-	pMountArgumente[2] = NULL;
-	pMountArgumente[3] = NULL;
-	pMountArgumente[4] = NULL;
-	pMountArgumente[5] = new char[3];
-	strncpy(pMountArgumente[5], "-o", 3);
-	pMountArgumente[6] = NULL;
-	pMountArgumente[7] = NULL; // terminator
-
-	// Ermittelt die Remote-Pfade.
-	//cout << argv[0] << endl;
 	const char* cshareurl = shareurl.c_str();
 	const char* pchDoppelPunktPos = strchr(cshareurl, ':');
 	assert(pchDoppelPunktPos != NULL);
 	int nDoppelPunktIndex = int (pchDoppelPunktPos - cshareurl);
-
 	remotefstype = shareurl.substr(0,nDoppelPunktIndex);
 	sharepath = shareurl.substr(nDoppelPunktIndex+3);
 	// handle special protocols
@@ -197,82 +186,62 @@ void FilesystemStatusManager::mountfs()
 		shareremote = string("//") + sharepath;
 	else if(remotefstype == "file") {
 		shareremote = string("/") + sharepath;
-		remotemountpoint = shareremote;
+		remotemountpoint = shareremote; // FIXME: Has no effect here
 	} else
 		shareremote = sharepath;
-
-	char* pArgumente[8];
-
-	if(remotefstype != "file") {
-		// Legt das Dateisystem fest.
-		pMountArgumente[2] = (char*)remotefstype.c_str();
-
-		// Oeffnet die Konfigurationsdatei.
+	if(remotefstype != "file") { // FIXME: else missing!
+		const char * remotemountpoint_c;
 		OFSConf& conf = OFSConf::Instance();
-		//conf.ParseFile(); //obsolete
-
-		// Legt die Server-Share fest.
-		pMountArgumente[3] = (char*)shareremote.c_str();
+		// set remote path and mount point
 		remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
-		pMountArgumente[4] = (char*)remotemountpoint.c_str();
-
-		//    my_options(argc - 2, &argv[2], &pszOptions);
-		if(OFSEnvironment::Instance().getMountOptions().length() > 0)
-		{
-			pMountArgumente[6] = (char *)OFSEnvironment::Instance().getMountOptions().c_str();
+		remotemountpoint_c = remotemountpoint.c_str();
+		// create mount point and check and if it exits check it is actually a directory
+		struct stat s;
+		int stat_result = stat(remotemountpoint_c, &s);
+		if ((stat_result == 0) && !S_ISDIR(s.st_mode)) {
+			throw OFSException(remotemountpoint + ": not a directory",
+					ENOTDIR,
+					true);
 		}
-		else
-		{
-			pMountArgumente[5] = NULL;
+		if (stat_result == -1 && errno == ENOENT) {
+			if (mkdir(remotemountpoint_c, 0777) == -1) {
+				throw OFSException("Failed to create " + remotemountpoint,
+						errno,
+						true);
+			}
 		}
-		// filesystem options
-		//    pArgumente[2] = szOptions;
-
-		// Mountet die Share, die vom Benutzer übergeben wurde.
+		// Mount remote file system
 		int childpid = fork();
 		int status;
-		ofslog::info("Mounting filesystem");
 		if(childpid == 0) {
-			/*cout << endl << "mount" << " ";
-		cout << pMountArgumente[1] << " ";
-    		cout << pMountArgumente[2] << " ";
-    		cout << pMountArgumente[3] << " ";
-    		cout << pMountArgumente[4] << " ";
-    		cout << pMountArgumente[5] << " ";
-    		cout << pMountArgumente[6] << " ";
-    		cout << endl;*/
-			// make the mount point and ignore errors of it does exits
-			//ofslog::debug("mkdir %s", pMountArgumente[4]);
-			mkdir(pMountArgumente[4], 0777);
-			/*ofslog::debug("mount %s %s %s %s %s %s %s",
-       				pMountArgumente[0], pMountArgumente[1], pMountArgumente[2],
-       				pMountArgumente[3], pMountArgumente[4], pMountArgumente[5],
-       				pMountArgumente[6]);*/
-			execvp("mount", pMountArgumente);
-			ofslog::error(strerror(errno));
-			return;
+			execlp("mount",
+					"mount",
+					"-t", remotefstype.c_str(),
+					shareremote.c_str(),
+					remotemountpoint_c,
+					(OFSEnvironment::Instance().getMountOptions().length() > 0 ? NULL : "-o"),
+					OFSEnvironment::Instance().getMountOptions().c_str(),
+					NULL);
+			throw OFSException("Failed to exec mount for " + remotemountpoint,
+					errno,
+					true);
 		}
 		if(childpid < 0) {
-			ofslog::error(strerror(errno));
-			return;
+			throw OFSException("fork failed",
+					errno,
+					true);
 		}
-		//waitpid(childpid, &status, 0);
+
 		int childpid2 = wait(&status);
-		//    cout << status << " - (" << childpid << "/" << childpid2 << ") - " << WEXITSTATUS(status) << endl;
 		int exitstatus = WEXITSTATUS(status);
-
-		// TODO: Handle errors
-		seteuid(OFSEnvironment::Instance().getUid());
-
-		ofslog::debug("Mount finished");
+// FIXME: mount exit status is not an errno value in Linux
 		if(WIFEXITED(status) && exitstatus) {
-			// TODO: Perhaps "already mounted" should not be reported as error
 			errno = exitstatus;
-			ofslog::error("Unable to mount the remote filesystem!");
-			ofslog::error(strerror(exitstatus));
-			return;
+			throw OFSException("Mount command returned unsuccessfully",
+					errno,
+					true);
 		}
-
+		return;
 	}
 }
 
@@ -322,13 +291,13 @@ void FilesystemStatusManager::unmountfs()
 	int childpid2 = wait(&status);
 	int exitstatus = WEXITSTATUS(status);
 	if(WIFEXITED(status) && exitstatus) {
-		ofslog::error("Unable to unmount the remote filesystem!");
+		ofslog::error("Unable to unmount the remote file system!");
 		ofslog::error(strerror(exitstatus));
 		errno = 0;
 	}
 	else
 	{
-		ofslog::debug("Filesystem unmounted");
+		ofslog::debug("File system unmounted");
 	}
 #endif /* HAVE_UMOUNT2 */
 // TODO: handle errors
@@ -345,10 +314,16 @@ void FilesystemStatusManager::setAvailability(bool value)
 			mountfs();
 			SynchronizationManager::Instance().ReintegrateAll(
 					OFSEnvironment::Instance().getShareID().c_str());
+            //Remote==Cache
+            sync=true;
 		}
 		else
 		{ // unmount fs
 			unmountfs();
 		}
 	}
+}
+void FilesystemStatusManager::setsync(bool value)
+{
+	sync=value;
 }

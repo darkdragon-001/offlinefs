@@ -40,6 +40,7 @@
 #include "backingtreemanager.h"
 #include "ofsenvironment.h"
 #include "offlinerecognizer.h"
+#include "lazywrite.h"
 #include <pthread.h>
 
 using namespace std;
@@ -58,8 +59,14 @@ void *runOfflineRecognizer(void*) {
 // : fusexx::fuse<ofs_fuse> ()
 //{
 //}
-
-
+/**
+ * Run the Lazywrite supervisor thread
+ */
+void *runlazywrite(void*){
+	Lazywrite lw(1);
+	lw.startLazywrite();
+	return 0;
+}
 ofs_fuse::~ofs_fuse()
 {
 }
@@ -888,8 +895,10 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 
 	// create offline recognition thread
 	//if (argv[5]) {
-		pthread_t thread;
+		pthread_t thread, threadlw;
 		pthread_create( &thread, NULL, runOfflineRecognizer, NULL);
+		pthread_create( &threadlw, NULL, runlazywrite, NULL);
+
 	//}
 
 	return NULL;
@@ -898,11 +907,18 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 
 /**
  * Exit the filesystem - unmount the remote share
+ * Write Cache back to Fileserver (Lazywrite)
  * @param
  */
 void ofs_fuse::fuse_destroy(void *)
 {
     if(!OFSEnvironment::Instance().isUnmount())
         return;
+	if(OFSEnvironment::Instance().getlazywrite() && !(FilesystemStatusManager::Instance().issync()))
+	{
+	ofslog::info("Write back Changes");
+	SynchronizationManager::Instance().ReintegrateAll(OFSEnvironment::Instance().getShareID().c_str());
+	FilesystemStatusManager::Instance().setsync(true);
+	}
     FilesystemStatusManager::Instance().unmountfs();
 }
