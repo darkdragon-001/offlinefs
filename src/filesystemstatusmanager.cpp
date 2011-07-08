@@ -52,7 +52,7 @@ using namespace std;
 std::auto_ptr<FilesystemStatusManager> FilesystemStatusManager::theFilesystemStatusManagerInstance;
 Mutex FilesystemStatusManager::m;
 
-FilesystemStatusManager::FilesystemStatusManager() : available(true) {sync=true;}
+FilesystemStatusManager::FilesystemStatusManager() : available(true), sync(true) {}
 FilesystemStatusManager::~FilesystemStatusManager(){}
 FilesystemStatusManager& FilesystemStatusManager::Instance()
 {

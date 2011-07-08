@@ -405,65 +405,40 @@ int OFSFile::op_mknod ( mode_t mode, dev_t rdev )
 		update_cache();
 		string remotepath = get_remote_path();
 		string cachepath = get_cache_path();
-		if ( S_ISFIFO ( mode ) )
-		{
 
-			if (get_offline_state() )
+		if ( get_offline_state() )
+		{
+			res = mknod ( cachepath.c_str(), mode, rdev );
+			if ( res == -1 )
 			{
-				res = mkfifo ( cachepath.c_str(), mode );
-				if ( res == -1 )
-				{
-					nErrNo = -errno;
-					bCacheOK = false;
-				}
-				SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'c' );
-				FilesystemStatusManager::Instance().setsync(false);
+				nErrNo = -errno;
+				bCacheOK = false;
 			}
-			else
-			{
-				res = mkfifo ( remotepath.c_str(), mode );
-				if ( res == -1 )
-				{
-					nErrNo = -errno;
-					bOK = false;
-				}
-			}
+			SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'c' );
+			FilesystemStatusManager::Instance().setsync(false);
 		}
 		else
 		{
-			if ( get_offline_state() )
+			res = mknod ( remotepath.c_str(), mode, rdev );
+			if ( res == -1 )
 			{
-				res = mknod ( cachepath.c_str(), mode, rdev );
-				if ( res == -1 )
-				{
-					nErrNo = -errno;
-					bCacheOK = false;
-				}
-				SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(), get_relative_path().c_str(), 'c' );
-				FilesystemStatusManager::Instance().setsync(false);
-			}
-			else
-			{
-				res = mknod ( remotepath.c_str(), mode, rdev );
-				if ( res == -1 )
-				{
-					nErrNo = -errno;
-					bOK = false;
-				}
+				nErrNo = -errno;
+				bOK = false;
 			}
 		}
+
 		if ( !bOK )
 		{
 			// Sends a signal: Couldn't create file on remote share.
 			OFSBroadcast::Instance().SendError( "FileError", "RemoteNotWritable",
-				       "File error: Could not create node on remote share.",0);
+					"File error: Could not create node on remote share.",0);
 			return nErrNo;
 		}
 		if ( !bCacheOK )
 		{
 			// Sends a signal: Couldn't create file on cache.
 			OFSBroadcast::Instance().SendError( "FileError", "CacheNotWritable",
-				       "File error: Could not create node on cache.",nErrNo );
+					"File error: Could not create node on cache.",nErrNo );
 			return nErrNo;
 		}
 		return 0;
@@ -894,7 +869,8 @@ int OFSFile::op_unlink()
  */
 int OFSFile::op_utimens ( const struct timespec ts[2] )
 {
-	int res;
+	int result_offline = 0;
+	int result_available = 0;
 
 	struct timeval tv[2];
 
@@ -909,13 +885,14 @@ int OFSFile::op_utimens ( const struct timespec ts[2] )
 
 		if ( get_offline_state() )
 		{
-			res = utimes ( get_cache_path().c_str(), tv );
+			result_offline = utimes ( get_cache_path().c_str(), tv );
 		}
-		else
+		if (get_availability())
 		{
-			res = utimes ( get_remote_path().c_str(), tv );
+			result_available = utimes ( get_remote_path().c_str(), tv );
 		}
-			if ( res == -1 )
+		// TODO: Reconsider error handling
+			if ( result_offline == -1 && result_available == -1 )
 				return -errno;
 		return 0;
 	}

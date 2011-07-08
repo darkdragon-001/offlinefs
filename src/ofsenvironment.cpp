@@ -108,14 +108,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			{NULL,0,NULL,0} /* Required at end of array. */
 	};
 
-	if (argc < 3)
-		throw OFSException("Not enough parameters", 1,true);
 	// binary name, mount point and remote path
 	// TODO: support multiple remote file systems
-	env.binarypath = argv[0];
-	env.mountPoint = argv[2];
-	env.shareURL = argv[1];
-	ofslog::debug("shareURL: %s", env.shareURL.c_str());
+	if (argc > 2) {
+		env.binarypath = argv[0];
+		env.mountPoint = argv[2];
+		env.shareURL = argv[1];
+		ofslog::debug("shareURL: %s", env.shareURL.c_str());
+	}
 
 	enum {
 		REMOTE_OPTIONS_OPT = 0,
