@@ -27,9 +27,13 @@
 #include "ofshash.h"
 #include "ofslog.h"
 #include <getopt.h>
-#include <stdlib.h>
 #include <sstream>
 #include <cstring>
+
+#include <cstdlib>
+#include <sys/types.h>
+#include <pwd.h>
+#include <grp.h>
 
 std::auto_ptr<OFSEnvironment> OFSEnvironment::theOFSEnvironmentInstance;
 Mutex OFSEnvironment::m;
@@ -67,9 +71,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	bool lAllowOther = false;
 	bool lUnmount = true;
 	bool lUseFSCache = false;
-
 	list<string> lListenDevices;
-	list<string> lMountOptionsList;
+    list<string> lMountOptionsList;
+
+    uid_t l_uid = -1;
+    gid_t l_gid = -1;
+    char * subopts;
+    char * value;
+	string remote_options;
 
 	MutexLocker obtain_lock(initm);
 	initialized = true;
@@ -118,10 +127,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		ALLOWOTHER_OPT,
 		NOUNMOUNT_OPT,
 		FS_CACHE_OPT,
-		LAZYWRITE_OPT
+		LAZYWRITE_OPT,
+    	USER_OPT,
+    	UID_OPT,
+    	GROUP_OPT,
+    	GID_OPT
 	};
 
-	char const * const mount_option_names[] = {
+	char * const mount_option_names[] = {
 			"remoteoptions",
 			"rw",
 			"ro",
@@ -132,12 +145,14 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 			"nounmount",
 			"fsc",
 			"lazywrite",
+    		"user",
+    		"uid",
+    		"group",
+    		"gid",
 			NULL
 	};
 
-	char * subopts;
-	char * value;
-	string remote_options;
+	int position;
 
 	while((nextopt =
 			getopt_long(argc, argv, short_options, long_options, NULL)) != -1){
@@ -161,13 +176,10 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		case 'i': // custom share identifier
 			lShareID = optarg;
 			break;
-		case 'o': // ofs options
-			// TODO: this method is too long re-factor sub options parsing into private method
-			subopts = optarg;
-			int position;
-
-			while (*subopts != '\0') {
-				switch (getsubopt(&subopts, const_cast<char* const*>(mount_option_names), &value)) {
+			case 'o':
+				subopts = optarg;
+				while (*subopts != '\0') {
+				switch(getsubopt(&subopts, mount_option_names, &value)) {
 				case REMOTE_OPTIONS_OPT:
 					// TODO: check if value == NULL
 					// this would be so much nicer with boost::regex
@@ -218,18 +230,59 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 					// TODO: check if value == NULL
 					env.lazywrite = true;
 					env.lwoption = value[0];
-				default:
-					throw OFSException(
-							(string("Undefined parameter or error while parsing command line: ") + subopts).c_str(),
-							1,true);
+					case USER_OPT:
+						if (l_uid != -1) {
+							cerr << "User id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						struct passwd * userinfo;
+						userinfo = getpwnam(value);
+						if (userinfo == NULL) {
+							cerr << "User not found" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_uid = userinfo->pw_uid;
+						break;
+					case UID_OPT:
+						if (l_uid != -1) {
+							cerr << "User id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_uid = static_cast<uid_t>(atol(value));
+						break;
+					case GROUP_OPT:
+						if (l_gid != -1) {
+							cerr << "Group id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						struct group * groupinfo;
+						groupinfo = getgrnam(value);
+						if (groupinfo == NULL) {
+							cerr << "Group not found" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_gid = groupinfo->gr_gid;
+						break;
+					case GID_OPT:
+						if (l_gid != -1) {
+							cerr << "Group id already set" << endl;
+							exit (EXIT_FAILURE);
+						}
+						l_gid = static_cast<gid_t>(atol(value));
+						break;
+					default: // unknown option (ignore)
+						// FIXME: deal with unknown options
+						break;
+					};
 				}
-			}
-		case 'p': // mount options
+				break;
+	case 'p': // mount options
 			char *mntopt;
 			mntopt = optarg;
 			lMountOptions = mntopt;
 			break;
-		case 't': // allow other users access to the file system
+				
+		   case 't': // allow other users access to the file system
 			lAllowOther = true;
 			break;
 		case 'n': // do not unmount remote share after exit
@@ -257,12 +310,11 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 					"Undefined parameter or error while parsing command line",
 					1,true);
 		}
-
+		
 	}
 
 	// variable from config file
 	OFSConf &ofsconf = OFSConf::Instance();
-
 	// share ID
 	if(lShareID=="")
 		env.shareID = ofs_hash(env.shareURL);
@@ -283,15 +335,18 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 		env.listendevices = ofsconf.GetListenDevices();
 	else
 		env.listendevices = lListenDevices;
-	// mount options
-	env.mountoptions = lMountOptions;
+    // mount options
+    env.mountoptions = lMountOptions;
 	// unmount flag
 	env.unmount = lUnmount;
 	// allow other flag
 	env.allowother = lAllowOther;
-	// use FSCache flag
-	env.usefscache = lUseFSCache;
-				}
+    // use FSCache flag
+    env.usefscache = lUseFSCache;
+    env.uid = (l_uid == -1) ? 0 : l_uid;
+    env.gid = (l_gid == -1) ? 0 : l_gid;
+
+}
 
 list<string> OFSEnvironment::getListenDevices()
 {

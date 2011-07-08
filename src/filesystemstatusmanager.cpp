@@ -168,6 +168,9 @@ void FilesystemStatusManager::mountfs()
 	string shareremote;
 	string remotemountpoint;
 
+	// TODO: Handle errors
+	seteuid(0);
+
 	//////////////////////////////////////////////////////////////////////////
 	// MOUNT
 	//////////////////////////////////////////////////////////////////////////
@@ -256,6 +259,9 @@ void FilesystemStatusManager::unmountfs()
 {	
 	int status;
 
+	// TODO: Handle errors
+	seteuid(0);
+
 #if HAVE_UMOUNT2
 	const char *target = OFSEnvironment::Instance().getRemotePath().c_str();
 	status = umount2(target, MNT_FORCE);
@@ -300,6 +306,8 @@ void FilesystemStatusManager::unmountfs()
 		ofslog::debug("File system unmounted");
 	}
 #endif /* HAVE_UMOUNT2 */
+// TODO: handle errors
+	seteuid(OFSEnvironment::Instance().getUid());
 }
 
 void FilesystemStatusManager::setAvailability(bool value)
