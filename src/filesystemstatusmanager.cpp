@@ -228,9 +228,8 @@ void FilesystemStatusManager::mountfs()
 					(OFSEnvironment::Instance().getMountOptions().length() > 0 ? NULL : "-o"),
 					OFSEnvironment::Instance().getMountOptions().c_str(),
 					NULL);
-			throw OFSException("Failed to exec mount for " + remotemountpoint,
-					errno,
-					true);
+			// TODO: Linux man does not specify return codes (on openSUSE 11.4)
+			exit(1);
 		}
 		if(childpid < 0) {
 			throw OFSException("fork failed",
@@ -259,7 +258,7 @@ void FilesystemStatusManager::unmountfs()
 {	
 	int status;
 
-	// TODO: Handle errors
+	// FIXME: Handle errors
 	seteuid(0);
 
 #if HAVE_UMOUNT2
@@ -276,29 +275,23 @@ void FilesystemStatusManager::unmountfs()
 		ofslog::debug("File system unmounted");
 	}
 #else
-	char *arguments[4];
-	arguments[0] = new char[7];
-	strncpy(arguments[0], "umount", 7);
-	arguments[1] = new char[3];
-	strncpy(arguments[1], "-f", 3);
-	arguments[2] = (char *)OFSEnvironment::Instance().getRemotePath().c_str();
-	arguments[3] = NULL;
 	int childpid = fork();
 	if(childpid == 0) {
-		execvp(arguments[0], arguments);
-		errno = 0;
-		return;
+		execlp("umount",
+				"umount", "-f", const_cast<char *>(OFSEnvironment::Instance().getRemotePath().c_str()), NULL);
+		// TODO: Linux man does not specify return codes (on openSUSE 11.4)
+		exit(1);
 	}
 	if(childpid < 0) {
-		perror(strerror(errno));
-		errno = 0;
+		ofslog::error("Unable to unmount the remote file system!");
+		ofslog::error(strerror(errno));
 		return;
 	}
 	int childpid2 = wait(&status);
 	int exitstatus = WEXITSTATUS(status);
 	if(WIFEXITED(status) && exitstatus) {
 		ofslog::error("Unable to unmount the remote file system!");
-		ofslog::error(strerror(exitstatus));
+		ofslog::error(strerror(exitstatus)); // TODO: Interpret return codes properly
 		errno = 0;
 	}
 	else
@@ -306,7 +299,7 @@ void FilesystemStatusManager::unmountfs()
 		ofslog::debug("File system unmounted");
 	}
 #endif /* HAVE_UMOUNT2 */
-// TODO: handle errors
+// FIXME: handle errors
 	seteuid(OFSEnvironment::Instance().getUid());
 }
 
