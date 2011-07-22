@@ -515,7 +515,7 @@ int ofs_fuse::fuse_create(const char *path, mode_t mode,
 	ofslog::debug(path);
 	int res;
 	OFSFile *file = new OFSFile(path);
-	res = file->op_create(mode, fi->flags);
+	res = file->op_create(mode);
 	if (res < 0)
 		delete file;
 	else
@@ -775,7 +775,7 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 	ofslog::debug(path);
 	ofslog::debug((string("Name: ")+string(name)).c_str());
 	int res = 0;
-	OFSFile file = OFSFile(path);
+	OFSFile file(path);
 	ofslog::debug("Leave fuse_setxattr");
 	return file.op_setxattr(name, value, size, flags);
 }
@@ -800,7 +800,7 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 	ofslog::debug(path);
 	ofslog::debug((string("Name: ")+string(name)).c_str());
 	int ret;
-	OFSFile file = OFSFile(path);
+	OFSFile file(path);
 	ret = file.op_getxattr(name, value, size);
 	ofslog::debug("Leave fuse_getxattr");
 	return ret;
@@ -819,7 +819,7 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 int ofs_fuse::fuse_listxattr(const char *path, char *list, size_t size)
 {
 	ofslog::debug("Enter fuse_listxattr");
-	OFSFile file = OFSFile(path);
+	OFSFile file(path);
 	ofslog::debug("Leave fuse_listxattr");
 	return file.op_listxattr(list, size);
 }
@@ -838,7 +838,7 @@ int ofs_fuse::fuse_removexattr(const char *path, const char *name)
 {
 	ofslog::debug("Enter fuse_removexattr");
 	int res = 0;
-	OFSFile file = OFSFile(path);
+	OFSFile file(path);
 	ofslog::debug("Leave fuse_removexattr");
 	return file.op_removexattr(name);
 }
