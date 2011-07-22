@@ -213,7 +213,7 @@ int OFSFile::op_chown ( uid_t uid, gid_t gid )
  * @param mode
  * @return
  */
-int OFSFile::op_create ( mode_t mode, int flags )
+int OFSFile::op_create ( mode_t mode )
 {
     int fdr=0, fdc=0, nRet = 0;
     try
@@ -223,7 +223,7 @@ int OFSFile::op_create ( mode_t mode, int flags )
 
 	if ( get_offline_state() )
 	{
-            fdc = open ( get_cache_path().c_str(), flags, mode );
+            fdc = creat ( get_cache_path().c_str(), mode);
             if ( fdc == -1 )
             {
                 // Sends a signal: Couldn't create file on cache.
@@ -237,7 +237,7 @@ int OFSFile::op_create ( mode_t mode, int flags )
         }
 	else
         {
-            fdr = open ( get_remote_path().c_str(), flags, mode );
+            fdr = creat ( get_remote_path().c_str(), mode );
             if ( fdr == -1 )
             {
                 close ( fdc );
