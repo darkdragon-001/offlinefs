@@ -219,19 +219,19 @@ int SynchronizationManager::CreateFile(const File& fileInfo)
             }
             else if (S_ISLNK(fsCache.st_mode))
             {
-                // FIXME: Use code found in readlink(2) or stat first then allocate buffer
-                char buf[1024];
-                ssize_t len;
 		// remove the old link if it exists
                 unlink(fileInfo.get_remote_path().c_str());
                 errno = 0;
                 // create the new link
-                len = readlink(fileInfo.get_cache_path().c_str(), buf, sizeof(buf)-1);
-                if (len < 0)
+                char * link= readlink_alloc_buffer(fileInfo.get_cache_path().c_str());
+                if (link == 0)
                     throw OFSException(strerror(errno), errno,true);
-                buf[len] = '\0';
-                if (symlink(buf, fileInfo.get_remote_path().c_str()) < 0)
+
+                if (symlink(link, fileInfo.get_remote_path().c_str()) < 0) {
+                	delete link;
                     throw OFSException(strerror(errno), errno,true);
+                }
+                delete link;
             } // TODO: Other file types
 
             // set atime and mtime
@@ -329,20 +329,19 @@ int SynchronizationManager::ModifyFile(const File& fileInfo)
 			}
 			else if (S_ISLNK(fsCache.st_mode))
 			{
-				// FIXME: Could be buggy!!! See line 222 (refactor into separate private method)
-				char buf[1024];
-				ssize_t len;
 				// remove the old link if it exists
 				unlink(fileInfo.get_remote_path().c_str());
 				errno = 0;
 				// create the new link
-				len = readlink(fileInfo.get_cache_path().c_str(), buf,
-				 sizeof(buf)-1);
-				if (len < 0)
+				char * link = readlink_alloc_buffer(fileInfo.get_cache_path().c_str());
+				if (link == NULL)
 					throw OFSException(strerror(errno), errno,true);
-				buf[len] = '\0';
-				if (symlink(buf, fileInfo.get_remote_path().c_str()) < 0)
+
+				if (symlink(link, fileInfo.get_remote_path().c_str()) < 0) {
+					delete link;
 					throw OFSException(strerror(errno), errno,true);
+				}
+				delete link;
 			} // TODO: Other file types
 
 			// set atime and mtime
@@ -426,4 +425,20 @@ void SynchronizationManager::removemtime(string path)
         mtimes.erase(iter);
         persist();
     }
+}
+
+char * SynchronizationManager::readlink_alloc_buffer(const char * path) {
+	struct stat s;
+
+	if (lstat(path, &s) == -1)
+			return 0;
+
+	char * link = new char[s.st_size + 1];
+	if (readlink(path, link, s.st_size) == -1) {
+		delete link;
+		return 0;
+	}
+
+	link[s.st_size] = '\0';
+	return link;
 }

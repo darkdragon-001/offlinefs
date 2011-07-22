@@ -110,6 +110,7 @@ private:
     map<string,time_t> mtimes;
     static std::auto_ptr<SynchronizationManager> theSynchronizationManagerInstance;
     static Mutex m_mutex;
+    char * readlink_alloc_buffer(const char * path);
 };
 
 #endif
