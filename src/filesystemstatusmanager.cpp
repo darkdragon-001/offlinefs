@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Carsten Kolassa   *
- *   Carsten@Kolassa.de   *
+ *   Copyright (C) 2007, 2011 by Carsten Kolassa, Peter Trommler           *
+ *   Carsten@Kolassa.de                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,7 +20,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <cstring>
@@ -30,8 +29,6 @@
 #include <sys/time.h>
 #include <time.h>
 #include <errno.h>
-#include <iostream>
-#include <string>
 #include <list>
 #include <assert.h>
 #include <sys/stat.h>
@@ -228,8 +225,9 @@ void FilesystemStatusManager::mountfs()
 					(OFSEnvironment::Instance().getMountOptions().length() > 0 ? NULL : "-o"),
 					OFSEnvironment::Instance().getMountOptions().c_str(),
 					NULL);
-			// TODO: Linux man does not specify return codes (on openSUSE 11.4)
-			exit(1);
+			throw OFSException("Failed to exec mount for " + remotemountpoint,
+					errno,
+					true);
 		}
 		if(childpid < 0) {
 			throw OFSException("fork failed",
@@ -250,7 +248,7 @@ void FilesystemStatusManager::mountfs()
 	}
 }
 
-
+// FIXME: We need some way to tell our callers when unmount fails.
 /*!
     \fn FilesystemStatusManager::unmountfs()
  */
@@ -258,7 +256,7 @@ void FilesystemStatusManager::unmountfs()
 {	
 	int status;
 
-	// FIXME: Handle errors
+	// TODO: Handle errors
 	seteuid(0);
 
 #if HAVE_UMOUNT2
@@ -277,21 +275,21 @@ void FilesystemStatusManager::unmountfs()
 #else
 	int childpid = fork();
 	if(childpid == 0) {
-		execlp("umount",
-				"umount", "-f", const_cast<char *>(OFSEnvironment::Instance().getRemotePath().c_str()), NULL);
-		// TODO: Linux man does not specify return codes (on openSUSE 11.4)
-		exit(1);
+		execlp("umount", "umount", "-f", OFSEnvironment::Instance().getRemotePath().c_str(), NULL);
+		errno = 0;
+		return;
 	}
 	if(childpid < 0) {
-		ofslog::error("Unable to unmount the remote file system!");
-		ofslog::error(strerror(errno));
+		perror(strerror(errno));
+		errno = 0;
 		return;
 	}
 	int childpid2 = wait(&status);
 	int exitstatus = WEXITSTATUS(status);
 	if(WIFEXITED(status) && exitstatus) {
 		ofslog::error("Unable to unmount the remote file system!");
-		ofslog::error(strerror(exitstatus)); // TODO: Interpret return codes properly
+// FIXME: umount return codes are not errno values?
+		ofslog::error(strerror(exitstatus));
 		errno = 0;
 	}
 	else
@@ -299,7 +297,7 @@ void FilesystemStatusManager::unmountfs()
 		ofslog::debug("File system unmounted");
 	}
 #endif /* HAVE_UMOUNT2 */
-// FIXME: handle errors
+// TODO: handle errors
 	seteuid(OFSEnvironment::Instance().getUid());
 }
 
