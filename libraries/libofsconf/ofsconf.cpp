@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Tobias Jähnel,,,   *
- *   tobias@gmail.com   *
+ *   Copyright (C) 2008 by Tobias Jähnel,,,                                *
+ *   tobias@gmail.com                                                      *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <mutexlocker.h>
 #include <confuse.h>
+#include <syslog.h>
 
 #define BACKING_TREE_PATH_VARNAME "backingTreePath"
 #define MOUNT_REMOTE_PATHS_TO_VARNAME "mountRemotePathsTo"
@@ -28,11 +29,11 @@
 #define LISTEN_DEVICES_VARNAME "listen"
 #define LOGLEVEL_VARNAME "loglevel"
 
-// TODO: Do not hardcode paths here. See Makefile.am in mounthelper!
+// TODO: Do not hard code paths here. Add these to configuration.
 #define BACKING_TREE_PATH_DEFAULT "/var/ofs/backing"
 #define MOUNT_REMOTE_PATHS_TO_DEFAULT "/var/ofs/remote"
 #define LISTEN_DEVICES_DEFAULT "{eth0}"
-#define LOGLEVEL_DEFAULT 6 // LOG INFO
+#define LOGLEVEL_DEFAULT LOG_INFO
 
 // Initializes the class attributes.
 std::auto_ptr<OFSConf> OFSConf::theOFSConfInstance;
