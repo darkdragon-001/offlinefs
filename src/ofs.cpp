@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include <string>
 #include <cstring>
-#include <assert.h>
 #include <getopt.h>
 #include <sys/types.h>
 #include <sys/wait.h>
