@@ -19,8 +19,8 @@
  ***************************************************************************/
 
 #include <syslog.h>
-#include <stdio.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdarg>
 #include "ofslog.h"
 #include "ofsconf.h"
 
