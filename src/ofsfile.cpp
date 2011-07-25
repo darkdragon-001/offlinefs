@@ -1241,7 +1241,6 @@ void OFSFile::update_amtime()
             // e.g. this happens while a file is closed which has been deleted prior to closing
 	    // for this reason we do not throw an exception here but just return
 	    return;
-            //throw OFSException ( strerror ( errno ), errno ,true );
 	}
 
         // utime can not be used with symbolic links because there
@@ -1263,6 +1262,7 @@ size_t size)
 int OFSFile::op_getxattr ( const char *name, char *value,
                            size_t size )
 {
+	// TODO: refactor
 	int res = 0;
 	// offline attribute
 	if ( strncmp ( name, OFS_ATTRIBUTE_OFFLINE,
@@ -1271,7 +1271,7 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 		if ( get_offline_state() )
 		{
 			res = strlen ( OFS_ATTRIBUTE_VALUE_YES );
-			if ( size >= res )
+			if ( size >= res ) // FIXME: else missing
 			{
 				strncpy ( value, OFS_ATTRIBUTE_VALUE_YES,
 				          strlen ( OFS_ATTRIBUTE_VALUE_YES ) );
@@ -1313,7 +1313,7 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 	else if ( strncmp ( name, OFS_ATTRIBUTE_STATE,
 	                    strlen ( OFS_ATTRIBUTE_STATE + 1 ) ) == 0 )
 	{
-            ///\todo fetch information from somewhere
+            // FIXME: fetch information from somewhere
 	}
 	else if ( strncmp (name, OFS_ATTRIBUTE_CONFLICT,
                             strlen ( OFS_ATTRIBUTE_CONFLICT + 1 ) ) == 0 )
