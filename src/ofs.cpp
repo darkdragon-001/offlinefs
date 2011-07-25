@@ -99,9 +99,25 @@ int main(int argc, char *argv[])
 #endif /* 0 */
 
 	// create cache path - ignore errors if it not exists
-	// FIXME: check if directory exists and mkdir if not
 	// TODO: check ownership
-	mkdir(env.getCachePath().c_str(), 0777);
+	struct stat s;
+	const char * cache_path = env.getCachePath().c_str();
+
+	int stat_result = stat(cache_path, &s);
+	if ((stat_result == 0) && !S_ISDIR(s.st_mode)) {
+		throw OFSException(env.getCachePath() + ": not a directory",
+				ENOTDIR,
+				true);
+	}
+
+	if (stat_result == -1 && errno == ENOENT) {
+		if (mkdir(cache_path, 0777) == -1) {
+			throw OFSException("Failed to create " + env.getCachePath(),
+					errno,
+					true);
+		}
+	}
+
 //drop privileges to uid and gid
 // TODO: this should probably go into environment, too
 	gid_t gid = env.getGid();
