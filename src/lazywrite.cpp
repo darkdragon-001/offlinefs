@@ -62,6 +62,7 @@ bool Lazywrite::loadnetwork()
 	}
 	old = is;
 	sleep(10);
+	pclose(fpipe);
 	}
 	diff=diff/1024; //Kbyte->Mbyte
 	if(diff<10) //if the different smaller then 10 Mbyte
@@ -81,6 +82,7 @@ bool Lazywrite::loadcpu()
 	fpipe=(FILE*)popen(command,"r");
 	fgets(line, sizeof line, fpipe);
 	is=atol(line);
+	pclose(fpipe);
 	if(is<max)
 	{
 		 return true;
