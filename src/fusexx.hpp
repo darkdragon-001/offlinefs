@@ -100,8 +100,16 @@ namespace fusexx {
 		    static int fuse_flush (const char *, struct fuse_file_info *) { return 0; }
 		    static int fuse_release (const char *, struct fuse_file_info *) { return 0; }
 		    static int fuse_fsync (const char *, int, struct fuse_file_info *) { return 0; }
-		    static int fuse_setxattr (const char *, const char *, const char *, size_t, int) { return 0; }
+#if (__FreeBSD__ >= 10)
+                    static int fuse_setxattr (const char *, const char *, const char *, size_t, int, uint32_t) {return 0; }
+#else
+                    static int fuse_setxattr (const char *, const char *, const char *, size_t, int) { return 0; }
+#endif /* __FreeBSD__ >= 10 */
+#if (__FreeBSD__ >= 10)
+                    static int fuse_getxattr (const char *, const char *, char *, size_t, uint32_t) {return 0;}
+#else
 		    static int fuse_getxattr (const char *, const char *, char *, size_t) { return 0; }
+#endif /* __FreeBSD__ >= 10 */
 		    static int fuse_listxattr (const char *, char *, size_t) { return 0; }
 		    static int fuse_removexattr (const char *, const char *) { return 0; }
 		    static int fuse_readdir (const char *, void *, fuse_fill_dir_t, off_t, struct fuse_file_info *) { return 0; }

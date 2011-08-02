@@ -80,10 +80,20 @@ public:
 	static int fuse_release(const char *path, struct fuse_file_info *fi);
 	static int fuse_fsync(const char *path, int isdatasync,
                      struct fuse_file_info *fi);
+#if (__FreeBSD__ >= 10)
+        static int fuse_setxattr (const char *path, const char *name, const char *value, size_t size,
+				  int flags, uint32_t position);
+#else
 	static int fuse_setxattr(const char *path, const char *name,
 			const char *value, size_t size, int flags);
+#endif /* __FreeBSD__ >= 10 */
+#if (__FreeBSD__ >= 10)
+        static int fuse_getxattr (const char *path, const char *name, char *value, size_t size,
+				  uint32_t position);
+#else
 	static int fuse_getxattr(const char *path, const char *name, char *value,
                     size_t size);
+#endif /* __FreeBSD__ >= 10 */
 	static int fuse_listxattr(const char *path, char *list, size_t size);
 	static int fuse_removexattr(const char *path, const char *name);
 /*	static int fuse_lock(const char *path, struct fuse_file_info *fi, int cmd,

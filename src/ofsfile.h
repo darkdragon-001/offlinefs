@@ -82,8 +82,16 @@ public:
     void update_cache();
     OFSFile * get_parent_directory();
     void update_amtime();
+#if (__FreeBSD__ >= 10)
+    int op_getxattr(const char *name, char *value, size_t size, uint32_t position);
+#else
     int op_getxattr(const char *name, char *value, size_t size);
+#endif
+#if (__FreeBSD__ >= 10)
+    int op_setxattr(const char *name, const char *value, size_t size, int flags, uint32_t position);
+#else
     int op_setxattr(const char *name, const char *value, size_t size, int flags);
+#endif
     ~OFSFile();
     inline string get_remote_path() { return fileinfo.get_remote_path(); }
     inline string get_cache_path() { return fileinfo.get_cache_path(); }

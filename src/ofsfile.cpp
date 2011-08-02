@@ -35,7 +35,12 @@
 #include <sstream>
 #include <utime.h>
 #include <cstring>
+#include <sys/types.h>
+#if (__FreeBSD__ >= 10)
+#include <sys/xattr.h>
+#else
 #include <attr/xattr.h>
+#endif
 
 OFSFile::OFSFile ( const string path ) : dh_cache ( NULL ), dh_remote ( NULL ),
 		fd_cache ( 0 ), fd_remote ( 0 ),
@@ -1259,8 +1264,13 @@ void OFSFile::update_amtime()
     \fn OFSFile::op_getxattr(const char *name, char *value,
 size_t size)
  */
+#if (__FreeBSD__ >= 10)
+int OFSFile::op_getxattr ( const char *name, char *value,
+                           size_t size, uint32_t position )
+#else
 int OFSFile::op_getxattr ( const char *name, char *value,
                            size_t size )
+#endif
 {
 	// TODO: refactor
 	int res = 0;
@@ -1339,8 +1349,12 @@ int OFSFile::op_getxattr ( const char *name, char *value,
         }
 	else   // TODO: By now this is only for remote files
 	{
+#if (__FreeBSD__ >= 10)
+	  res = getxattr(get_remote_path().c_str(), name, value, size, position, XATTR_NOFOLLOW);
+#else
 		res = lgetxattr ( get_remote_path().c_str(),
 		                  name, value, size );
+#endif
 		// do not return "unsupported" but "unknown attribute"
 		if ( errno == ENOTSUP )
 			errno = ENOATTR;
@@ -1353,7 +1367,11 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 /*!
     \fn OFSFile::op_setxattr(const char *value, size_t size, int flags)
  */
+#if (__FreeBSD__ >= 10)
+int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int flags, uint32_t position )
+#else
 int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int flags )
+#endif
 {
 	int res = 0;
 	// offline attribute
@@ -1414,8 +1432,14 @@ int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int
 	}
 	else   // other attribute - delegate to underlying filesystem
 	{
+#if (__FreeBSD__ >= 10)
+		res = setxattr ( get_remote_path().c_str(), name,
+				 value, size, position, flags | XATTR_NOFOLLOW );
+		// TODO: check if XATTR_NOFOLLOW is set by default!
+#else
 		res = lsetxattr ( get_remote_path().c_str(), name,
 		                  value, size, flags );
+#endif
 	}
 	if ( res == -1 )
 		return -errno;
@@ -1432,7 +1456,11 @@ int OFSFile::op_listxattr ( char *list, size_t size )
 	// which try to copy all extended attributes from one file to another
 	// This of course failes for most ofs attributes
 	// not listing them makes them invisible for the application
+#if (__FreeBSD__ >= 10)
+  return listxattr ( get_remote_path().c_str(), list, size, XATTR_NOFOLLOW );
+#else
  	return llistxattr ( get_remote_path().c_str(), list, 0 ); // works
+#endif
 
 /*	int res = 0;
 	int fsres = 0;
@@ -1505,11 +1533,15 @@ int OFSFile::op_removexattr ( const char *name )
         {
 		// readonly -> error
 		res = -1;
-		errno = EACCES;
+	 	errno = EACCES;
         }
 	else
 	{
-		res = lremovexattr ( get_remote_path().c_str(), name );
+#if (__FreeBSD__ >= 10)
+	  res = removexattr ( get_remote_path().c_str(), name, XATTR_NOFOLLOW );
+#else
+	  res = lremovexattr ( get_remote_path().c_str(), name );
+#endif
 	}
 	if ( res == -1 )
 		return -errno;
