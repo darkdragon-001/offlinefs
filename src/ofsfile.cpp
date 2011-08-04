@@ -877,12 +877,18 @@ int OFSFile::op_utimens ( const struct timespec ts[2] )
 	int result_offline = 0;
 	int result_available = 0;
 
+	struct timeval * times;
 	struct timeval tv[2];
 
-	tv[0].tv_sec = ts[0].tv_sec;
-	tv[0].tv_usec = ts[0].tv_nsec / 1000;
-	tv[1].tv_sec = ts[1].tv_sec;
-	tv[1].tv_usec = ts[1].tv_nsec / 1000;
+	if (ts == 0) {
+	  times = 0;
+	} else {
+	  tv[0].tv_sec = ts[0].tv_sec;
+	  tv[0].tv_usec = ts[0].tv_nsec / 1000;
+	  tv[1].tv_sec = ts[1].tv_sec;
+	  tv[1].tv_usec = ts[1].tv_nsec / 1000;
+	  times = tv;
+	}
 
 	try
 	{
@@ -890,11 +896,11 @@ int OFSFile::op_utimens ( const struct timespec ts[2] )
 
 		if ( get_offline_state() )
 		{
-			result_offline = utimes ( get_cache_path().c_str(), tv );
+			result_offline = utimes ( get_cache_path().c_str(), times );
 		}
 		if (get_availability())
 		{
-			result_available = utimes ( get_remote_path().c_str(), tv );
+			result_available = utimes ( get_remote_path().c_str(), times );
 		}
 		// TODO: Reconsider error handling
 			if ( result_offline == -1 && result_available == -1 )
