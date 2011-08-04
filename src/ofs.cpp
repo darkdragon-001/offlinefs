@@ -63,7 +63,13 @@ int main(int argc, char *argv[])
 		return 1; // see mount(8) for return codes
 	}
 
-	FilesystemStatusManager::Instance().mountfs();
+	// FIXME: Do not terminate if remote file system cannot be mounted because we are offline
+	try {
+		FilesystemStatusManager::Instance().mountfs();
+	} catch (OFSException& e) {
+		cerr << e.what() << endl;
+		return 1;
+	}
 
 	ofs_fuse my_ofs;
 	ofslog::info("Starting ofs daemon");
@@ -71,6 +77,7 @@ int main(int argc, char *argv[])
 	OFSEnvironment &env = OFSEnvironment::Instance();
 	char *fuse_arguments[5];
 	int numargs;
+	// TODO: Check out fuse option handling function
 	// TODO: Pass on rw or ro option?
 	// TODO: check if we really need to copy here, if yes use strdup(3)
 	fuse_arguments[0] = new char[env.getBinaryPath().length()+1];
