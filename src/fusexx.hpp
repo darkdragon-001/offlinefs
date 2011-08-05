@@ -97,6 +97,7 @@ namespace fusexx {
 		    static int fuse_chown (const char *, uid_t, gid_t) { return 0; }
 		    static int fuse_truncate (const char *, off_t) { return 0; }
 		    static int fuse_utime (const char *, struct utimbuf *) { return 0; }
+		    static int fuse_utimens(const char *path, const struct timespec ts[2]) { return 0; }
 		    static int fuse_open (const char *, struct fuse_file_info *) { return 0; }
 		    static int fuse_read (const char *, char *, size_t, off_t, struct fuse_file_info *) { return 0; }
 		    static int fuse_write (const char *, const char *, size_t, off_t,struct fuse_file_info *) { return 0; }
@@ -141,7 +142,8 @@ namespace fusexx {
 			    operations.chmod = T::fuse_chmod;
 			    operations.chown = T::fuse_chown;
 			    operations.truncate = T::fuse_truncate;
-			    operations.utime = T::fuse_utime;
+			    operations.utime = 0; // utime is deprecated
+			    operations.utimens = T::fuse_utimens;
 			    operations.open = T::fuse_open;
 			    operations.read = T::fuse_read;
 			    operations.write = T::fuse_write;
