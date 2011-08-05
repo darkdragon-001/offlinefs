@@ -41,7 +41,6 @@
 #include "ofsenvironment.h"
 #include "offlinerecognizer.h"
 #include "lazywrite.h"
-#include <pthread.h>
 
 using namespace std;
 
