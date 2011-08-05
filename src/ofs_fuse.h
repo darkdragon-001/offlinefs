@@ -20,8 +20,6 @@
 #ifndef OFS_FUSE_H
 #define OFS_FUSE_H
 
-#define HAVE_SETXATTR
-
 #include <fusexx.hpp>
 #include <string>
 #include <dirent.h>

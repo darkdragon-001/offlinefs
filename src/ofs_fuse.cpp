@@ -927,10 +927,11 @@ void *ofs_fuse::fuse_init (struct fuse_conn_info *conn) {
 //	btm.set_Cache_Path("/tmp/ofscache/");
 	btm.reinstate();
 
-	// create offline recognition thread
 	//if (argv[5]) {
-		pthread_t thread, threadlw;
+	pthread_t thread;
+	pthread_t threadlw;
 		pthread_create( &thread, NULL, runOfflineRecognizer, NULL);
+		// FIXME: Create thread only if lazy write enabled
 		pthread_create( &threadlw, NULL, runlazywrite, NULL);
 
 	//}
