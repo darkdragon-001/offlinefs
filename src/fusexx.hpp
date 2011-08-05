@@ -20,6 +20,10 @@
 #ifndef FUSEXX_H_
 #define FUSEXX_H_
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #define FUSE_USE_VERSION 26 // earlier versions have deprecated functions
 
 // C++ Headers

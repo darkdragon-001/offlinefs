@@ -20,6 +20,10 @@
 #ifndef OFS_FUSE_H
 #define OFS_FUSE_H
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <fusexx.hpp>
 #include <string>
 #include <dirent.h>
