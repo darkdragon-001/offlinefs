@@ -27,8 +27,11 @@ AM_CXXFLAGS = -ansi
 ofs_LDADD = $(top_builddir)/libraries/libofshash/libofshash.la \
 	$(top_builddir)/libraries/libofsconf/libofsconf.la $(top_builddir)/libraries/libofs/libofs.la $(CONFUSE_LIBS)
 
+MOUNT_HELPER_DIR = /sbin
+MOUNT_HELPER = $(MOUNT_HELPER_DIR)/@MOUNT_HELPER_PROG@
+
 install-exec-hook:
 	${MKDIR_P} $(DESTDIR)${localstatedir}/ofs/remote
 	${MKDIR_P} $(DESTDIR)${localstatedir}/ofs/backing
-	${MKDIR_P} $(DESTDIR)/sbin && \
-	${LN_S} -f ${sbindir}/ofs $(DESTDIR)/sbin/mount.ofs
+	${MKDIR_P} $(DESTDIR)$(MOUNT_HELPER_DIR) && \
+	${LN_S} -f ${sbindir}/ofs $(DESTDIR)$(MOUNT_HELPER)
