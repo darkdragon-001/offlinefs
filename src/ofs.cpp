@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+#include <fuse_opt.h>
 
 /**
  * @TODO: This is very unclean
@@ -75,17 +76,14 @@ int main(int argc, char *argv[])
 	ofslog::info("Starting ofs daemon");
 	ofslog::debug("Adopting parameters");
 	OFSEnvironment &env = OFSEnvironment::Instance();
-	char *fuse_arguments[5];
-	int numargs;
-	// TODO: Check out fuse option handling function
+
+	struct fuse_args fuse_arguments = FUSE_ARGS_INIT(0, 0);
 	// TODO: Pass on rw or ro option?
-	// TODO: check if we really need to copy here, if yes use strdup(3)
-	fuse_arguments[0] = new char[env.getBinaryPath().length()+1];
-	strncpy(fuse_arguments[0], env.getBinaryPath().c_str(),
-		env.getBinaryPath().length()+1);
-	fuse_arguments[1] = new char[env.getMountPoint().length()+1];
-	strncpy(fuse_arguments[1], env.getMountPoint().c_str(),
-		env.getMountPoint().length()+1);
+	fuse_opt_add_arg(&fuse_arguments, env.getBinaryPath().c_str());
+	fuse_opt_add_arg(&fuse_arguments, env.getMountPoint().c_str());
+	// FIXME: How do we start fuse properly so we don't allow_other?
+	fuse_opt_add_arg(&fuse_arguments, "-o");
+	fuse_opt_add_arg(&fuse_arguments, "allow_other");
 #if 0
 	if(env.isAllowOther()) {
 		fuse_arguments[2] = new char[3];
@@ -95,13 +93,12 @@ int main(int argc, char *argv[])
 		fuse_arguments[4] = NULL;
 		numargs = 4;
 	} else {
-#endif /* 0 */
+
 // FIXME: How do we start fuse properly so we don't allow_other?
 		fuse_arguments[2] = const_cast<char*>("-o");
 		fuse_arguments[3] = "allow_other";
 
 		numargs = 4;
-#if 0
 	}
 #endif /* 0 */
 
@@ -148,5 +145,5 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return my_ofs.main(numargs, fuse_arguments, NULL, &my_ofs);
+	return my_ofs.main(fuse_arguments.argc, fuse_arguments.argv, NULL, &my_ofs);
 }
