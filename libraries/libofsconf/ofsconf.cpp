@@ -30,8 +30,8 @@
 #define LOGLEVEL_VARNAME "loglevel"
 
 // TODO: Do not hard code paths here. Add these to configuration.
-#define BACKING_TREE_PATH_DEFAULT "/var/ofs/backing"
-#define MOUNT_REMOTE_PATHS_TO_DEFAULT "/var/ofs/remote"
+#define BACKING_TREE_PATH_DEFAULT OFS_STATE_DIR"/backing"
+#define MOUNT_REMOTE_PATHS_TO_DEFAULT OFS_STATE_DIR"/remote"
 #define LISTEN_DEVICES_DEFAULT "{eth0}"
 #define LOGLEVEL_DEFAULT LOG_INFO
 
@@ -40,7 +40,7 @@ std::auto_ptr<OFSConf> OFSConf::theOFSConfInstance;
 Mutex OFSConf::m_mutex;
 
 //////////////////////////////////////////////////////////////////////////////
-// KONSTRUKTION/ DESTRUKTION
+// constructors and destructors
 //////////////////////////////////////////////////////////////////////////////
 
 OFSConf::OFSConf()

@@ -44,7 +44,6 @@
 #include <fuse_opt.h>
 
 /**
- * @TODO: This is very unclean
  * @param argc
  * @param argv[]
  * @return
@@ -84,23 +83,6 @@ int main(int argc, char *argv[])
 	// FIXME: How do we start fuse properly so we don't allow_other?
 	fuse_opt_add_arg(&fuse_arguments, "-o");
 	fuse_opt_add_arg(&fuse_arguments, "allow_other");
-#if 0
-	if(env.isAllowOther()) {
-		fuse_arguments[2] = new char[3];
-		strncpy(fuse_arguments[2], "-o", 3);
-		fuse_arguments[3] = new char[12];
-		strncpy(fuse_arguments[3], "allow_other", 12);
-		fuse_arguments[4] = NULL;
-		numargs = 4;
-	} else {
-
-// FIXME: How do we start fuse properly so we don't allow_other?
-		fuse_arguments[2] = const_cast<char*>("-o");
-		fuse_arguments[3] = "allow_other";
-
-		numargs = 4;
-	}
-#endif /* 0 */
 
 	// create cache path - ignore errors if it not exists
 	// TODO: check ownership
