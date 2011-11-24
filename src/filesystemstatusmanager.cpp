@@ -222,9 +222,9 @@ void FilesystemStatusManager::mountfs()
 					"-t", remotefstype.c_str(),
 					shareremote.c_str(),
 					remotemountpoint_c,
-					(OFSEnvironment::Instance().getMountOptions().length() > 0 ? NULL : "-o"),
+					(OFSEnvironment::Instance().getMountOptions().length() > 0 ? "-o" : 0),
 					OFSEnvironment::Instance().getMountOptions().c_str(),
-					NULL);
+					0);
 			throw OFSException("Failed to exec mount for " + remotemountpoint,
 					errno,
 					true);
