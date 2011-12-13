@@ -21,7 +21,7 @@
 #define FUSEXX_H_
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include "config.h"
 #endif
 
 #define FUSE_USE_VERSION 26 // earlier versions have deprecated functions
@@ -83,7 +83,7 @@ namespace fusexx {
 		 * Overload these functions
 		 */
 		 public:
-			static int fuse_readlink (const char *, char *, size_t) { return 0; }
+                    static int fuse_readlink (const char *, char *, size_t) { return 0; }
 		    static int fuse_getattr (const char *, struct stat * ) { return 0; }
 		    static int fuse_getdir (const char *, fuse_dirh_t, fuse_dirfil_t) { return 0; }
 		    static int fuse_mknod (const char *, mode_t, dev_t) { return 0; }
@@ -109,12 +109,12 @@ namespace fusexx {
                     static int fuse_setxattr (const char *, const char *, const char *, size_t, int, uint32_t) {return 0; }
 #else
                     static int fuse_setxattr (const char *, const char *, const char *, size_t, int) { return 0; }
-#endif /* __FreeBSD__ >= 10 */
+#endif /* FUSE_XATTR_ADD_OPT */
 #ifdef FUSE_XATTR_ADD_OPT
                     static int fuse_getxattr (const char *, const char *, char *, size_t, uint32_t) {return 0;}
 #else
 		    static int fuse_getxattr (const char *, const char *, char *, size_t) { return 0; }
-#endif /* __FreeBSD__ >= 10 */
+#endif /* FUSE_XATTR_ADD_OPT */
 		    static int fuse_listxattr (const char *, char *, size_t) { return 0; }
 		    static int fuse_removexattr (const char *, const char *) { return 0; }
 		    static int fuse_readdir (const char *, void *, fuse_fill_dir_t, off_t, struct fuse_file_info *) { return 0; }
@@ -129,7 +129,7 @@ namespace fusexx {
 		    static int fuse_fgetattr (const char *, struct stat *, struct fuse_file_info *) { return 0; }
 		    		    
 		    static void loadOperations () {
-				operations.readlink = T::fuse_readlink;
+			    operations.readlink = T::fuse_readlink;
 			    operations.getattr = T::fuse_getattr;
 			    operations.getdir = T::fuse_getdir;
 			    operations.mknod = T::fuse_mknod;

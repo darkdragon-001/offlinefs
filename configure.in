@@ -66,17 +66,17 @@ if test x"$xattr_cv_add_opt" = x"yes"; then
 fi
 
 AC_CACHE_CHECK([whether FUSE xattr interface takes additional options], fuse_cv_xattr_add_opt, [
-	old_LIBS=$LIBS
-	LIBS="$LIBS $ACL_LIBS"
+	old_CPPFLAGS=$CPPFLAGS
+	CPPFLAGS="$CPPFLAGS $FUSE_CFLAGS"
 	AC_TRY_COMPILE([
-		#include <sys/types.h>
+		#define FUSE_USE_VERSION 26
 		#include <fuse.h>
 	],[
 	    struct fuse_operations f;
-		f.(*getxattr)(0, 0, 0, 0, 0);
+		(f.getxattr)(0, 0, 0, 0, 0);
 	],
-        [fuse_cv_xattr_add_opt=yes],
-	[fuse_cv_xattr_add_opt=no;LIBS=$old_LIBS])
+        [fuse_cv_xattr_add_opt=yes;CPPFLAGS=$old_CPFLAGS],
+	[fuse_cv_xattr_add_opt=no;CPPFLAGS=$old_CPFLAGS])
 ])
 if test x"$fuse_cv_xattr_add_opt" = x"yes"; then
 	AC_DEFINE(FUSE_XATTR_ADD_OPT, 1, [FUSE xattr functions have additional options])

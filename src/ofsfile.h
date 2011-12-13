@@ -82,12 +82,12 @@ public:
     void update_cache();
     OFSFile * get_parent_directory();
     void update_amtime();
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
     int op_getxattr(const char *name, char *value, size_t size, uint32_t position);
 #else
     int op_getxattr(const char *name, char *value, size_t size);
 #endif
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
     int op_setxattr(const char *name, const char *value, size_t size, int flags, uint32_t position);
 #else
     int op_setxattr(const char *name, const char *value, size_t size, int flags);
