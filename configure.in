@@ -25,7 +25,7 @@ PKG_CHECK_MODULES([FUSE], [fuse])
 PKG_CHECK_MODULES([CONFUSE], [libconfuse])
 
 # Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h stdlib.h string.h sys/file.h sys/mount.h sys/socket.h sys/time.h syslog.h unistd.h utime.h xattr.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h stdlib.h string.h sys/file.h sys/mount.h sys/socket.h sys/time.h syslog.h unistd.h utime.h])
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
@@ -42,6 +42,45 @@ AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 
+# taken from netatalk configure.in
+AC_CHECK_HEADERS(sys/attributes.h attr/xattr.h sys/xattr.h sys/extattr.h sys/uio.h sys/ea.h)
+# Do xattr functions take additional options like on Darwin?
+AC_CACHE_CHECK([whether xattr interface takes additional options], xattr_cv_add_opt, [
+	old_LIBS=$LIBS
+	LIBS="$LIBS $ACL_LIBS"
+	AC_TRY_COMPILE([
+		#include <sys/types.h>
+		#if HAVE_ATTR_XATTR_H
+		#include <attr/xattr.h>
+		#elif HAVE_SYS_XATTR_H
+		#include <sys/xattr.h>
+		#endif
+	],[
+		getxattr(0, 0, 0, 0, 0, 0);
+	],
+        [xattr_cv_add_opt=yes],
+	[xattr_cv_add_opt=no;LIBS=$old_LIBS])
+])
+if test x"$xattr_cv_add_opt" = x"yes"; then
+	AC_DEFINE(XATTR_ADD_OPT, 1, [xattr functions have additional options])
+fi
+
+AC_CACHE_CHECK([whether FUSE xattr interface takes additional options], fuse_cv_xattr_add_opt, [
+	old_LIBS=$LIBS
+	LIBS="$LIBS $ACL_LIBS"
+	AC_TRY_COMPILE([
+		#include <sys/types.h>
+		#include <fuse.h>
+	],[
+	    struct fuse_operations f;
+		f.(*getxattr)(0, 0, 0, 0, 0);
+	],
+        [fuse_cv_xattr_add_opt=yes],
+	[fuse_cv_xattr_add_opt=no;LIBS=$old_LIBS])
+])
+if test x"$fuse_cv_xattr_add_opt" = x"yes"; then
+	AC_DEFINE(FUSE_XATTR_ADD_OPT, 1, [FUSE xattr functions have additional options])
+fi
 #
 case "${target_os}" in
 linux*)

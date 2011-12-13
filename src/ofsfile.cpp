@@ -17,6 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "ofsfile.h"
 #include "synclogger.h"
 #include "filestatusmanager.h"
@@ -36,9 +40,10 @@
 #include <utime.h>
 #include <cstring>
 #include <sys/types.h>
-#if (__FreeBSD__ >= 10)
+#ifdef HAVE_SYS_XATTR_H
 #include <sys/xattr.h>
-#else
+#endif
+#ifdef HAVE_ATTR_XATTR_H
 #include <attr/xattr.h>
 #endif
 
@@ -101,13 +106,13 @@ int OFSFile::op_chmod ( mode_t mode )
 			res = chmod ( get_remote_path().c_str(), mode );
 		if ( res == -1 )return -errno;
 
-		return 0;
 	}
 	catch ( OFSException &e )
 	{
 		errno = e.get_posixerrno();
 		return -errno;
 	}
+	return 0;
 }
 
 
@@ -1270,7 +1275,7 @@ void OFSFile::update_amtime()
     \fn OFSFile::op_getxattr(const char *name, char *value,
 size_t size)
  */
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
 int OFSFile::op_getxattr ( const char *name, char *value,
                            size_t size, uint32_t position )
 #else
@@ -1355,7 +1360,7 @@ int OFSFile::op_getxattr ( const char *name, char *value,
         }
 	else   // TODO: By now this is only for remote files
 	{
-#if (__FreeBSD__ >= 10)
+#ifdef XATTR_ADD_OPT
 	  res = getxattr(get_remote_path().c_str(), name, value, size, position, XATTR_NOFOLLOW);
 #else
 		res = lgetxattr ( get_remote_path().c_str(),
@@ -1373,7 +1378,7 @@ int OFSFile::op_getxattr ( const char *name, char *value,
 /*!
     \fn OFSFile::op_setxattr(const char *value, size_t size, int flags)
  */
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
 int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int flags, uint32_t position )
 #else
 int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int flags )
@@ -1438,7 +1443,7 @@ int OFSFile::op_setxattr ( const char *name, const char *value, size_t size, int
 	}
 	else   // other attribute - delegate to underlying filesystem
 	{
-#if (__FreeBSD__ >= 10)
+#ifdef XATTR_ADD_OPT
 		res = setxattr ( get_remote_path().c_str(), name,
 				 value, size, position, flags | XATTR_NOFOLLOW );
 		// TODO: check if XATTR_NOFOLLOW is set by default!
@@ -1462,7 +1467,7 @@ int OFSFile::op_listxattr ( char *list, size_t size )
 	// which try to copy all extended attributes from one file to another
 	// This of course failes for most ofs attributes
 	// not listing them makes them invisible for the application
-#if (__FreeBSD__ >= 10)
+#ifdef XATTR_ADD_OPT
   return listxattr ( get_remote_path().c_str(), list, size, XATTR_NOFOLLOW );
 #else
  	return llistxattr ( get_remote_path().c_str(), list, 0 ); // works
@@ -1543,7 +1548,7 @@ int OFSFile::op_removexattr ( const char *name )
         }
 	else
 	{
-#if (__FreeBSD__ >= 10)
+#ifdef XATTR_ADD_OPT
 	  res = removexattr ( get_remote_path().c_str(), name, XATTR_NOFOLLOW );
 #else
 	  res = lremovexattr ( get_remote_path().c_str(), name );

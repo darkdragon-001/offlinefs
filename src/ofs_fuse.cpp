@@ -771,7 +771,7 @@ int ofs_fuse::fuse_fsync(const char *path, int isdatasync,
  * @param flags Don't know
  *
  */
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
 int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 			    const char *value, size_t size, int flags, uint32_t position)
 #else
@@ -785,7 +785,7 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
 	int res = 0;
 	OFSFile file(path);
 	ofslog::debug("Leave fuse_setxattr");
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
 	return file.op_setxattr(name, value, size, flags, position);
 #else
 	return file.op_setxattr(name, value, size, flags);
@@ -805,7 +805,7 @@ int ofs_fuse::fuse_setxattr(const char *path, const char *name,
  * @param value Pointer to buffer, the result should be copied to (second call)
  * @param size size of buffer value points to (0 on first call)
  */
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
 int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 			    size_t size, uint32_t position)
 #else
@@ -818,7 +818,7 @@ int ofs_fuse::fuse_getxattr(const char *path, const char *name, char *value,
 	ofslog::debug((string("Name: ")+string(name)).c_str());
 	int ret;
 	OFSFile file(path);
-#if (__FreeBSD__ >= 10)
+#ifdef FUSE_XATTR_ADD_OPT
 	ret = file.op_getxattr(name, value, size, position);
 #else
 	ret = file.op_getxattr(name, value, size);
