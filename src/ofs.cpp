@@ -104,27 +104,30 @@ int main(int argc, char *argv[])
 		}
 	}
 
-//drop privileges to uid and gid
+//drop privileges to uid and gid if desired
 // TODO: this should probably go into environment, too
-	gid_t gid = env.getGid();
-	if (gid == -1) {
-		struct passwd * userinfo;
-		userinfo = getpwuid(env.getUid());
-		if (userinfo == NULL) {
-			cerr << "Could not determine default group id" << endl;
-			exit (EXIT_FAILURE);
+	uid_t uid = env.getUid();
+	if (uid != -1) {
+		gid_t gid = env.getGid();
+		if (gid == -1) {
+			struct passwd * userinfo;
+			userinfo = getpwuid(uid);
+			if (userinfo == NULL) {
+				cerr << "Could not determine default group id." << endl;
+				exit (EXIT_FAILURE);
+			}
+			gid = userinfo->pw_gid;
 		}
-		gid = userinfo->pw_gid;
-	}
 
-	if (setegid(gid) == -1) {
-		cerr << "Failed to set GID\n";
-		exit(EXIT_FAILURE);
-	}
+		if (setegid(gid) == -1) {
+			cerr << "Failed to set GID\n";
+			exit(EXIT_FAILURE);
+		}
 
-	if (seteuid(env.getUid()) == -1) {
-		cerr << "Failed to set UID\n";
-		exit(EXIT_FAILURE);
+		if (seteuid(uid) == -1) {
+			cerr << "Failed to set UID\n";
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	return my_ofs.main(fuse_arguments.argc, fuse_arguments.argv, NULL, &my_ofs);

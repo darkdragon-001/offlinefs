@@ -343,8 +343,9 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	env.allowother = lAllowOther;
 	// use FSCache flag
 	env.usefscache = lUseFSCache;
-	env.uid = (l_uid == -1) ? 0 : l_uid;
-	env.gid = (l_gid == -1) ? 0 : l_gid;
+	
+	env.uid = l_uid;
+	env.gid = l_gid;
 }
 
 list<string> OFSEnvironment::getListenDevices()
