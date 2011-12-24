@@ -158,12 +158,13 @@ string FilesystemStatusManager::getRemote(string path)
  */
 void FilesystemStatusManager::mountfs()
 {
-	string shareurl = OFSEnvironment::Instance().getShareURL();
+	OFSEnvironment &env = OFSEnvironment::Instance();
+	string remotemountpoint = env.getRemotePath();
+	string shareurl = env.getShareURL();
 	ofslog::debug("shareURL: %s", shareurl.c_str());
 	string sharepath;
 	string remotefstype;
 	string shareremote;
-	string remotemountpoint;
 
 	// TODO: Handle errors
 	seteuid(0);
@@ -179,21 +180,19 @@ void FilesystemStatusManager::mountfs()
 	remotefstype = shareurl.substr(0,nDoppelPunktIndex);
 	sharepath = shareurl.substr(nDoppelPunktIndex+3);
 	// handle special protocols
-	if(remotefstype == "smb" || remotefstype == "smbfs" || remotefstype == "cifs")
+	if(remotefstype == "smb" || remotefstype == "smbfs" || remotefstype == "cifs") {
 		shareremote = string("//") + sharepath;
-	else if(remotefstype == "file") {
+	} else if(remotefstype == "file") {
 		shareremote = string("/") + sharepath;
-		remotemountpoint = shareremote; // FIXME: Has no effect here
 	} else
 		shareremote = sharepath;
 
-	if(remotefstype != "file") { // FIXME: else missing!
+	if(remotefstype == "file") {
+		// do not mount anything, but just declare the path as remote path
+		env.setRemotePath(shareremote);
+	} else {
+		// mount the remote filesystem
 		const char * remotemountpoint_c;
-
-		OFSConf& conf = OFSConf::Instance();
-
-		// set remote path and mount point
-		remotemountpoint = conf.GetRemotePath()+"/"+ofs_hash(shareurl);
 		remotemountpoint_c = remotemountpoint.c_str();
 
 		// create mount point and check and if it exits check it is actually a directory

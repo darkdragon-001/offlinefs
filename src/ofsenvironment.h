@@ -63,6 +63,11 @@ public:
      */
     inline string getRemotePath() { return remotePath; };
     /**
+     * Set the path, the remote share is mounted to
+     * @param remotePath remote share path
+     */
+    inline void setRemotePath(string val) { remotePath = val; };
+    /**
      * Get the root of the backingtree path
      * @return backingtree path
      */
