@@ -26,6 +26,8 @@
 #include "ofsconf.h"
 #include "ofshash.h"
 #include "ofslog.h"
+#define _GNU_SOURCE
+#include <unistd.h>
 #include <getopt.h>
 #include <sstream>
 #include <cstring>

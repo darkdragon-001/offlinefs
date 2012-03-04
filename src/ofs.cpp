@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	try {
 		FilesystemStatusManager::Instance().mountfs();
 	} catch (OFSException& e) {
-		cerr << e.what() << endl;
+		cerr << "Failed to mount remote file system: " << e.what() << endl;
 		return 1;
 	}
 
