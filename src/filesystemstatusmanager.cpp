@@ -21,6 +21,7 @@
 #include <config.h>
 #endif
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <string>
 #include <cstring>
@@ -33,7 +34,6 @@
 #include <list>
 #include <assert.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #if HAVE_SYS_MOUNT_H
 #include <sys/mount.h>

@@ -1,1 +1,3 @@
- 
+ -----------------------------------------------------------------------------------
+ 0.4.6                                                   April 30, 2012
+  * Fix compile error on openSUSE Factory (#include <unistd.h> missing for sleep(3))
