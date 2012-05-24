@@ -21,6 +21,7 @@
 #define OFSBROADCAST_H
 
 #include "mutexlocker.h"
+#include <memory>
 #include <dbus/dbus.h>
 
 class DBusMessage;

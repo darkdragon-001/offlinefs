@@ -21,6 +21,8 @@
 #include "ofsbroadcast.h"
 #include "ofslog.h"
 #include <cstdlib>
+#include <memory>
+#include <unistd.h>
 
 // Initializes the class attributes.
 std::auto_ptr<OFSBroadcast> OFSBroadcast::theOFSBroadcastInstance;
@@ -150,12 +152,9 @@ void OFSBroadcast::Listen()
 {
    return; ///\todo skipping DBUS stuff by now
    DBusMessage* msg;
-   DBusMessage* reply;
-   DBusMessageIter args;
    DBusConnection* conn;
    DBusError err;
    int ret;
-   char* param;
 
    ofslog::debug("DBus Listening for method calls.");
 
@@ -192,7 +191,7 @@ void OFSBroadcast::Listen()
 
       // loop again if we haven't got a message
       if (NULL == msg) { 
-         sleep(1); 
+         sleep(1);
          continue; 
       }
       
