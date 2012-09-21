@@ -95,5 +95,5 @@ AC_SUBST(MOUNT_HELPER_PROG)
 
 AC_CONFIG_FILES([Makefile libraries/Makefile libraries/libofs/Makefile \
 	libraries/libofsconf/Makefile libraries/libofshash/Makefile ofs-gui/Makefile \
-	src/Makefile])
+	src/Makefile src/mount.ofs.8])
 AC_OUTPUT

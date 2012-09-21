@@ -1,4 +1,4 @@
-.TH mount.ofs 8 "May 10, 2011" "version 0.3" ""
+.TH mount.ofs 8 "September 21, 2012" "version @PACKAGE_VERSION@" ""
 .SH NAME
 mount.ofs \- mount an Offline File System
 .SH SYNOPSIS
