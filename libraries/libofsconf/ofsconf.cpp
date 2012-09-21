@@ -113,7 +113,7 @@ bool OFSConf::ParseFile()
     m_logLvl = cfg_getint(m_pCFG,LOGLEVEL_VARNAME);
     // listening devices
     listendevices.clear();
-    for(int i=0; i < cfg_size(m_pCFG, LISTEN_DEVICES_VARNAME); i++) {
+    for(unsigned int i=0; i < cfg_size(m_pCFG, LISTEN_DEVICES_VARNAME); i++) {
         listendevices.push_back(
             cfg_getnstr(m_pCFG, LISTEN_DEVICES_VARNAME, i));
     }
