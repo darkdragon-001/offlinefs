@@ -232,7 +232,6 @@ bool SyncLogger::RemoveEntry(const char* pszHash, SyncLogEntry& sle)
 	struct stat fileinfo;
 	char szLogName[MAX_PATH];
 	CalcLogFileName(pszHash, szLogName);
-	char szSubstring[20];
 	int nRet = lstat(szLogName, &fileinfo);
 	if (nRet < 0 && errno == ENOENT)
 		throw OFSException(strerror(errno), errno);
