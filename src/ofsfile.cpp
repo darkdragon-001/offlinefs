@@ -228,7 +228,7 @@ int OFSFile::op_create ( mode_t mode )
     int fdr=0, fdc=0, nRet = 0;
     try
     {
-        // make sure the cache is sync regarding this file
+        // make sure the cache is in sync regarding this file
 	update_cache();
 
 	if ( get_offline_state() )
@@ -239,11 +239,13 @@ int OFSFile::op_create ( mode_t mode )
                 // Sends a signal: Couldn't create file on cache.
                 OFSBroadcast::Instance().SendError( "FileError", "CacheNotWritable",
 				"File error: Could not create file on cache.", -errno );
-                return -errno;
+                nRet =-errno;
+            } else {
+                SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(),
+                    get_relative_path().c_str(), 'c' );
+                FilesystemStatusManager::Instance().setsync(false);
+                nRet = 0;
             }
-            SyncLogger::Instance().AddEntry ( OFSEnvironment::Instance().getShareID().c_str(),
-                get_relative_path().c_str(), 'c' );
-            FilesystemStatusManager::Instance().setsync(false);
         }
 	else
         {
@@ -255,21 +257,20 @@ int OFSFile::op_create ( mode_t mode )
                 // Sends a signal: Couldn't create file on remote share.
                 OFSBroadcast::Instance().SendError( "FileError", "RemoteNotWritable",
 				"File error: Could not create file on remote share.",nRet );
-                ///\todo If this failes, move to offline mode
-                return -errno;
+                ///\todo If this fails, move to offline mode
+                nRet = -errno;
             }
         }
 
         fd_remote = fdr;
         fd_cache = fdc;
-
-        return 0;
     }
     catch ( OFSException &e )
     {
         errno = e.get_posixerrno();
-        return -errno;
+        nRet = -errno;
     }
+    return nRet;
 }
 
 /**
