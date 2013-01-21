@@ -143,6 +143,9 @@ int OFSFile::op_getattr ( struct stat *stbuf )
 
 
 /**
+ * FIXME: Check that return code is supposed to be 0. Readlink(2) requires number of
+ * bytes put in buffer. The buffer is not necessarily NUL terminated.
+ *
  * Read the target of a symbolic link
  *
  * The buffer should be filled with a null terminated string.
@@ -156,6 +159,8 @@ int OFSFile::op_getattr ( struct stat *stbuf )
 int OFSFile::op_readlink ( char *buf, size_t size )
 {
 	int res;
+	int ret;
+
 	try
 	{
 		update_cache();
@@ -165,17 +170,18 @@ int OFSFile::op_readlink ( char *buf, size_t size )
 		else
 			res = readlink ( get_cache_path().c_str(), buf, size - 1 );
 		if ( res == -1 )
-			return -errno;
+			ret = -errno;
 
 		update_amtime();
 		buf[res] = '\0';
-		return 0;
+		ret = 0;
 	}
 	catch ( OFSException &e )
 	{
 		errno = e.get_posixerrno();
-		return -errno;
+		ret = -errno;
 	}
+	return ret;
 }
 
 
@@ -200,16 +206,14 @@ int OFSFile::op_chown ( uid_t uid, gid_t gid )
 		else
 			res = lchown ( get_remote_path().c_str(), uid, gid );
 		if ( res == -1 )
-			return -errno;
-
-		return 0;
+			res = -errno;
 
 	}
 	catch ( OFSException &e )
 	{
-		errno = e.get_posixerrno();
-		return -errno;
+		res = e.get_posixerrno();
 	}
+	return res;
 }
 
 /**
@@ -1167,7 +1171,7 @@ void OFSFile::update_cache()
 
 		// if the remote file is not in cache or has changed
 		// we have to copy it to the cache
-		// TODO: If the file gets openend for overwriting, we may skip copying it from
+		// TODO: If the file gets opened for overwriting, we may skip copying it from
 		// the remote location
 		if ( !file_exists || fileinfo_remote.st_mtime > fileinfo_cache.st_mtime )
 		{
@@ -1466,7 +1470,7 @@ int OFSFile::op_listxattr ( char *list, size_t size )
 {
 	// we must not expose our own attribute because there are programs (gedit is one)
 	// which try to copy all extended attributes from one file to another
-	// This of course failes for most ofs attributes
+	// This of course fails for most ofs attributes
 	// not listing them makes them invisible for the application
 #ifdef XATTR_ADD_OPT
   return listxattr ( get_remote_path().c_str(), list, size, XATTR_NOFOLLOW );
