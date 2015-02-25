@@ -1,0 +1,32 @@
+# temporary files
+*~ 
+
+# m4
+*.m4
+m4/*
+autom4te.cache
+
+# autotools
+compile
+config.*
+configure
+depcomp
+INSTALL
+install-sh
+libtool
+ltmain.sh
+Makefile.in
+missing
+ofs.tag
+
+# compilation
+*.la
+*.lo
+*.o
+.deps
+.libs
+Makefile
+src/mount.ofs.8
+src/ofs
+stamp-h1
+
