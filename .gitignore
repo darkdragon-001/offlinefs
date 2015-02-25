@@ -30,3 +30,5 @@ src/mount.ofs.8
 src/ofs
 stamp-h1
 
+# documentation
+api_docs/
