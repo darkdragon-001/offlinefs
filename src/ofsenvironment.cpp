@@ -345,7 +345,7 @@ void OFSEnvironment::init(int argc, char *argv[]) throw(OFSException)
 	env.allowother = lAllowOther;
 	// use FSCache flag
 	env.usefscache = lUseFSCache;
-	
+
 	env.uid = l_uid;
 	env.gid = l_gid;
 }
@@ -375,5 +375,3 @@ string OFSEnvironment::getUsageString(string executable)
 	usage << "\t-h --help       Print this screen and exit" << endl;
 	return usage.str();
 }
-
-

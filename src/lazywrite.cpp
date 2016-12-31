@@ -43,7 +43,7 @@ Lazywrite::~Lazywrite()
 bool Lazywrite::loadnetwork()
 {
 	FILE *fpipe;
-	char *command ="grep eth0 /proc/net/dev | awk -F: \'{print  $2}\' | awk \'{print $9}\'";
+	const char *command = "grep eth0 /proc/net/dev | awk -F: \'{print  $2}\' | awk \'{print $9}\'";
 	char line[255];
 	long int is=0, old = 0;
 	long int diff=0;
@@ -75,7 +75,7 @@ bool Lazywrite::loadnetwork()
 bool Lazywrite::loadcpu()
 {
 	FILE *fpipe;
-	char *command ="grep -o \'[0-9]\\+\\.[0-9]\\+*\' /proc/loadavg | sed -n \"3p\"";
+	const char *command = "grep -o \'[0-9]\\+\\.[0-9]\\+*\' /proc/loadavg | sed -n \"3p\"";
 	char line[10];
 	int is, max = 5;
 	// re-integration per Load CPU
