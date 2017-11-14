@@ -1,4 +1,3 @@
-INCLUDES = 
 METASOURCES = AUTO
 libofs_la_CPPFLAGS = $(CONFUSE_CFLAGS)
 lib_LTLIBRARIES = libofs.la

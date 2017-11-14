@@ -12,10 +12,10 @@ dist_man8_MANS = mount.ofs.8
 
 
 # set the include path found by configure
-INCLUDES = -I$(top_srcdir)/libraries/libofs \
-	-I$(top_srcdir)/libraries/libofsconf -I$(top_srcdir)/libraries/libofshash $(all_includes) 
-ofs_CPPFLAGS = $(DBUS_CFLAGS) $(FUSE_CFLAGS) $(CONFUSE_CFLAGS)
- 
+ofs_CPPFLAGS = $(DBUS_CFLAGS) $(FUSE_CFLAGS) $(CONFUSE_CFLAGS) \
+	-I$(top_srcdir)/libraries/libofs -I$(top_srcdir)/libraries/libofsconf \
+	-I$(top_srcdir)/libraries/libofshash $(all_includes)
+
 # the library search path.
 ofs_LDFLAGS = $(all_libraries) $(DBUS_LIBS) $(FUSE_LIBS) $(CONFUSE_LIBS)
 noinst_HEADERS = backingtreepersistence.h conflictmanager.h \
