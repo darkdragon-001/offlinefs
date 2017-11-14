@@ -26,6 +26,7 @@ Fork of http://offlinefs.sourceforge.net/
     ./configure
     make
     sudo make install
+    sudo ldconfig
 
 ## Usage
 
