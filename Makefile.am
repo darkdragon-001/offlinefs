@@ -11,6 +11,9 @@ README: README.md
 AUTHORS: .FORCE
 	git shortlog --summary --numbered --email | cut -f2 > $@
 
+NEWS:
+	touch $@
+
 .FORCE:
 
 .PHONY: .FORCE
