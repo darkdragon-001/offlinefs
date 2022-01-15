@@ -4,3 +4,6 @@ SUBDIRS = libraries ofs-gui src
 MYEXECPDIR =${sbindir}
 
 ACLOCAL_AMFLAGS = -I m4
+
+README: README.md
+	cat $< > $@
