@@ -37,7 +37,7 @@
 #include <sys/wait.h>
 #if HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
-#endif /* HAVE_UMOUNT2 */
+#endif /* HAVE_SYS_MOUNT_H */
 using namespace std;
 
 #include "filesystemstatusmanager.h"

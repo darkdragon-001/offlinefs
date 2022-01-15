@@ -98,8 +98,6 @@ bool SyncLogger::AddEntry(const char* pszHash,
         return false;
 
 	fstream& logStream = *(OpenLogFile(pszHash, ios::app));
-	if (logStream == NULL)
-		return false;
 
 	// Writes new entry into sync log.
 	// TODO: define << operator in SyncLogEntry
