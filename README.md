@@ -10,7 +10,7 @@ Fork of http://offlinefs.sourceforge.net/
  
 ### Required packages
 
-    sudo apt-get install libfuse-dev pkg-config libtool automake autoconf g++ libattr1-dev attr libconfuse-dev libdbus-1-dev
+    sudo apt-get install cmake pkg-config g++ libfuse-dev libattr1-dev attr libconfuse-dev libdbus-1-dev
 
 ### Optional packages for documentation
 
@@ -18,12 +18,9 @@ Fork of http://offlinefs.sourceforge.net/
 
 ### Compilation
 
-    libtoolize
-    aclocal
-    autoheader
-    automake --add-missing
-    autoconf
-    ./configure
+    mkdir build
+    cd build
+    cmake ..
     make
     sudo make install
     sudo ldconfig
