@@ -1,0 +1,25 @@
+===== OFS extended attributes =====
+The filesystem can be managed from the command line using extended attributes. There are two attributes available at the moment.
+
+==== ofs.offline ====
+Indicated whether the directory or file is marked //offline//. If you set the attribute on a directory, the subtree, starting with this directory is copied to the offline cache. If you remove it, the offline cache for this tree is cleaned.
+
+**Note:** You can remove the ''ofs.offline'' attribute only on the root of an offline tree.
+==== ofs.available ====
+This attribute indicates whether there is a connection to the network share, this file or directory is in.
+
+===== Using extended attributes =====
+Make sure the package //attr// is installed.
+
+==== Get extended attribute ====
+  # getfattr -n <attribute name> <path>
+==== Set exteded attribute ====
+  # setfattr -n <attribute name> <path>
+or
+  # setfattr -n <attribute name> -v <value> <path>
+==== Remove exteded attribute ==== 
+  # setfattr -x <attribute name> <path>
+**Note:** The attributes //ofs.available// and //ofs.offline// are always available and contain one of the values 'yes' or 'no'. Even if you remove //ofs.offline// it does not disappear but switches to 'no'. Should we change this??
+==== List extended attributes ====
+  # getfattr -d <path>
+**Note:** This does not list our OFS attributes, because attributes of a FUSE filesystem are only shown if they are in the namespace //user// (i.e. name starts with //user.//). This might be a bug in FUSE.

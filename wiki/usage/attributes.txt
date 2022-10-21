@@ -1,0 +1,14 @@
+====== Extended attributes ======
+Interaction with OFS is done using extended attributes. So before you can start, you have to install the tools for using extended attributes, which ship with almost any linux distribution.
+
+OFS supports the following attributes
+| ofs.offline | **set** this attribute to make directory and all its subdirectories available offline |
+| ofs.available | **remove** this attribute to switch to offline mode |
+| |**set** this attribute to switch to online mode|
+| |**read** this attribute to see if the share is connected |
+| ofs.conflict | **read** this attribute to see if the **given file** or any file in the tree below the **given directory** is in conflicted state |
+| |**write** this attribute to choose which file is current. The other one will be overwritten. Possible values: local, remote | 
+To make the a path available offline, use the following command
+ # setfattr -n ofs.offline /path/to/directory
+You can see if a file is currently available by using the command
+ # getfattr -n ofs.available /path/to/directory/or/file

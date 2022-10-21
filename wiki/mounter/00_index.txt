@@ -1,0 +1,2 @@
+====== Remote filesystem mounter ======
+This component tries to mounts a given remote filesystem into a temporary location. If this fails, the filesystem is considered "offline".
