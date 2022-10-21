@@ -1,6 +1,0 @@
-====== Monitor thread ======
-The OFS monitor thread is a thread, started in the init function of [[:ofsfuse:00_index]]. This means, each [[:glossary:ofsmanagedmountpoint]] has its own monitor thread. 
-
-This thread is responisble for:
-  * monitoring the network connection
-  * synchronizing remote share and local cache on demand

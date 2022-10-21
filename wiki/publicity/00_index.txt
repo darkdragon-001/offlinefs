@@ -1,5 +1,0 @@
-====== Publicity ======
-
-  * [[http://www.linuxmagazin.de|Linux Magazin 01/2009]] (german)
-  * [[http://www.linuxpromagazine.com|Linux Pro Magazine 02/2009]] (english)
-  * [[http://chemnitzer.linux-tage.de/2009/vortraege/detail.html?idx=170|Chemnitzer Linux-Tage Mar 14, 2009]] (Germany)

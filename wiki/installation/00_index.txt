@@ -1,5 +1,0 @@
-====== Compiling and installing OFS ======
-  * [[ubuntu]]
-  * [[suse]]
-  * [[fedora]]
-  * [[Mac OS X]]

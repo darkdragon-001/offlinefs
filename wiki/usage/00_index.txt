@@ -1,3 +1,0 @@
-====== Usage ======
-  * [[getting started]]
-  * [[attributes]]
